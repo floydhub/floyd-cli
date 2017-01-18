@@ -8,17 +8,25 @@ class FloydConfigManager(object):
     Manages ~/.floydconfig file with access token
     """
 
-    def __init__(self):
-        self.config_file_path = os.path.expanduser("~/.floydconfig")
+    CONFIG_FILE_PATH = os.path.expanduser("~/.floydconfig")
 
-    def set_access_token(self, access_token):
-        with open(self.config_file_path, "w") as config_file:
+    @classmethod
+    def set_access_token(cls, access_token):
+        with open(cls.CONFIG_FILE_PATH, "w") as config_file:
             config_file.write(access_token.token)
 
-    def get_access_token(self):
-        if not os.path.isfile(self.config_file_path):
+    @classmethod
+    def get_access_token(cls):
+        if not os.path.isfile(cls.CONFIG_FILE_PATH):
             return None
 
-        with open(self.config_file_path, "r") as config_file:
+        with open(cls.CONFIG_FILE_PATH, "r") as config_file:
             token = config_file.read()
         return AccessToken(token=token)
+
+    @classmethod
+    def purge_access_token(cls):
+        if not os.path.isfile(cls.CONFIG_FILE_PATH):
+            return True
+
+        os.remove(cls.CONFIG_FILE_PATH)

@@ -12,6 +12,5 @@ from floyd.logging import logger as floyd_logger
 def login(username, password):
     credentials = Credentials(username, password)
     access_token = LoginClient().login(credentials)
-    config_manager = FloydConfigManager()
-    config_manager.set_access_token(access_token)
+    FloydConfigManager.set_access_token(access_token)
     floyd_logger.info("Login Successful")

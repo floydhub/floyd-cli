@@ -1,6 +1,8 @@
 import requests
+from json.decoder import JSONDecodeError
 
 import floyd
+from floyd.config import FloydConfigManager
 from floyd.exceptions import AuthenticationException
 from floyd.logging import logger as floyd_logger
 
@@ -11,6 +13,7 @@ class FloydHttpClient(object):
     """
     def __init__(self):
         self.base_url = "{}/api/v1".format(floyd.floyd_host)
+        self.access_token = FloydConfigManager.get_access_token()
 
     def request(self,
                 method,
@@ -22,8 +25,20 @@ class FloydHttpClient(object):
         """
         request_url = self.base_url + url
         floyd_logger.debug("Starting request to url: {} with params: {}, data: {}".format(request_url, params, data))
-        response = requests.request(method, request_url, params=params, json=data)
-        floyd_logger.debug("Response Content: {}, Headers: {}".format(response.json(), response.headers))
+
+        response = requests.request(method,
+                                    request_url,
+                                    params=params,
+                                    headers={"Authorization": "Bearer {}".format(
+                                        self.access_token.token if self.access_token else None)
+                                    },
+                                    json=data)
+
+        try:
+            floyd_logger.debug("Response Content: {}, Headers: {}".format(response.json(), response.headers))
+        except JSONDecodeError:
+            floyd_logger.error("Request failed. Response: {}".format(response.content))
+
         self.check_response_status(response)
         return response
 

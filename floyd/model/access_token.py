@@ -17,7 +17,7 @@ class AccessToken(object):
 
     def __init__(self,
                  token,
-                 expiry):
+                 expiry=None):
         self.token = token
         self.expiry = expiry
 
