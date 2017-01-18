@@ -1,4 +1,5 @@
 import click
+import logging
 
 import floyd
 from floyd.cli.auth import login, logout
@@ -6,9 +7,16 @@ from floyd.cli.experiment import logs, output, ps, stop
 
 
 @click.group()
-@click.option('--host', default='https://beta.floydhub.com', help='Floyd server endpoint')
-def cli(host):
+@click.option('-h', '--host', default='https://beta.floydhub.com', help='Floyd server endpoint')
+@click.option('-v', '--verbose', count=True)
+def cli(host, verbose):
     floyd.floyd_host = host
+    configure_logger(verbose)
+
+
+def configure_logger(verbose):
+    log_level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(format='%(message)s', level=log_level)
 
 
 cli.add_command(login)

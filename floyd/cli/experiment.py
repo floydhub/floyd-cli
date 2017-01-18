@@ -23,7 +23,6 @@ def ps(id):
 def logs(id):
     experiment = ExperimentClient().get(id)
     task_instance = TaskInstanceClient().get(experiment.task_instances[0])
-    print(task_instance.output_ids)
     log_url = "{}/api/v1/resources/{}?content=true".format(floyd.floyd_host, task_instance.log_id)
     floyd_logger.info(log_url)
 

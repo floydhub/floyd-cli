@@ -15,5 +15,4 @@ class TaskInstanceClient(FloydHttpClient):
                                 "{}{}".format(self.url, id))
         task_instance_dict = response.json()
         ti = TaskInstance.from_dict(task_instance_dict)
-        print("Returning : ti ", ti, type(ti))
         return ti
