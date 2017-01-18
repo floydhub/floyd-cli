@@ -21,7 +21,8 @@ class AuthClient(FloydHttpClient):
         if not access_token:
             raise FloydException("Access token missing in response", 500)
 
-        return AccessToken(token=access_token,
+        return AccessToken(username=credentials.username,
+                           token=access_token,
                            expiry=expiry)
 
     def logout(self):

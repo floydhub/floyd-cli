@@ -3,7 +3,16 @@ import click
 import floyd
 from floyd.client.experiment import ExperimentClient
 from floyd.client.task_instance import TaskInstanceClient
+from floyd.config import ExperimentConfigManager
+from floyd.model.experiment_config import ExperimentConfig
 from floyd.logging import logger as floyd_logger
+
+
+@click.command()
+@click.option('--project', prompt=True, required=True, help='Project name')
+def init(project):
+    experiment_config = ExperimentConfig(name=project)
+    ExperimentConfigManager.set_config(experiment_config)
 
 
 @click.command()

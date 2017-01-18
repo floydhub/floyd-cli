@@ -1,5 +1,7 @@
 from marshmallow import Schema, fields, post_load
 
+from floyd.model.base import BaseModel
+
 
 class CredentialsSchema(Schema):
     """
@@ -13,7 +15,7 @@ class CredentialsSchema(Schema):
         return Credentials(**data)
 
 
-class Credentials(object):
+class Credentials(BaseModel):
     """
     Floyd credentials consists of username and password
     """
@@ -24,10 +26,3 @@ class Credentials(object):
                  password):
         self.username = username
         self.password = password
-
-    def to_dict(self):
-        return self.schema.dump(self).data
-
-    @classmethod
-    def from_dict(cls, dct):
-        return cls.schema.load(dct).data

@@ -2,7 +2,7 @@ import requests
 from json.decoder import JSONDecodeError
 
 import floyd
-from floyd.config import FloydConfigManager
+from floyd.config import AuthConfigManager
 from floyd.exceptions import AuthenticationException
 from floyd.logging import logger as floyd_logger
 
@@ -13,7 +13,7 @@ class FloydHttpClient(object):
     """
     def __init__(self):
         self.base_url = "{}/api/v1".format(floyd.floyd_host)
-        self.access_token = FloydConfigManager.get_access_token()
+        self.access_token = AuthConfigManager.get_access_token()
 
     def request(self,
                 method,

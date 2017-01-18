@@ -1,4 +1,7 @@
 class BaseModel(object):
+    """
+    Base for all model classes
+    """
 
     def to_dict(self):
         return self.schema.dump(self).data
