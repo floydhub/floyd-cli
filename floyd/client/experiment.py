@@ -2,24 +2,27 @@ from floyd.client.base import FloydHttpClient
 from floyd.model.experiment import Experiment
 
 
-class PsClient(FloydHttpClient):
+class ExperimentClient(FloydHttpClient):
     """
-    Check status of experiments / runs
+    Client to interact with Experiments api
     """
     def __init__(self):
         self.url = "/experiments/"
-        super(PsClient, self).__init__()
+        super(ExperimentClient, self).__init__()
 
     def get_all(self):
         response = self.request("GET",
                                 self.url)
         experiments_dict = response.json()
-        experiments = [Experiment.from_dict(expt) for expt in experiments_dict]
-        return experiments
+        return [Experiment.from_dict(expt) for expt in experiments_dict]
 
     def get(self, id):
         response = self.request("GET",
                                 "{}{}".format(self.url, id))
         experiment_dict = response.json()
-        experiment = Experiment.from_dict(experiment_dict)
-        return experiment
+        return Experiment.from_dict(experiment_dict)
+
+    def stop(self, id):
+        self.request("GET",
+                     "{}cancel/{}".format(self.url, id))
+        return True

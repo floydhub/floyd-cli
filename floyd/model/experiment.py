@@ -9,6 +9,9 @@ class ExperimentSchema(Schema):
     created = fields.DateTime()
     state = fields.Str()
     duration = fields.Number()
+    log_id = fields.Str(load_from="logId")
+    canvas = fields.Dict(load_only=True)
+    task_instances = fields.List(fields.Str(), dump_only=True)
 
     @post_load
     def make_experiment(self, data):
@@ -23,9 +26,17 @@ class Experiment(BaseModel):
                  name,
                  created,
                  state,
-                 duration):
+                 duration,
+                 log_id,
+                 canvas=None):
         self.id = id
         self.name = name
         self.created = created
         self.state = state
         self.duration = duration
+        self.log_id = log_id
+        if canvas:
+            nodes = canvas.get('nodes', {})
+            self.task_instances = [nodes[key].get("taskInstanceId") for key in nodes]
+        else:
+            self.task_instances = []

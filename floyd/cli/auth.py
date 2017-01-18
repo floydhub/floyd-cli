@@ -1,6 +1,6 @@
 import click
 
-from floyd.client.login import LoginClient
+from floyd.client.auth import AuthClient
 from floyd.config import FloydConfigManager
 from floyd.model.credentials import Credentials
 from floyd.logging import logger as floyd_logger
@@ -11,6 +11,13 @@ from floyd.logging import logger as floyd_logger
 @click.option('--password', prompt=True, required=True, hide_input=True, help='Floyd password')
 def login(username, password):
     credentials = Credentials(username, password)
-    access_token = LoginClient().login(credentials)
+    access_token = AuthClient().login(credentials)
     FloydConfigManager.set_access_token(access_token)
     floyd_logger.info("Login Successful")
+
+
+@click.command()
+def logout():
+    FloydConfigManager.purge_access_token()
+    if AuthClient().logout():
+        floyd_logger.info("Logout Successful")

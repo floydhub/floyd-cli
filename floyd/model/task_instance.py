@@ -1,0 +1,25 @@
+from marshmallow import Schema, fields, post_load
+
+from floyd.model.base import BaseModel
+
+
+class TaskInstanceSchema(Schema):
+    id = fields.Str()
+    log_id = fields.Str()
+    output_ids = fields.Dict(load_from='output_ids_dict')
+
+    @post_load
+    def make_task_instance(self, data):
+        return TaskInstance(**data)
+
+
+class TaskInstance(BaseModel):
+    schema = TaskInstanceSchema()
+
+    def __init__(self,
+                 id,
+                 log_id,
+                 output_ids):
+        self.id = id
+        self.log_id = log_id
+        self.output_ids = output_ids

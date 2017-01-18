@@ -3,13 +3,13 @@ from floyd.exceptions import FloydException
 from floyd.model.access_token import AccessToken
 
 
-class LoginClient(FloydHttpClient):
+class AuthClient(FloydHttpClient):
     """
-    Login specific client
+    Auth specific client
     """
     def __init__(self):
         self.url = "/user/login/"
-        super(LoginClient, self).__init__()
+        super(AuthClient, self).__init__()
 
     def login(self, credentials):
         response = self.request("POST",
@@ -23,3 +23,7 @@ class LoginClient(FloydHttpClient):
 
         return AccessToken(token=access_token,
                            expiry=expiry)
+
+    def logout(self):
+        self.request("DELETE", url="/user/logout/")
+        return True

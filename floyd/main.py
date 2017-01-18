@@ -1,9 +1,8 @@
 import click
 
 import floyd
-from floyd.cli.login import login
-from floyd.cli.logout import logout
-from floyd.cli.ps import ps
+from floyd.cli.auth import login, logout
+from floyd.cli.experiment import logs, output, ps, stop
 
 
 @click.group()
@@ -14,4 +13,7 @@ def cli(host):
 
 cli.add_command(login)
 cli.add_command(logout)
+cli.add_command(logs)
+cli.add_command(output)
 cli.add_command(ps)
+cli.add_command(stop)
