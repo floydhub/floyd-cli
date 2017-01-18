@@ -5,7 +5,7 @@ from floyd.logging import logger as floyd_logger
 
 
 @click.command()
-@click.argument('id', nargs=1)
+@click.argument('id', required=False, nargs=1)
 def ps(id):
     if id:
         experiment = PsClient().get(id)
