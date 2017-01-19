@@ -16,7 +16,7 @@ class AccessTokenSchema(Schema):
 
 class AccessToken(BaseModel):
 
-    schema = AccessTokenSchema()
+    schema = AccessTokenSchema(strict=True)
 
     def __init__(self,
                  username,

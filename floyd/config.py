@@ -1,5 +1,6 @@
-import os
 import json
+import os
+from shortuuid import uuid
 
 from floyd.model.access_token import AccessToken
 from floyd.model.experiment_config import ExperimentConfig
@@ -59,3 +60,10 @@ class ExperimentConfigManager(object):
         with open(cls.CONFIG_FILE_PATH, "r") as config_file:
             experiment_config_str = config_file.read()
         return ExperimentConfig.from_dict(json.loads(experiment_config_str))
+
+
+def generate_uuid():
+    """
+    Generate uuid that is used for experiments and modules
+    """
+    return uuid()

@@ -19,7 +19,7 @@ class Credentials(BaseModel):
     """
     Floyd credentials consists of username and password
     """
-    schema = CredentialsSchema()
+    schema = CredentialsSchema(strict=True)
 
     def __init__(self,
                  username,

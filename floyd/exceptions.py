@@ -11,7 +11,16 @@ class FloydException(Exception):
 class AuthenticationException(FloydException):
 
     def __init__(self,
-                 message="Authentication Failed",
+                 message="Authentication failed",
                  status_code=401):
         super(AuthenticationException, self).__init__(message=message,
                                                       status_code=status_code)
+
+
+class NotFoundException(FloydException):
+
+    def __init__(self,
+                 message="Resource not found",
+                 status_code=404):
+        super(NotFoundException, self).__init__(message=message,
+                                                status_code=status_code)

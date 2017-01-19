@@ -1,3 +1,5 @@
+import json
+
 from floyd.client.base import FloydHttpClient
 from floyd.model.experiment import Experiment
 
@@ -26,3 +28,9 @@ class ExperimentClient(FloydHttpClient):
         self.request("GET",
                      "{}cancel/{}".format(self.url, id))
         return True
+
+    def create(self, experiment_request):
+        response = self.request("POST",
+                                "{}run_module/".format(self.url),
+                                data=json.dumps(experiment_request.to_dict()))
+        return response.json().get("id")

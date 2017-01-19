@@ -19,6 +19,7 @@ setup(
         "click>=6.7",
         "requests>=2.12.4",
         "marshmallow>=2.11.1",
+        "shortuuid>=0.4.3",
         "PyYAML>=3.12",
     ],
     setup_requires=[

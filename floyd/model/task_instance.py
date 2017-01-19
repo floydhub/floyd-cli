@@ -14,7 +14,7 @@ class TaskInstanceSchema(Schema):
 
 
 class TaskInstance(BaseModel):
-    schema = TaskInstanceSchema()
+    schema = TaskInstanceSchema(strict=True)
 
     def __init__(self,
                  id,

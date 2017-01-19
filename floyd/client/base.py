@@ -3,7 +3,7 @@ from json.decoder import JSONDecodeError
 
 import floyd
 from floyd.config import AuthConfigManager
-from floyd.exceptions import AuthenticationException
+from floyd.exceptions import AuthenticationException, NotFoundException
 from floyd.logging import logger as floyd_logger
 
 
@@ -55,6 +55,8 @@ class FloydHttpClient(object):
                                                                                       message or response.content))
 
             if response.status_code == 401:
-                raise AuthenticationException(message=message, status_code=response.status_code)
+                raise AuthenticationException()
+            elif response.status_code == 404:
+                raise NotFoundException()
             else:
                 response.raise_for_status()
