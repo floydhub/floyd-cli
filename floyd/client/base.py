@@ -19,7 +19,8 @@ class FloydHttpClient(object):
                 method,
                 url,
                 params=None,
-                data=None):
+                data=None,
+                files=None):
         """
         Execute the request using requests library
         """
@@ -32,7 +33,8 @@ class FloydHttpClient(object):
                                     headers={"Authorization": "Bearer {}".format(
                                         self.access_token.token if self.access_token else None)
                                     },
-                                    data=data)
+                                    data=data,
+                                    files=files)
 
         try:
             floyd_logger.debug("Response Content: {}, Headers: {}".format(response.json(), response.headers))

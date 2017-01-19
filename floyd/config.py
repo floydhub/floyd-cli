@@ -2,6 +2,7 @@ import json
 import os
 from shortuuid import uuid
 
+from floyd.exceptions import FloydException
 from floyd.model.access_token import AccessToken
 from floyd.model.experiment_config import ExperimentConfig
 from floyd.logging import logger as floyd_logger
@@ -55,7 +56,7 @@ class ExperimentConfigManager(object):
     @classmethod
     def get_config(cls):
         if not os.path.isfile(cls.CONFIG_FILE_PATH):
-            return None
+            raise FloydException("Missing .floydexpt file, run floyd init first")
 
         with open(cls.CONFIG_FILE_PATH, "r") as config_file:
             experiment_config_str = config_file.read()

@@ -25,7 +25,9 @@ def run(command):
     floyd_logger.debug("Created module with id : {}".format(module_id))
 
     # Create experiment request
-    experiment_name = "{}/{}".format(access_token.username, experiment_config.name)
+    experiment_name = "{}/{}:{}".format(access_token.username,
+                                        experiment_config.name,
+                                        experiment_config.version)
     experiment_request = ExperimentRequest(name=experiment_name,
                                            description=experiment_config.version,
                                            module_id=module_id,

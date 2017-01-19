@@ -1,6 +1,7 @@
 import json
 
 from floyd.client.base import FloydHttpClient
+from floyd.config import ExperimentConfigManager
 from floyd.model.experiment import Experiment
 
 
@@ -13,8 +14,10 @@ class ExperimentClient(FloydHttpClient):
         super(ExperimentClient, self).__init__()
 
     def get_all(self):
+        experiment_config = ExperimentConfigManager.get_config()
         response = self.request("GET",
-                                self.url)
+                                self.url,
+                                params="family_id={}".format(experiment_config.family_id))
         experiments_dict = response.json()
         return [Experiment.from_dict(expt) for expt in experiments_dict]
 
