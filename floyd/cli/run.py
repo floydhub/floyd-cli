@@ -14,26 +14,27 @@ def run(command):
     command_str = ' '.join(command)
     experiment_config = ExperimentConfigManager.get_config()
     access_token = AuthConfigManager.get_access_token()
+    version = experiment_config.version
 
     # Create module
     module = Module(name=experiment_config.name,
                     description=experiment_config.name,
                     command=command_str,
                     family_id=experiment_config.family_id,
-                    version=experiment_config.version)
+                    version=version)
     module_id = ModuleClient().create(module)
     floyd_logger.debug("Created module with id : {}".format(module_id))
 
     # Create experiment request
     experiment_name = "{}/{}:{}".format(access_token.username,
                                         experiment_config.name,
-                                        experiment_config.version)
+                                        version)
     experiment_request = ExperimentRequest(name=experiment_name,
-                                           description=experiment_config.version,
+                                           description=version,
                                            module_id=module_id,
                                            predecessor=experiment_config.experiment_predecessor,
                                            family_id=experiment_config.family_id,
-                                           version=experiment_config.version)
+                                           version=version)
     experiment_id = ExperimentClient().create(experiment_request)
     floyd_logger.debug("Created experiment : {}".format(experiment_id))
 
@@ -41,4 +42,4 @@ def run(command):
     experiment_config.set_module_predecessor(module_id)
     experiment_config.set_experiment_predecessor(experiment_id)
     ExperimentConfigManager.set_config(experiment_config)
-    floyd_logger.info(experiment_id)
+    floyd_logger.info("Run created. Id: {}, version: {}".format(experiment_id, version))

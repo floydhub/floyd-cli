@@ -5,7 +5,7 @@ import floyd
 from floyd.client.common import get_url_contents
 from floyd.client.experiment import ExperimentClient
 from floyd.client.task_instance import TaskInstanceClient
-from floyd.config import ExperimentConfigManager, generate_uuid
+from floyd.config import ExperimentConfigManager, FloydIgnoreManager, generate_uuid
 from floyd.model.experiment_config import ExperimentConfig
 from floyd.logging import logger as floyd_logger
 
@@ -16,6 +16,8 @@ def init(project):
     experiment_config = ExperimentConfig(name=project,
                                          family_id=generate_uuid())
     ExperimentConfigManager.set_config(experiment_config)
+    FloydIgnoreManager.init()
+    floyd_logger.info("Project {} initialized in current directory".format(project))
 
 
 @click.command()
@@ -67,7 +69,7 @@ def output(id, url):
 def stop(id):
     experiment = ExperimentClient().get(id)
     if experiment.state not in ["queued", "running"]:
-        floyd_logger.info("Experiment already finished")
+        floyd_logger.info("Experiment in {} state cannot be stopped".format(experiment.state))
         return
 
     if ExperimentClient().stop(id):

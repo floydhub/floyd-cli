@@ -2,6 +2,7 @@ import json
 import os
 
 from floyd.client.base import FloydHttpClient
+from floyd.config import FloydIgnoreManager
 from floyd.logging import logger as floyd_logger
 
 
@@ -25,7 +26,20 @@ class ModuleClient(FloydHttpClient):
 
     def get_local_files(self):
         local_files = []
+        ignore_list = FloydIgnoreManager.get_list()
+        ignore_list_localized = ["./{}".format(item) for item in ignore_list]
+        floyd_logger.debug("Ignoring list : {}".format(ignore_list_localized))
+
         for root, dirs, files in os.walk('.'):
+            ignore_dir = False
+            for item in ignore_list_localized:
+                if root.startswith(item):
+                    ignore_dir = True
+
+            if ignore_dir:
+                floyd_logger.debug("Ignoring directory : {}".format(root))
+                continue
+
             for file_name in files:
                 file_relative_path = os.path.join(root, file_name)
                 file_full_path = os.path.join(os.getcwd(), root, file_name)

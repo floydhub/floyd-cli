@@ -2,6 +2,7 @@ import json
 import os
 from shortuuid import uuid
 
+from floyd.constants import DEFAULT_FLOYD_IGNORE_LIST
 from floyd.exceptions import FloydException
 from floyd.model.access_token import AccessToken
 from floyd.model.experiment_config import ExperimentConfig
@@ -61,6 +62,35 @@ class ExperimentConfigManager(object):
         with open(cls.CONFIG_FILE_PATH, "r") as config_file:
             experiment_config_str = config_file.read()
         return ExperimentConfig.from_dict(json.loads(experiment_config_str))
+
+
+class FloydIgnoreManager(object):
+    """
+    Manages .floydignore file in the current directory
+    """
+
+    CONFIG_FILE_PATH = os.path.join(os.getcwd() + "/.floydignore")
+
+    @classmethod
+    def init(cls):
+        floyd_logger.debug("Setting default floyd ignore in the file {}".format(cls.CONFIG_FILE_PATH))
+
+        with open(cls.CONFIG_FILE_PATH, "w") as config_file:
+            config_file.write(DEFAULT_FLOYD_IGNORE_LIST)
+
+    @classmethod
+    def get_list(cls):
+        if not os.path.isfile(cls.CONFIG_FILE_PATH):
+            raise FloydException("Missing .floydexpt file, run floyd init first")
+
+        ignore_dirs = []
+        with open(cls.CONFIG_FILE_PATH, "r") as floyd_ignore_file:
+            for line in floyd_ignore_file:
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    ignore_dirs.append(line)
+
+        return ignore_dirs
 
 
 def generate_uuid():
