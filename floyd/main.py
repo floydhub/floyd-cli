@@ -1,9 +1,10 @@
 import click
-import logging
 
 import floyd
+from floyd.logging import configure_logger
 from floyd.cli.auth import login, logout
 from floyd.cli.experiment import init, logs, output, ps, stop
+from floyd.cli.run import run
 
 
 @click.group()
@@ -14,11 +15,6 @@ def cli(host, verbose):
     configure_logger(verbose)
 
 
-def configure_logger(verbose):
-    log_level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(format='%(message)s', level=log_level)
-
-
 cli.add_command(init)
 cli.add_command(login)
 cli.add_command(logout)
@@ -26,3 +22,4 @@ cli.add_command(logs)
 cli.add_command(output)
 cli.add_command(ps)
 cli.add_command(stop)
+cli.add_command(run)

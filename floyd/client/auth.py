@@ -1,3 +1,5 @@
+import json
+
 from floyd.client.base import FloydHttpClient
 from floyd.exceptions import FloydException
 from floyd.model.access_token import AccessToken
@@ -14,7 +16,7 @@ class AuthClient(FloydHttpClient):
     def login(self, credentials):
         response = self.request("POST",
                                 self.url,
-                                data=credentials.to_dict())
+                                data=json.dumps(credentials.to_dict()))
         access_token = response.headers.get("access-token")
         expiry = response.headers.get("expiry")
 

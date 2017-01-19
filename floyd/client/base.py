@@ -32,7 +32,7 @@ class FloydHttpClient(object):
                                     headers={"Authorization": "Bearer {}".format(
                                         self.access_token.token if self.access_token else None)
                                     },
-                                    json=data)
+                                    data=data)
 
         try:
             floyd_logger.debug("Response Content: {}, Headers: {}".format(response.json(), response.headers))

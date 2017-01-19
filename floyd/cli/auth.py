@@ -12,7 +12,7 @@ from floyd.logging import logger as floyd_logger
 def login(username, password):
     credentials = Credentials(username, password)
     access_token = AuthClient().login(credentials)
-    AuthConfigManager.set_access_token(username, access_token)
+    AuthConfigManager.set_access_token(access_token)
     floyd_logger.info("Login Successful")
 
 

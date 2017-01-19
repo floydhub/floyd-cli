@@ -22,3 +22,6 @@ class ExperimentConfig(BaseModel):
                  version=1):
         self.name = name
         self.version = version
+
+    def increment_version(self):
+        self.version = self.version + 1
