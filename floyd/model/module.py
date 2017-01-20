@@ -21,7 +21,7 @@ class ModuleSchema(Schema):
 
 class Module(BaseModel):
     schema = ModuleSchema(strict=True)
-    default_outputs = [{'name': 'output_dir', 'type': 'dir'}]
+    default_outputs = [{'name': 'output', 'type': 'dir'}]
 
     def __init__(self,
                  name,

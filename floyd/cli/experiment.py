@@ -52,9 +52,9 @@ def logs(id, url):
 def output(id, url):
     experiment = ExperimentClient().get(id)
     task_instance = TaskInstanceClient().get(experiment.task_instances[0])
-    if "output_dir" in task_instance.output_ids:
+    if "output" in task_instance.output_ids:
         output_dir_url = "{}/api/v1/resources/{}?content=true".format(floyd.floyd_host,
-                                                                      task_instance.output_ids["output_dir"])
+                                                                      task_instance.output_ids["output"])
         if url:
             floyd_logger.info(output_dir_url)
         else:
