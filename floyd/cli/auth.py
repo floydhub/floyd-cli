@@ -7,7 +7,7 @@ from floyd.log import logger as floyd_logger
 
 
 @click.command()
-@click.option('--username', required=True, help='Floyd username')
+@click.option('--username', prompt=True, required=True, help='Floyd username')
 @click.option('--password', prompt=True, required=True, hide_input=True, help='Floyd password')
 def login(username, password):
     credentials = Credentials(username, password)

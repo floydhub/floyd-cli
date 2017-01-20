@@ -17,7 +17,7 @@ class ModuleClient(FloydHttpClient):
     def create(self, module):
         upload_files = self.get_local_files()
         request_data = {"json": json.dumps(module.to_dict())}
-        floyd_logger.debug("Creating module. Uploading {} files ...".format(len(upload_files)))
+        floyd_logger.info("Creating module. Uploading {} files ...".format(len(upload_files)))
         response = self.request("POST",
                                 self.url,
                                 data=request_data,
