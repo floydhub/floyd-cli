@@ -1,4 +1,5 @@
 import click
+from tabulate import tabulate
 
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
@@ -38,8 +39,12 @@ def run(command):
     experiment_id = ExperimentClient().create(experiment_request)
     floyd_logger.debug("Created experiment : {}".format(experiment_id))
 
+    # Update expt config including predecessor
     experiment_config.increment_version()
     experiment_config.set_module_predecessor(module_id)
     experiment_config.set_experiment_predecessor(experiment_id)
     ExperimentConfigManager.set_config(experiment_config)
-    floyd_logger.info("Run created. Id: {}, version: {}".format(experiment_id, version))
+
+    table_output = [["RUN ID", "NAME", "VERSION"],
+                    [experiment_id, experiment_name, version]]
+    floyd_logger.info(tabulate(table_output, headers="firstrow"))

@@ -1,5 +1,6 @@
 import click
 import webbrowser
+from tabulate import tabulate
 
 import floyd
 from floyd.client.common import get_url_contents
@@ -25,11 +26,19 @@ def init(project):
 def ps(id):
     if id:
         experiment = ExperimentClient().get(id)
-        floyd_logger.info(experiment.to_dict())
+        print_experiments([experiment])
     else:
         experiments = ExperimentClient().get_all()
-        for experiment in experiments:
-            floyd_logger.info(experiment.to_dict())
+        print_experiments(experiments)
+
+
+def print_experiments(experiments):
+    headers = ["RUN ID", "CREATED", "STATUS", "DURATION(s)", "NAME", "VERSION"]
+    expt_list = []
+    for experiment in experiments:
+        expt_list.append([experiment.id, experiment.created, experiment.state,
+                          experiment.duration, experiment.name, experiment.description])
+    floyd_logger.info(tabulate(expt_list, headers=headers))
 
 
 @click.command()

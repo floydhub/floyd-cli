@@ -20,6 +20,7 @@ setup(
         "requests>=2.12.4",
         "marshmallow>=2.11.1",
         "shortuuid>=0.4.3",
+        "tabulate>=0.7.7",
     ],
     setup_requires=[
         "nose>=1.0",
