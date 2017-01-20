@@ -14,6 +14,9 @@ from floyd.log import logger as floyd_logger
 @click.command()
 @click.option('--project', prompt=True, required=True, help='Project name')
 def init(project):
+    """
+    Initialize a new project at the current directory.
+    """
     experiment_config = ExperimentConfig(name=project,
                                          family_id=generate_uuid())
     ExperimentConfigManager.set_config(experiment_config)
@@ -24,6 +27,9 @@ def init(project):
 @click.command()
 @click.argument('id', required=False, nargs=1)
 def ps(id):
+    """
+    List all the runs of the current project
+    """
     if id:
         experiment = ExperimentClient().get(id)
         print_experiments([experiment])
@@ -45,6 +51,9 @@ def print_experiments(experiments):
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
 @click.argument('id', nargs=1)
 def logs(id, url):
+    """
+    Print the logs of the run.
+    """
     experiment = ExperimentClient().get(id)
     task_instance = TaskInstanceClient().get(experiment.task_instances[0])
     log_url = "{}/api/v1/resources/{}?content=true".format(floyd.floyd_host, task_instance.log_id)
@@ -59,6 +68,10 @@ def logs(id, url):
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
 @click.argument('id', nargs=1)
 def output(id, url):
+    """
+    Shows the output url of the run.
+    By default opens the output page in your default browser.
+    """
     experiment = ExperimentClient().get(id)
     task_instance = TaskInstanceClient().get(experiment.task_instances[0])
     if "output" in task_instance.output_ids:
@@ -76,6 +89,9 @@ def output(id, url):
 @click.command()
 @click.argument('id', nargs=1)
 def stop(id):
+    """
+    Stop a run before it can finish.
+    """
     experiment = ExperimentClient().get(id)
     if experiment.state not in ["queued", "running"]:
         floyd_logger.info("Experiment in {} state cannot be stopped".format(experiment.state))

@@ -12,6 +12,11 @@ from floyd.log import logger as floyd_logger
 @click.command()
 @click.argument('command', nargs=-1)
 def run(command):
+    """
+    Run a command on Floyd. Floyd will upload contents of the
+    current directory and run your command remotely.
+    This command will generate a run id for reference.
+    """
     command_str = ' '.join(command)
     experiment_config = ExperimentConfigManager.get_config()
     access_token = AuthConfigManager.get_access_token()
