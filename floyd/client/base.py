@@ -1,10 +1,9 @@
 import requests
-from json.decoder import JSONDecodeError
 
 import floyd
 from floyd.config import AuthConfigManager
 from floyd.exceptions import AuthenticationException, NotFoundException
-from floyd.logging import logger as floyd_logger
+from floyd.log import logger as floyd_logger
 
 
 class FloydHttpClient(object):
@@ -38,7 +37,7 @@ class FloydHttpClient(object):
 
         try:
             floyd_logger.debug("Response Content: {}, Headers: {}".format(response.json(), response.headers))
-        except JSONDecodeError:
+        except Exception:
             floyd_logger.error("Request failed. Response: {}".format(response.content))
 
         self.check_response_status(response)

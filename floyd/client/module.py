@@ -3,7 +3,7 @@ import os
 
 from floyd.client.base import FloydHttpClient
 from floyd.config import FloydIgnoreManager
-from floyd.logging import logger as floyd_logger
+from floyd.log import logger as floyd_logger
 
 
 class ModuleClient(FloydHttpClient):

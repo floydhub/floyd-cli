@@ -3,7 +3,7 @@ import click
 from floyd.client.auth import AuthClient
 from floyd.config import AuthConfigManager
 from floyd.model.credentials import Credentials
-from floyd.logging import logger as floyd_logger
+from floyd.log import logger as floyd_logger
 
 
 @click.command()

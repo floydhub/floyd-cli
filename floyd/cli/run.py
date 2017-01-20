@@ -5,7 +5,7 @@ from floyd.client.module import ModuleClient
 from floyd.config import AuthConfigManager, ExperimentConfigManager
 from floyd.model.module import Module
 from floyd.model.experiment import ExperimentRequest
-from floyd.logging import logger as floyd_logger
+from floyd.log import logger as floyd_logger
 
 
 @click.command()

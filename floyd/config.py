@@ -6,7 +6,7 @@ from floyd.constants import DEFAULT_FLOYD_IGNORE_LIST
 from floyd.exceptions import FloydException
 from floyd.model.access_token import AccessToken
 from floyd.model.experiment_config import ExperimentConfig
-from floyd.logging import logger as floyd_logger
+from floyd.log import logger as floyd_logger
 
 
 class AuthConfigManager(object):
