@@ -17,6 +17,7 @@ class ExperimentSchema(Schema):
     log_id = fields.Str(load_from="logId")
     canvas = fields.Dict(load_only=True)
     task_instances = fields.List(fields.Str(), dump_only=True)
+    instance_type = fields.Str(load_from="instanceType", allow_none=True)
 
     @post_load
     def make_experiment(self, data):
@@ -34,7 +35,8 @@ class Experiment(BaseModel):
                  state,
                  duration,
                  log_id,
-                 canvas=None):
+                 canvas=None,
+                 instance_type=None):
         self.id = id
         self.name = name
         self.description = description
@@ -47,6 +49,7 @@ class Experiment(BaseModel):
             self.task_instances = [nodes[key].get("taskInstanceId") for key in nodes]
         else:
             self.task_instances = []
+        self.instance_type = instance_type
 
     def localize_date(self, date):
         if not date.tzinfo:
@@ -61,6 +64,12 @@ class Experiment(BaseModel):
     def duration_rounded(self):
         return int(self.duration or 0)
 
+    @property
+    def instance_type_trimmed(self):
+        if self.instance_type:
+            return self.instance_type.split('_')[0]
+        return self.instance_type
+
 
 class ExperimentRequestSchema(Schema):
     name = fields.Str()
@@ -69,6 +78,7 @@ class ExperimentRequestSchema(Schema):
     family_id = fields.Str(allow_none=True)
     version = fields.Integer(allow_none=True)
     predecessor = fields.Str(allow_none=True)
+    instance_type = fields.Str(allow_none=True)
 
     @post_load
     def make_experiment_request(self, data):
@@ -84,9 +94,11 @@ class ExperimentRequest(BaseModel):
                  module_id,
                  predecessor=None,
                  family_id=None,
-                 version=None):
+                 version=None,
+                 instance_type=None):
         self.name = name
         self.description = description
         self.module_id = module_id
         self.family_id = family_id
         self.version = version
+        self.instance_type = instance_type

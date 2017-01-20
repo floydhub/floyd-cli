@@ -43,11 +43,12 @@ def status(id):
 
 
 def print_experiments(experiments):
-    headers = ["RUN ID", "CREATED", "STATUS", "DURATION", "NAME", "VERSION"]
+    headers = ["RUN ID", "CREATED", "STATUS", "DURATION", "NAME", "INSTANCE", "VERSION"]
     expt_list = []
     for experiment in experiments:
         expt_list.append([experiment.id, experiment.created_pretty, experiment.state,
-                          experiment.duration_rounded, experiment.name, experiment.description])
+                          experiment.duration_rounded, experiment.name,
+                          experiment.instance_type_trimmed, experiment.description])
     floyd_logger.info(tabulate(expt_list, headers=headers))
 
 

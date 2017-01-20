@@ -1,7 +1,6 @@
 from pytz import timezone
 
 TENSORFLOW_DOCKER_IMAGE = "tensorflow/tensorflow:0.12.1-py3"
-
 PST_TIMEZONE = timezone("America/Los_Angeles")
 
 DEFAULT_FLOYD_IGNORE_LIST = """
@@ -17,3 +16,6 @@ parts
 sdist
 var
 """
+
+CPU_INSTANCE_TYPE = "cpu_high"
+GPU_INSTANCE_TYPE = "gpu_high"
