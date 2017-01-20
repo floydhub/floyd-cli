@@ -19,6 +19,7 @@ setup(
         "click>=6.7",
         "requests>=2.12.4",
         "marshmallow>=2.11.1",
+        "pytz>=2016.10",
         "shortuuid>=0.4.3",
         "tabulate>=0.7.7",
     ],

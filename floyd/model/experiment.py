@@ -1,5 +1,8 @@
 from marshmallow import Schema, fields, post_load
+from pytz import utc
 
+from floyd.constants import PST_TIMEZONE
+from floyd.date_utils import pretty_date
 from floyd.model.base import BaseModel
 
 
@@ -35,7 +38,7 @@ class Experiment(BaseModel):
         self.id = id
         self.name = name
         self.description = description
-        self.created = created
+        self.created = self.localize_date(created)
         self.state = state
         self.duration = duration
         self.log_id = log_id
@@ -44,6 +47,19 @@ class Experiment(BaseModel):
             self.task_instances = [nodes[key].get("taskInstanceId") for key in nodes]
         else:
             self.task_instances = []
+
+    def localize_date(self, date):
+        if not date.tzinfo:
+            date = utc.localize(date)
+        return date.astimezone(PST_TIMEZONE)
+
+    @property
+    def created_pretty(self):
+        return pretty_date(self.created)
+
+    @property
+    def duration_rounded(self):
+        return int(self.duration or 0)
 
 
 class ExperimentRequestSchema(Schema):

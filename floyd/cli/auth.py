@@ -23,7 +23,7 @@ def login(username, password):
 @click.command()
 def logout():
     """
-    Logout of Floyd
+    Logout of Floyd.
     """
     AuthConfigManager.purge_access_token()
     if AuthClient().logout():

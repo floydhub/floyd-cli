@@ -3,7 +3,7 @@ import click
 import floyd
 from floyd.log import configure_logger
 from floyd.cli.auth import login, logout
-from floyd.cli.experiment import init, logs, output, ps, stop
+from floyd.cli.experiment import init, logs, output, status, stop
 from floyd.cli.run import run
 
 
@@ -24,6 +24,6 @@ cli.add_command(login)
 cli.add_command(logout)
 cli.add_command(logs)
 cli.add_command(output)
-cli.add_command(ps)
+cli.add_command(status)
 cli.add_command(stop)
 cli.add_command(run)

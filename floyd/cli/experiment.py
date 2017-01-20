@@ -15,7 +15,10 @@ from floyd.log import logger as floyd_logger
 @click.option('--project', prompt=True, required=True, help='Project name')
 def init(project):
     """
-    Initialize a new project at the current directory.
+    Initialize new project at the current dir.
+    After init run your command. Example:
+
+        floyd run python tensorflow.py > /output/model.1
     """
     experiment_config = ExperimentConfig(name=project,
                                          family_id=generate_uuid())
@@ -26,9 +29,10 @@ def init(project):
 
 @click.command()
 @click.argument('id', required=False, nargs=1)
-def ps(id):
+def status(id):
     """
-    List all the runs of the current project
+    Show the status of a run with id.
+    It can also list status of all the runs in the project.
     """
     if id:
         experiment = ExperimentClient().get(id)
@@ -39,11 +43,11 @@ def ps(id):
 
 
 def print_experiments(experiments):
-    headers = ["RUN ID", "CREATED", "STATUS", "DURATION(s)", "NAME", "VERSION"]
+    headers = ["RUN ID", "CREATED", "STATUS", "DURATION", "NAME", "VERSION"]
     expt_list = []
     for experiment in experiments:
-        expt_list.append([experiment.id, experiment.created, experiment.state,
-                          experiment.duration, experiment.name, experiment.description])
+        expt_list.append([experiment.id, experiment.created_pretty, experiment.state,
+                          experiment.duration_rounded, experiment.name, experiment.description])
     floyd_logger.info(tabulate(expt_list, headers=headers))
 
 
@@ -61,7 +65,10 @@ def logs(id, url):
         floyd_logger.info(log_url)
         return
     log_file_contents = get_url_contents(log_url)
-    floyd_logger.info(log_file_contents)
+    if len(log_file_contents.strip()):
+        floyd_logger.info(log_file_contents)
+    else:
+        floyd_logger.info("No logs available yet. Try after a few seconds.")
 
 
 @click.command()
