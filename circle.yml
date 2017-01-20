@@ -1,0 +1,19 @@
+# CircleCI Configuration file
+
+machine:
+  python:
+      version: 2.7.11
+
+general:
+  artifacts:
+     - "dist"
+
+dependencies:
+  override:
+    - pip install tox tox-pyenv
+    - pyenv local 2.7.11 3.5.2  # Should correspond to pre-installed Python versions on CircleCI
+
+test:
+  override:
+     - tox
+
