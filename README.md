@@ -2,7 +2,7 @@
 
 Command line tool for Floyd. Use this to interact with Floyd (www.floydhub.com).
 
-[![CircleCI](https://circleci.com/gh/floydhub/floyd-cli/tree/master.svg?style=svg)](https://circleci.com/gh/floydhub/floyd-cli/tree/master)
+[![CircleCI](https://circleci.com/gh/floydhub/floyd-cli/tree/master.svg?style=shield)](https://circleci.com/gh/floydhub/floyd-cli/tree/master)
 [![PyPI version](https://badge.fury.io/py/floyd-cli.svg)](https://badge.fury.io/py/floyd-cli)
 
 ## Install
