@@ -43,7 +43,7 @@ def status(id):
 
 
 def print_experiments(experiments):
-    headers = ["RUN ID", "CREATED", "STATUS", "DURATION", "NAME", "INSTANCE", "VERSION"]
+    headers = ["RUN ID", "CREATED", "STATUS", "DURATION(s)", "NAME", "INSTANCE", "VERSION"]
     expt_list = []
     for experiment in experiments:
         expt_list.append([experiment.id, experiment.created_pretty, experiment.state,
@@ -106,6 +106,6 @@ def stop(id):
         return
 
     if ExperimentClient().stop(id):
-        floyd_logger.info("Experiment stopped")
+        floyd_logger.info("Experiment shutdown request submitted. Check status to confirm shutdown")
     else:
         floyd_logger.error("Failed to stop experiment")

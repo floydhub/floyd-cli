@@ -2,7 +2,7 @@ import requests
 
 import floyd
 from floyd.config import AuthConfigManager
-from floyd.exceptions import AuthenticationException, NotFoundException
+from floyd.exceptions import AuthenticationException, BadRequestException, NotFoundException, OverLimitException
 from floyd.log import logger as floyd_logger
 
 
@@ -59,5 +59,9 @@ class FloydHttpClient(object):
                 raise AuthenticationException()
             elif response.status_code == 404:
                 raise NotFoundException()
+            elif response.status_code == 400:
+                raise BadRequestException()
+            elif response.status_code == 429:
+                raise OverLimitException()
             else:
                 response.raise_for_status()

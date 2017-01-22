@@ -30,3 +30,18 @@ class AuthClient(FloydHttpClient):
     def logout(self):
         self.request("DELETE", url="/user/logout/")
         return True
+
+    def signup(self, signup_request):
+        signup_url = "/user/create/"
+        response = self.request("POST",
+                                signup_url,
+                                data=json.dumps(signup_request.to_dict()))
+        access_token = response.headers.get("access-token")
+        expiry = response.headers.get("expiry")
+
+        if not access_token:
+            raise FloydException("Access token missing in response", 500)
+
+        return AccessToken(username=signup_request.username,
+                           token=access_token,
+                           expiry=expiry)

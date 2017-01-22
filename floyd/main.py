@@ -2,7 +2,7 @@ import click
 
 import floyd
 from floyd.log import configure_logger
-from floyd.cli.auth import login, logout
+from floyd.cli.auth import demo, login, logout
 from floyd.cli.experiment import init, logs, output, status, stop
 from floyd.cli.run import run
 
@@ -19,6 +19,7 @@ def cli(host, verbose):
     configure_logger(verbose)
 
 
+cli.add_command(demo)
 cli.add_command(init)
 cli.add_command(login)
 cli.add_command(logout)
