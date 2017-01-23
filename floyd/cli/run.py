@@ -4,7 +4,8 @@ from tabulate import tabulate
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.config import AuthConfigManager, ExperimentConfigManager
-from floyd.constants import CPU_INSTANCE_TYPE, GPU_INSTANCE_TYPE
+from floyd.constants import (CPU_INSTANCE_TYPE, GPU_INSTANCE_TYPE,
+                             TENSORFLOW_CPU_DOCKER_IMAGE, TENSORFLOW_GPU_DOCKER_IMAGE)
 from floyd.model.module import Module
 from floyd.model.experiment import ExperimentRequest
 from floyd.log import logger as floyd_logger
@@ -29,6 +30,7 @@ def run(gpu, command):
                     description=experiment_config.name,
                     command=command_str,
                     family_id=experiment_config.family_id,
+                    default_container=TENSORFLOW_GPU_DOCKER_IMAGE if gpu else TENSORFLOW_CPU_DOCKER_IMAGE,
                     version=version)
     module_id = ModuleClient().create(module)
     floyd_logger.debug("Created module with id : {}".format(module_id))

@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from floyd.constants import TENSORFLOW_DOCKER_IMAGE
+from floyd.constants import TENSORFLOW_CPU_DOCKER_IMAGE
 from floyd.model.base import BaseModel
 
 
@@ -28,7 +28,7 @@ class Module(BaseModel):
                  description,
                  command,
                  module_type="code",
-                 default_container=TENSORFLOW_DOCKER_IMAGE,
+                 default_container=TENSORFLOW_CPU_DOCKER_IMAGE,
                  family_id=None,
                  version=None,
                  outputs=default_outputs):
