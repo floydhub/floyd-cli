@@ -28,5 +28,5 @@ Start by cloning the sample project
     cd tensorflow-examples
 
 And init a floyd project inside that.
-    floyd init example-proj
+    floyd init --project example-proj
 """
