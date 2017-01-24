@@ -21,7 +21,7 @@ class AuthClient(FloydHttpClient):
         expiry = response.headers.get("expiry")
 
         if not access_token:
-            raise FloydException("Access token missing in response", 500)
+            raise FloydException("Unexpected Error: Access token missing in response")
 
         return AccessToken(username=credentials.username,
                            token=access_token,
@@ -40,7 +40,7 @@ class AuthClient(FloydHttpClient):
         expiry = response.headers.get("expiry")
 
         if not access_token:
-            raise FloydException("Access token missing in response", 500)
+            raise FloydException("Unexpected Error: Access token missing in response")
 
         return AccessToken(username=signup_request.username,
                            token=access_token,

@@ -1,13 +1,9 @@
 from click import ClickException
 
 
-class FloydException(Exception):
+class FloydException(ClickException):
 
-    def __init__(self,
-                 message=None,
-                 status_code=None):
-        self.message = message
-        self.status_code = status_code
+    def __init__(self, message=None, code=None):
         super(FloydException, self).__init__(message)
 
 

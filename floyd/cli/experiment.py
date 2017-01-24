@@ -24,7 +24,11 @@ def init(project):
                                          family_id=generate_uuid())
     ExperimentConfigManager.set_config(experiment_config)
     FloydIgnoreManager.init()
-    floyd_logger.info("Project {} initialized in current directory".format(project))
+    floyd_logger.info("Project \"{}\" initialized in current directory".format(project))
+    floyd_logger.info("""
+    You can now run your code in Floyd by:
+        floyd run "python 1_Introduction/helloworld.py"
+    """)
 
 
 @click.command()

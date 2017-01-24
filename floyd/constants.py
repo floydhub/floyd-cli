@@ -23,9 +23,10 @@ CPU_INSTANCE_TYPE = "cpu_high"
 GPU_INSTANCE_TYPE = "gpu_high"
 
 FIRST_STEPS_DOC = """
-You can now run your project with:
-    floyd run python hello_tensorflow.py
+Start by cloning the sample project
+    git clone https://github.com/floydhub/tensorflow-examples.git
+    cd tensorflow-examples
 
-To create a new project at current directory run:
-    floyd init
+And init a floyd project inside that.
+    floyd init example-proj
 """
