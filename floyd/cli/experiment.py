@@ -12,7 +12,7 @@ from floyd.log import logger as floyd_logger
 
 
 @click.command()
-@click.option('--project', prompt=True, required=True, help='Project name')
+@click.argument('project', nargs=1)
 def init(project):
     """
     Initialize new project at the current dir.
