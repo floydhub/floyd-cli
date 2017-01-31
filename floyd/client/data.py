@@ -2,6 +2,7 @@ import json
 
 from floyd.client.base import FloydHttpClient
 from floyd.client.files import get_files_in_directory
+from floyd.model.data import Data
 from floyd.log import logger as floyd_logger
 
 
@@ -22,3 +23,16 @@ class DataClient(FloydHttpClient):
                                 data=request_data,
                                 files=upload_files)
         return response.json().get("id")
+
+    def get(self, id):
+        response = self.request("GET",
+                                "{}{}".format(self.url, id))
+        data_dict = response.json()
+        return Data.from_dict(data_dict)
+
+    def get_all(self):
+        response = self.request("GET",
+                                self.url,
+                                params="module_type=data")
+        experiments_dict = response.json()
+        return [Data.from_dict(expt) for expt in experiments_dict]

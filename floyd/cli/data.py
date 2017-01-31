@@ -1,10 +1,12 @@
 import click
+import webbrowser
 from tabulate import tabulate
 
+import floyd
 from floyd.client.data import DataClient
 from floyd.config import AuthConfigManager, generate_uuid
 from floyd.manager.data_config import DataConfig, DataConfigManager
-from floyd.model.data import Data
+from floyd.model.data import DataRequest
 from floyd.log import logger as floyd_logger
 
 
@@ -48,12 +50,12 @@ def upload():
     data_name = "{}/{}:{}".format(access_token.username,
                                   data_config.name,
                                   version)
-    data = Data(name=data_name,
-                description=version,
-                version=version)
+    data = DataRequest(name=data_name,
+                       description=version,
+                       version=version)
     data_id = DataClient().create(data)
     floyd_logger.debug("Created data with id : {}".format(data_id))
-    floyd_logger.info("Data upload finished")
+    floyd_logger.info("Upload finished")
 
     # Update expt config including predecessor
     data_config.increment_version()
@@ -65,74 +67,49 @@ def upload():
                     [data_id, data_name, version]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
 
+
+@click.command()
+@click.argument('id', required=False, nargs=1)
+def status(id):
+    """
+    Show the status of a run with id.
+    It can also list status of all the runs in the project.
+    """
+    if id:
+        data_source = DataClient().get(id)
+        print_data([data_source])
+    else:
+        data_sources = DataClient().get_all()
+        print_data(data_sources)
+
+
+def print_data(data_sources):
+    headers = ["DATA ID", "CREATED", "DISK USAGE", "NAME", "VERSION"]
+    data_list = []
+    for data_source in data_sources:
+        data_list.append([data_source.id, data_source.created_pretty,
+                          data_source.size, data_source.name, data_source.version])
+    floyd_logger.info(tabulate(data_list, headers=headers))
+
+
+@click.command()
+@click.option('-u', '--url', is_flag=True, default=False, help='Only print url for viewing data')
+@click.argument('id', nargs=1)
+def output(id, url):
+    """
+    Shows the output url of the run.
+    By default opens the output page in your default browser.
+    """
+    data_source = DataClient().get(id)
+    data_url = "{}/api/v1/resources/{}?content=true".format(floyd.floyd_host,
+                                                            data_source.resource_id)
+    if url:
+        floyd_logger.info(data_url)
+    else:
+        floyd_logger.info("Opening output directory in your browser ...")
+        webbrowser.open(data_url)
+
 data.add_command(init)
 data.add_command(upload)
-
-#
-# def print_experiments(experiments):
-#     headers = ["RUN ID", "CREATED", "STATUS", "DURATION(s)", "NAME", "INSTANCE", "VERSION"]
-#     expt_list = []
-#     for experiment in experiments:
-#         expt_list.append([experiment.id, experiment.created_pretty, experiment.state,
-#                           experiment.duration_rounded, experiment.name,
-#                           experiment.instance_type_trimmed, experiment.description])
-#     floyd_logger.info(tabulate(expt_list, headers=headers))
-#
-#
-# @click.command()
-# @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
-# @click.argument('id', nargs=1)
-# def logs(id, url):
-#     """
-#     Print the logs of the run.
-#     """
-#     experiment = ExperimentClient().get(id)
-#     task_instance = TaskInstanceClient().get(experiment.task_instances[0])
-#     log_url = "{}/api/v1/resources/{}?content=true".format(floyd.floyd_host, task_instance.log_id)
-#     if url:
-#         floyd_logger.info(log_url)
-#         return
-#     log_file_contents = get_url_contents(log_url)
-#     if len(log_file_contents.strip()):
-#         floyd_logger.info(log_file_contents)
-#     else:
-#         floyd_logger.info("No logs available yet. Try after a few seconds.")
-#
-#
-# @click.command()
-# @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
-# @click.argument('id', nargs=1)
-# def output(id, url):
-#     """
-#     Shows the output url of the run.
-#     By default opens the output page in your default browser.
-#     """
-#     experiment = ExperimentClient().get(id)
-#     task_instance = TaskInstanceClient().get(experiment.task_instances[0])
-#     if "output" in task_instance.output_ids:
-#         output_dir_url = "{}/api/v1/resources/{}?content=true".format(floyd.floyd_host,
-#                                                                       task_instance.output_ids["output"])
-#         if url:
-#             floyd_logger.info(output_dir_url)
-#         else:
-#             floyd_logger.info("Opening output directory in your browser ...")
-#             webbrowser.open(output_dir_url)
-#     else:
-#         floyd_logger.error("Output directory not available")
-#
-#
-# @click.command()
-# @click.argument('id', nargs=1)
-# def stop(id):
-#     """
-#     Stop a run before it can finish.
-#     """
-#     experiment = ExperimentClient().get(id)
-#     if experiment.state not in ["queued", "running"]:
-#         floyd_logger.info("Experiment in {} state cannot be stopped".format(experiment.state))
-#         return
-#
-#     if ExperimentClient().stop(id):
-#         floyd_logger.info("Experiment shutdown request submitted. Check status to confirm shutdown")
-#     else:
-#         floyd_logger.error("Failed to stop experiment")
+data.add_command(status)
+data.add_command(output)
