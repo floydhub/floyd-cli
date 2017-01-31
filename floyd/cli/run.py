@@ -13,8 +13,9 @@ from floyd.log import logger as floyd_logger
 
 @click.command()
 @click.option('--gpu/--cpu', default=False, help='Run on a gpu instance')
+@click.option('--data', help='Data source id to use')
 @click.argument('command', nargs=-1)
-def run(gpu, command):
+def run(gpu, data, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -24,10 +25,13 @@ def run(gpu, command):
     experiment_config = ExperimentConfigManager.get_config()
     access_token = AuthConfigManager.get_access_token()
     version = experiment_config.version
+    experiment_name = "{}/{}:{}".format(access_token.username,
+                                        experiment_config.name,
+                                        version)
 
     # Create module
-    module = Module(name=experiment_config.name,
-                    description=experiment_config.name,
+    module = Module(name=experiment_name,
+                    description=version,
                     command=command_str,
                     family_id=experiment_config.family_id,
                     default_container=TENSORFLOW_GPU_DOCKER_IMAGE if gpu else TENSORFLOW_CPU_DOCKER_IMAGE,
@@ -36,13 +40,11 @@ def run(gpu, command):
     floyd_logger.debug("Created module with id : {}".format(module_id))
 
     # Create experiment request
-    experiment_name = "{}/{}:{}".format(access_token.username,
-                                        experiment_config.name,
-                                        version)
     instance_type = GPU_INSTANCE_TYPE if gpu else CPU_INSTANCE_TYPE
     experiment_request = ExperimentRequest(name=experiment_name,
                                            description=version,
                                            module_id=module_id,
+                                           data_id=data,
                                            predecessor=experiment_config.experiment_predecessor,
                                            family_id=experiment_config.family_id,
                                            version=version,
