@@ -13,6 +13,7 @@ class ModuleSchema(Schema):
     family_id = fields.Str(allow_none=True)
     version = fields.Integer(allow_none=True)
     outputs = fields.List(fields.Dict)
+    inputs = fields.List(fields.Dict)
 
     @post_load
     def make_module(self, data):
@@ -22,6 +23,7 @@ class ModuleSchema(Schema):
 class Module(BaseModel):
     schema = ModuleSchema(strict=True)
     default_outputs = [{'name': 'output', 'type': 'dir'}]
+    default_inputs = [{'name': 'input', 'type': 'dir'}]
 
     def __init__(self,
                  name,
@@ -31,7 +33,8 @@ class Module(BaseModel):
                  default_container=TENSORFLOW_CPU_DOCKER_IMAGE,
                  family_id=None,
                  version=None,
-                 outputs=default_outputs):
+                 outputs=default_outputs,
+                 inputs=default_inputs):
         self.name = name
         self.description = description
         self.command = command
@@ -40,3 +43,4 @@ class Module(BaseModel):
         self.family_id = family_id
         self.version = version
         self.outputs = outputs
+        self.inputs = inputs

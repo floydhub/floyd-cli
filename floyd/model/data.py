@@ -39,7 +39,6 @@ class DataSchema(Schema):
 
     @post_load
     def make_data(self, data):
-        print(data)
         return Data(**data)
 
 
