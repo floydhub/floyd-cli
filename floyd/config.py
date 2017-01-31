@@ -81,7 +81,7 @@ class FloydIgnoreManager(object):
     @classmethod
     def get_list(cls):
         if not os.path.isfile(cls.CONFIG_FILE_PATH):
-            raise FloydException("Missing .floydexpt file, run floyd init first")
+            return []
 
         ignore_dirs = []
         with open(cls.CONFIG_FILE_PATH, "r") as floyd_ignore_file:

@@ -3,6 +3,7 @@ import click
 import floyd
 from floyd.log import configure_logger
 from floyd.cli.auth import demo, login, logout
+from floyd.cli.data import data
 from floyd.cli.experiment import init, logs, output, status, stop
 from floyd.cli.run import run
 
@@ -20,6 +21,7 @@ def cli(host, verbose):
 
 
 cli.add_command(demo)
+cli.add_command(data)
 cli.add_command(init)
 cli.add_command(login)
 cli.add_command(logout)
