@@ -70,6 +70,10 @@ class Experiment(BaseModel):
             return self.instance_type.split('_')[0]
         return self.instance_type
 
+    @property
+    def is_finished(self):
+        return self.state in ["shutdown", "failed", "success"]
+
 
 class ExperimentRequestSchema(Schema):
     name = fields.Str()

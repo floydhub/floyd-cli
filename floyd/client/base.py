@@ -38,7 +38,7 @@ class FloydHttpClient(object):
         try:
             floyd_logger.debug("Response Content: {}, Headers: {}".format(response.json(), response.headers))
         except Exception:
-            floyd_logger.error("Request failed. Response: {}".format(response.content))
+            floyd_logger.debug("Request failed. Response: {}".format(response.content))
 
         self.check_response_status(response)
         return response
