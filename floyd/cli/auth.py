@@ -1,8 +1,9 @@
 import click
 
 from floyd.client.auth import AuthClient
-from floyd.config import AuthConfigManager, generate_uuid
+from floyd.config import generate_uuid
 from floyd.constants import FIRST_STEPS_DOC
+from floyd.manager.auth_config import AuthConfigManager
 from floyd.model.credentials import Credentials, SignupRequest
 from floyd.log import logger as floyd_logger
 

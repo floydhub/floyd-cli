@@ -7,7 +7,9 @@ import floyd
 from floyd.client.common import get_url_contents
 from floyd.client.experiment import ExperimentClient
 from floyd.client.task_instance import TaskInstanceClient
-from floyd.config import ExperimentConfigManager, FloydIgnoreManager, generate_uuid
+from floyd.config import generate_uuid
+from floyd.manager.experiment_config import ExperimentConfigManager
+from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.model.experiment_config import ExperimentConfig
 from floyd.log import logger as floyd_logger
 

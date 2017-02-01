@@ -5,7 +5,8 @@ from time import sleep
 from floyd.cli.experiment import logs
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
-from floyd.config import AuthConfigManager, ExperimentConfigManager
+from floyd.manager.auth_config import AuthConfigManager
+from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.constants import (CPU_INSTANCE_TYPE, GPU_INSTANCE_TYPE,
                              TENSORFLOW_CPU_DOCKER_IMAGE, TENSORFLOW_GPU_DOCKER_IMAGE)
 from floyd.model.module import Module

@@ -1,6 +1,6 @@
 import os
 
-from floyd.config import FloydIgnoreManager
+from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.log import logger as floyd_logger
 
 

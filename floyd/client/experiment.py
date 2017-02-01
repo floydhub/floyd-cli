@@ -1,7 +1,7 @@
 import json
 
 from floyd.client.base import FloydHttpClient
-from floyd.config import ExperimentConfigManager
+from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.model.experiment import Experiment
 
 
