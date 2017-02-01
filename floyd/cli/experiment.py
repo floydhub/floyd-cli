@@ -1,6 +1,7 @@
 import click
 import webbrowser
 from tabulate import tabulate
+from time import sleep
 
 import floyd
 from floyd.client.common import get_url_contents
@@ -58,8 +59,9 @@ def print_experiments(experiments):
 
 @click.command()
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
+@click.option('-t', '--tail', is_flag=True, default=False, help='Stream the logs')
 @click.argument('id', nargs=1)
-def logs(id, url):
+def logs(id, url, tail, sleep_duration=1):
     """
     Print the logs of the run.
     """
@@ -69,11 +71,25 @@ def logs(id, url):
     if url:
         floyd_logger.info(log_url)
         return
-    log_file_contents = get_url_contents(log_url)
-    if len(log_file_contents.strip()):
-        floyd_logger.info(log_file_contents)
+    if tail:
+        floyd_logger.info("Waiting for logs ...")
+        current_shell_output = ""
+        while True:
+            # Get the logs in a loop and log the new lines
+            log_file_contents = get_url_contents(log_url)
+            print_output = log_file_contents[len(current_shell_output):]
+            if len(print_output.strip()):
+                floyd_logger.info(print_output)
+            current_shell_output = log_file_contents
+            if ExperimentClient().get(id).is_finished:
+                break
+            sleep(sleep_duration)
     else:
-        floyd_logger.info("No logs available yet. Try after a few seconds.")
+        log_file_contents = get_url_contents(log_url)
+        if len(log_file_contents.strip()):
+            floyd_logger.info(log_file_contents)
+        else:
+            floyd_logger.info("No logs available yet. Try after a few seconds.")
 
 
 @click.command()

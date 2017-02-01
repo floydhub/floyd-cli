@@ -1,6 +1,8 @@
 import click
 from tabulate import tabulate
+from time import sleep
 
+from floyd.cli.experiment import logs
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.config import AuthConfigManager, ExperimentConfigManager
@@ -14,8 +16,10 @@ from floyd.log import logger as floyd_logger
 @click.command()
 @click.option('--gpu/--cpu', default=False, help='Run on a gpu instance')
 @click.option('--data', help='Data source id to use')
+@click.option('--detach/--tail', default=False, help='Do not wait for logs. Just print run id')
 @click.argument('command', nargs=-1)
-def run(gpu, data, command):
+@click.pass_context
+def run(ctx, gpu, data, detach, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -61,3 +65,17 @@ def run(gpu, data, command):
     table_output = [["RUN ID", "NAME", "VERSION"],
                     [experiment_id, experiment_name, version]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
+
+    if not detach:
+        while True:
+            # Wait for the experiment to become available
+            try:
+                ExperimentClient().get(experiment_id)
+                break
+            except Exception:
+                floyd_logger.debug("Experiment not available yet: {}".format(experiment_id))
+                sleep(1)
+                continue
+
+        # Now invoke the logs functions with tail mode on
+        ctx.invoke(logs, id=experiment_id, url=False, tail=True, sleep_duration=2)
