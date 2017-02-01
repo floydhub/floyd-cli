@@ -4,7 +4,8 @@ from tabulate import tabulate
 
 import floyd
 from floyd.client.data import DataClient
-from floyd.config import AuthConfigManager, generate_uuid
+from floyd.config import generate_uuid
+from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.data_config import DataConfig, DataConfigManager
 from floyd.model.data import DataRequest
 from floyd.log import logger as floyd_logger
