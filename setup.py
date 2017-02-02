@@ -31,6 +31,8 @@ setup(
     entry_points={
         "console_scripts": [
             "floyd = floyd.main:cli",
+            "floyd-dev = floyd.development.dev:cli",
+            "floyd-local = floyd.development.local:cli",
         ],
     },
     tests_require=[

@@ -90,3 +90,4 @@ ENV/
 
 # Floyd config
 .floydexpt
+.floydconfig

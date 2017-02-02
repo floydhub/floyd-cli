@@ -1,8 +1,8 @@
-import json
+import requests
 
+import floyd
 from floyd.client.base import FloydHttpClient
-from floyd.exceptions import FloydException
-from floyd.model.access_token import AccessToken
+from floyd.model.user import User
 
 
 class AuthClient(FloydHttpClient):
@@ -10,38 +10,10 @@ class AuthClient(FloydHttpClient):
     Auth specific client
     """
     def __init__(self):
-        self.url = "/user/login/"
-        super(AuthClient, self).__init__()
+        self.base_url = "{}/api/v1/user/".format(floyd.floyd_host)
 
-    def login(self, credentials):
-        response = self.request("POST",
-                                self.url,
-                                data=json.dumps(credentials.to_dict()))
-        access_token = response.headers.get("access-token")
-        expiry = response.headers.get("expiry")
-
-        if not access_token:
-            raise FloydException("Unexpected Error: Access token missing in response")
-
-        return AccessToken(username=credentials.username,
-                           token=access_token,
-                           expiry=expiry)
-
-    def logout(self):
-        self.request("DELETE", url="/user/logout/")
-        return True
-
-    def signup(self, signup_request):
-        signup_url = "/user/create/"
-        response = self.request("POST",
-                                signup_url,
-                                data=json.dumps(signup_request.to_dict()))
-        access_token = response.headers.get("access-token")
-        expiry = response.headers.get("expiry")
-
-        if not access_token:
-            raise FloydException("Unexpected Error: Access token missing in response")
-
-        return AccessToken(username=signup_request.username,
-                           token=access_token,
-                           expiry=expiry)
+    def get_user(self, access_token):
+        response = requests.get(self.base_url,
+                                headers={"Authorization": "Bearer {}".format(access_token)})
+        user_dict = response.json()
+        return User.from_dict(user_dict)

@@ -9,16 +9,14 @@ from floyd.cli.run import run
 
 
 @click.group()
-@click.option('-h', '--host', default='https://beta.floydhub.com', help='Floyd server endpoint')
 @click.option('-v', '--verbose', count=True, help='Turn on debug logging')
-def cli(host, verbose):
+def cli(verbose):
     """
     Floyd CLI interacts with Floyd server and executes your commands.
     More help is available under each command listed below.
     """
-    floyd.floyd_host = host
+    floyd.floyd_host = floyd.floyd_web_host = "https://dev.floydhub.com"
     configure_logger(verbose)
-
 
 cli.add_command(data)
 cli.add_command(init)

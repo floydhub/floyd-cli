@@ -7,7 +7,7 @@ class AccessTokenSchema(Schema):
 
     username = fields.Str()
     token = fields.Str()
-    expiry = fields.Number()
+    expiry = fields.Number(allow_none=True)
 
     @post_load
     def make_access_token(self, data):
