@@ -33,7 +33,8 @@ class FloydHttpClient(object):
                                         self.access_token.token if self.access_token else None)
                                     },
                                     data=data,
-                                    files=files)
+                                    files=files,
+                                    timeout=5)
 
         try:
             floyd_logger.debug("Response Content: {}, Headers: {}".format(response.json(), response.headers))
