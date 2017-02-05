@@ -35,5 +35,6 @@ class ExperimentClient(FloydHttpClient):
     def create(self, experiment_request):
         response = self.request("POST",
                                 "{}run_module/".format(self.url),
-                                data=json.dumps(experiment_request.to_dict()))
+                                data=json.dumps(experiment_request.to_dict()),
+                                timeout=600)
         return response.json().get("id")

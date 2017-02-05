@@ -19,7 +19,8 @@ class FloydHttpClient(object):
                 url,
                 params=None,
                 data=None,
-                files=None):
+                files=None,
+                timeout=5):
         """
         Execute the request using requests library
         """
@@ -34,7 +35,7 @@ class FloydHttpClient(object):
                                     },
                                     data=data,
                                     files=files,
-                                    timeout=5)
+                                    timeout=timeout)
 
         try:
             floyd_logger.debug("Response Content: {}, Headers: {}".format(response.json(), response.headers))

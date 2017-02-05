@@ -20,5 +20,6 @@ class ModuleClient(FloydHttpClient):
         response = self.request("POST",
                                 self.url,
                                 data=request_data,
-                                files=upload_files)
+                                files=upload_files,
+                                timeout=600)
         return response.json().get("id")

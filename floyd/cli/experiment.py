@@ -83,8 +83,6 @@ def logs(id, url, tail, sleep_duration=1):
             if len(print_output.strip()):
                 floyd_logger.info(print_output)
             current_shell_output = log_file_contents
-            if ExperimentClient().get(id).is_finished:
-                break
             sleep(sleep_duration)
     else:
         log_file_contents = get_url_contents(log_url)

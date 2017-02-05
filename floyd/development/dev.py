@@ -16,6 +16,7 @@ def cli(verbose):
     More help is available under each command listed below.
     """
     floyd.floyd_host = floyd.floyd_web_host = "https://dev.floydhub.com"
+    floyd.floyd_proxy_host = "https://dev.floydhub.com:8081"
     configure_logger(verbose)
 
 cli.add_command(data)
