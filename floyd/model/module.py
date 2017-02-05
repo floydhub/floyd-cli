@@ -8,6 +8,7 @@ class ModuleSchema(Schema):
     name = fields.Str()
     description = fields.Str()
     command = fields.Str()
+    mode = fields.Str(allow_none=True)
     module_type = fields.Str()
     default_container = fields.Str()
     family_id = fields.Str(allow_none=True)
@@ -29,6 +30,7 @@ class Module(BaseModel):
                  name,
                  description,
                  command,
+                 mode=None,
                  module_type="code",
                  default_container=TENSORFLOW_CPU_DOCKER_IMAGE,
                  family_id=None,
@@ -38,6 +40,7 @@ class Module(BaseModel):
         self.name = name
         self.description = description
         self.command = command
+        self.mode = mode
         self.module_type = module_type
         self.default_container = default_container
         self.family_id = family_id
