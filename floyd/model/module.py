@@ -30,7 +30,7 @@ class Module(BaseModel):
                  name,
                  description,
                  command,
-                 mode=None,
+                 mode="default",
                  module_type="code",
                  default_container=TENSORFLOW_CPU_DOCKER_IMAGE,
                  family_id=None,

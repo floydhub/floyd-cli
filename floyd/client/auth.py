@@ -1,5 +1,4 @@
 import requests
-from json.decoder import JSONDecodeError
 
 import floyd
 from floyd.exceptions import AuthenticationException
@@ -19,7 +18,7 @@ class AuthClient(FloydHttpClient):
                                 headers={"Authorization": "Bearer {}".format(access_token)})
         try:
             user_dict = response.json()
-        except JSONDecodeError:
+        except Exception:
             raise AuthenticationException("Invalid Token")
 
         return User.from_dict(user_dict)
