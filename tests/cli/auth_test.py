@@ -11,6 +11,6 @@ class TestAuthClient(unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
 
-    def test_login(self):
-        result = self.runner.invoke(login, ['test19', 'test'])
+    def test_login_help(self):
+        result = self.runner.invoke(login, ['--help'])
         assert(result.exit_code == 0)
