@@ -22,7 +22,7 @@ class DataClient(FloydHttpClient):
                                 self.url,
                                 data=request_data,
                                 files=upload_files,
-                                timeout=600)
+                                timeout=3600)
         return response.json().get("id")
 
     def get(self, id):
