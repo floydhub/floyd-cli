@@ -14,8 +14,7 @@ def login():
     Log into Floyd via Auth0.
     """
     cli_info_url = "{}/cli".format(floyd.floyd_web_host)
-    if not click.confirm('Access token page will now open in your browser. Continue?'):
-        return
+    click.confirm('Access token page will now open in your browser. Continue?', abort=True, default=True)
 
     webbrowser.open(cli_info_url)
     access_code = click.prompt('Please paste the code here', type=str)

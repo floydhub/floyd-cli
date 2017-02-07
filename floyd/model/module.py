@@ -12,7 +12,7 @@ class ModuleSchema(Schema):
     module_type = fields.Str()
     default_container = fields.Str()
     family_id = fields.Str(allow_none=True)
-    version = fields.Integer(allow_none=True)
+    version = fields.Float(allow_none=True)
     outputs = fields.List(fields.Dict)
     inputs = fields.List(fields.Dict)
 

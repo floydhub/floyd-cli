@@ -76,12 +76,28 @@ def logs(id, url, tail, sleep_duration=1):
     if tail:
         floyd_logger.info("Waiting for logs ...")
         current_shell_output = ""
+        has_output_started = False
+        has_output_ended = False
+        OUTPUT_MARKER = '#' * 80
+
         while True:
             # Get the logs in a loop and log the new lines
             log_file_contents = get_url_contents(log_url)
             print_output = log_file_contents[len(current_shell_output):]
             if len(print_output.strip()):
-                floyd_logger.info(print_output)
+                if OUTPUT_MARKER in print_output:
+                    if not has_output_started:
+                        print_output = print_output.split(OUTPUT_MARKER)[1]
+                        has_output_started = True
+                    elif not has_output_ended:
+                        print("OUTPUT ENDED")
+                        print(print_output)
+                        print_output = print_output.split(OUTPUT_MARKER)[0]
+                        has_output_ended = True
+                if has_output_started:
+                    floyd_logger.info(print_output)
+                if has_output_ended:
+                    break
             current_shell_output = log_file_contents
             sleep(sleep_duration)
     else:
