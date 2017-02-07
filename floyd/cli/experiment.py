@@ -38,7 +38,7 @@ def init(project):
 @click.argument('id', required=False, nargs=1)
 def status(id):
     """
-    Show the status of a run with id.
+    View status of all or specific run.
     It can also list status of all the runs in the project.
     """
     if id:
