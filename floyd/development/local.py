@@ -2,6 +2,7 @@ import click
 
 import floyd
 from floyd.log import configure_logger
+from floyd.main import check_cli_version
 from floyd.cli.auth import login, logout
 from floyd.cli.data import data
 from floyd.cli.experiment import init, logs, output, status, stop
@@ -19,6 +20,7 @@ def cli(verbose):
     floyd.floyd_web_host = "http://localhost:3000"
     floyd.floyd_proxy_host = "http://localhost:8000"
     configure_logger(verbose)
+    check_cli_version()
 
 cli.add_command(data)
 cli.add_command(init)

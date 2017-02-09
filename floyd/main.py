@@ -1,11 +1,15 @@
 import click
+from distutils.version import LooseVersion
+import pkg_resources
 
 import floyd
-from floyd.log import configure_logger
 from floyd.cli.auth import login, logout
 from floyd.cli.data import data
 from floyd.cli.experiment import init, logs, output, status, stop
 from floyd.cli.run import run
+from floyd.client.version import VersionClient
+from floyd.exceptions import FloydException
+from floyd.log import configure_logger
 
 
 @click.group()
@@ -18,6 +22,26 @@ def cli(host, verbose):
     """
     floyd.floyd_host = host
     configure_logger(verbose)
+    check_cli_version()
+
+
+def check_cli_version():
+    """
+    Check if the current cli version satisfies the server requirements
+    """
+    server_version = VersionClient().get_cli_version()
+    current_version = pkg_resources.require("floyd-cli")[0].version
+    if LooseVersion(current_version) < LooseVersion(server_version.min_version):
+        raise FloydException("""
+Your version of CLI ({}) is no longer compatible with server. Run:
+    pip install -U floyd-cli
+to upgrade to the latest version ({})
+            """.format(current_version, server_version.latest_version))
+    if LooseVersion(current_version) < LooseVersion(server_version.latest_version):
+        print("""
+New version of CLI ({}) is now available. To upgrade run:
+    pip install -U floyd-cli
+            """.format(server_version.latest_version))
 
 
 cli.add_command(data)
