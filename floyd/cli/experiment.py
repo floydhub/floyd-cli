@@ -4,6 +4,7 @@ from tabulate import tabulate
 from time import sleep
 
 import floyd
+from floyd.cli.run import get_task_url
 from floyd.client.common import get_url_contents
 from floyd.client.experiment import ExperimentClient
 from floyd.client.task_instance import TaskInstanceClient
@@ -29,8 +30,8 @@ def init(project):
     FloydIgnoreManager.init()
     floyd_logger.info("Project \"{}\" initialized in current directory".format(project))
     floyd_logger.info("""
-    You can now run your code in Floyd by:
-        floyd run "python 1_Introduction/helloworld.py"
+You can now run your code in Floyd by:
+    floyd run "python 1_Introduction/helloworld.py"
     """)
 
 
@@ -50,12 +51,24 @@ def status(id):
 
 
 def print_experiments(experiments):
-    headers = ["RUN ID", "CREATED", "STATUS", "DURATION(s)", "NAME", "INSTANCE", "VERSION"]
+    """
+    Prints expt details in a table. Includes urls and mode parameters
+    """
+    headers = ["RUN ID", "CREATED", "STATUS", "DURATION(s)", "NAME", "INSTANCE", "VERSION", "MODE", "URL"]
     expt_list = []
     for experiment in experiments:
+        mode = url = None
+        # Add mode and url fields to running experiments
+        if experiment.state == "running":
+            if not experiment.task_instances:
+                experiment = ExperimentClient().get(experiment.id)
+            task_instance = TaskInstanceClient().get(experiment.task_instances[0])
+            mode = task_instance.mode
+            url = get_task_url(task_instance.id)
+
         expt_list.append([experiment.id, experiment.created_pretty, experiment.state,
                           experiment.duration_rounded, experiment.name,
-                          experiment.instance_type_trimmed, experiment.description])
+                          experiment.instance_type_trimmed, experiment.description, mode, url])
     floyd_logger.info(tabulate(expt_list, headers=headers))
 
 
@@ -74,7 +87,7 @@ def logs(id, url, tail, sleep_duration=1):
         floyd_logger.info(log_url)
         return
     if tail:
-        floyd_logger.info("Waiting for logs ...")
+        floyd_logger.info("Launching your job ...")
         current_shell_output = ""
         while True:
             # Get the logs in a loop and log the new lines

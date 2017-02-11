@@ -3,7 +3,6 @@ from tabulate import tabulate
 from time import sleep
 
 import floyd
-from floyd.cli.experiment import logs
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.manager.auth_config import AuthConfigManager
@@ -18,11 +17,13 @@ from floyd.log import logger as floyd_logger
 @click.command()
 @click.option('--gpu/--cpu', default=False, help='Run on a gpu instance')
 @click.option('--data', help='Data source id to use')
-@click.option('--mode', help='Different floyd modes', default='default', type=click.Choice(['default', 'jupyter']))
-@click.option('--detach/--tail', default=False, help='Do not wait for logs. Just print run id')
+@click.option('--mode',
+              help='Different floyd modes',
+              default='default',
+              type=click.Choice(['default', 'jupyter', 'serving']))
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, gpu, data, mode, detach, command):
+def run(ctx, gpu, data, mode, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -71,7 +72,7 @@ def run(ctx, gpu, data, mode, detach, command):
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
     floyd_logger.info("")
 
-    if mode == 'jupyter' or not detach:
+    if mode != 'default':
         while True:
             # Wait for the experiment to become available
             try:
@@ -84,10 +85,20 @@ def run(ctx, gpu, data, mode, detach, command):
 
         # Print the path to jupyter notebook
         if mode == 'jupyter':
-            floyd_logger.info("Path to jupyter notebook: {}/{}".format(floyd.floyd_proxy_host,
-                                                                       experiment.task_instances[0]))
-            floyd_logger.info("")
+            floyd_logger.info("Path to jupyter notebook: {}".format(get_task_url(experiment.task_instances[0])))
 
-        # Invoke the logs functions with tail mode on
-        if not detach:
-            ctx.invoke(logs, id=experiment_id, url=False, tail=True, sleep_duration=2)
+        # Print the path to serving endpoint
+        if mode == 'serving':
+            floyd_logger.info("Path to service endpoint: {}".format(get_task_url(experiment.task_instances[0])))
+
+    floyd_logger.info("""
+To view logs enter:
+    floyd logs {}
+        """.format(experiment_id))
+
+
+def get_task_url(id):
+    """
+    Return the url to proxy to a running task
+    """
+    return "{}/{}".format(floyd.floyd_proxy_host, id)

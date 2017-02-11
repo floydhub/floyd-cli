@@ -7,6 +7,7 @@ class TaskInstanceSchema(Schema):
     id = fields.Str()
     log_id = fields.Str()
     output_ids = fields.Dict(load_from='output_ids_dict')
+    mode = fields.Str()
 
     @post_load
     def make_task_instance(self, data):
@@ -19,7 +20,9 @@ class TaskInstance(BaseModel):
     def __init__(self,
                  id,
                  log_id,
-                 output_ids):
+                 output_ids,
+                 mode):
         self.id = id
         self.log_id = log_id
         self.output_ids = output_ids
+        self.mode = mode
