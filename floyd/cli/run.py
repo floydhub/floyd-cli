@@ -22,8 +22,8 @@ from floyd.log import logger as floyd_logger
               type=click.Choice(['default', 'jupyter', 'serving']))
 @click.option('--env',
               help='Environment type to use',
-              default='default',
-              type=click.Choice(['default', 'tensorflow_py3', 'tensorflow_py2']))
+              default='tensorflow_py3',
+              type=click.Choice(['tensorflow_py3', 'tensorflow_py2']))
 @click.argument('command', nargs=-1)
 @click.pass_context
 def run(ctx, gpu, env, data, mode, command):

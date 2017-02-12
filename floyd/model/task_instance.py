@@ -7,7 +7,7 @@ class TaskInstanceSchema(Schema):
     id = fields.Str()
     log_id = fields.Str()
     output_ids = fields.Dict(load_from='output_ids_dict')
-    mode = fields.Str()
+    mode = fields.Str(allow_none=True)
 
     @post_load
     def make_task_instance(self, data):

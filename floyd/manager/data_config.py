@@ -57,7 +57,7 @@ class DataConfigManager(object):
     @classmethod
     def get_config(cls):
         if not os.path.isfile(cls.CONFIG_FILE_PATH):
-            raise FloydException("Missing .floyddata file, run floyd init first")
+            raise FloydException("Missing .floyddata file, run floyd data init first")
 
         with open(cls.CONFIG_FILE_PATH, "r") as config_file:
             data_config_str = config_file.read()

@@ -58,13 +58,14 @@ def print_experiments(experiments):
     expt_list = []
     for experiment in experiments:
         mode = url = None
-        # Add mode and url fields to running experiments
+        # Add mode and url fields to running experiments for non-default expts
         if experiment.state == "running":
             if not experiment.task_instances:
                 experiment = ExperimentClient().get(experiment.id)
             task_instance = TaskInstanceClient().get(experiment.task_instances[0])
-            mode = task_instance.mode
-            url = get_task_url(task_instance.id)
+            if task_instance.mode != 'default':
+                mode = task_instance.mode
+                url = get_task_url(task_instance.id)
 
         expt_list.append([experiment.id, experiment.created_pretty, experiment.state,
                           experiment.duration_rounded, experiment.name,
