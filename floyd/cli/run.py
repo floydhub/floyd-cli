@@ -18,8 +18,8 @@ from floyd.log import logger as floyd_logger
 @click.option('--data', help='Data source id to use')
 @click.option('--mode',
               help='Different floyd modes',
-              default='default',
-              type=click.Choice(['default', 'jupyter', 'serving']))
+              default='job',
+              type=click.Choice(['job', 'jupyter', 'serving']))
 @click.option('--env',
               help='Environment type to use',
               default='tensorflow_py3',
@@ -44,7 +44,7 @@ def run(ctx, gpu, env, data, mode, command):
     module = Module(name=experiment_name,
                     description=version,
                     command=command_str,
-                    mode=mode,
+                    mode='cli' if mode == 'job' else mode,
                     family_id=experiment_config.family_id,
                     default_container=get_docker_image(env, gpu),
                     version=version)

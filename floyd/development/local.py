@@ -2,11 +2,7 @@ import click
 
 import floyd
 from floyd.log import configure_logger
-from floyd.main import check_cli_version
-from floyd.cli.auth import login, logout
-from floyd.cli.data import data
-from floyd.cli.experiment import init, logs, output, status, stop
-from floyd.cli.run import run
+from floyd.main import check_cli_version, add_commands
 
 
 @click.group()
@@ -22,12 +18,4 @@ def cli(verbose):
     configure_logger(verbose)
     check_cli_version()
 
-cli.add_command(data)
-cli.add_command(init)
-cli.add_command(login)
-cli.add_command(logout)
-cli.add_command(logs)
-cli.add_command(output)
-cli.add_command(status)
-cli.add_command(stop)
-cli.add_command(run)
+add_commands(cli)

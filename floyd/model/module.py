@@ -30,7 +30,7 @@ class Module(BaseModel):
                  name,
                  description,
                  command,
-                 mode="default",
+                 mode="cli",
                  module_type="code",
                  default_container=DEFAULT_DOCKER_IMAGE,
                  family_id=None,

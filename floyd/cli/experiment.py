@@ -54,23 +54,37 @@ def print_experiments(experiments):
     """
     Prints expt details in a table. Includes urls and mode parameters
     """
-    headers = ["RUN ID", "CREATED", "STATUS", "DURATION(s)", "NAME", "INSTANCE", "VERSION", "MODE", "URL"]
+    headers = ["RUN ID", "CREATED", "STATUS", "DURATION(s)", "NAME", "INSTANCE", "VERSION"]
     expt_list = []
     for experiment in experiments:
-        mode = url = None
-        # Add mode and url fields to running experiments for non-default expts
-        if experiment.state == "running":
-            if not experiment.task_instances:
-                experiment = ExperimentClient().get(experiment.id)
-            task_instance = TaskInstanceClient().get(experiment.task_instances[0])
-            if task_instance.mode != 'default':
-                mode = task_instance.mode
-                url = get_task_url(task_instance.id)
-
         expt_list.append([experiment.id, experiment.created_pretty, experiment.state,
                           experiment.duration_rounded, experiment.name,
-                          experiment.instance_type_trimmed, experiment.description, mode, url])
+                          experiment.instance_type_trimmed, experiment.description])
     floyd_logger.info(tabulate(expt_list, headers=headers))
+
+
+@click.command()
+@click.argument('id', nargs=1)
+def info(id):
+    """
+    Prints detailed info for the run
+    """
+    experiment = ExperimentClient().get(id)
+    task_instance = TaskInstanceClient().get(experiment.task_instances[0])
+    mode = url = None
+    if experiment.state == "running":
+        if task_instance.mode in ['jupyter', 'serving']:
+            mode = task_instance.mode
+            url = get_task_url(task_instance.id)
+    table = [["Run ID", experiment.id], ["Name", experiment.name], ["Created", experiment.created_pretty],
+             ["Status", experiment.state], ["Duration(s)", experiment.duration_rounded],
+             ["Output ID", task_instance.id], ["Instance", experiment.instance_type_trimmed],
+             ["Version", experiment.description]]
+    if mode:
+        table.append(["Mode", mode])
+    if url:
+        table.append(["Url", url])
+    floyd_logger.info(tabulate(table))
 
 
 @click.command()

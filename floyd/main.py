@@ -5,7 +5,7 @@ import pkg_resources
 import floyd
 from floyd.cli.auth import login, logout
 from floyd.cli.data import data
-from floyd.cli.experiment import init, logs, output, status, stop
+from floyd.cli.experiment import info, init, logs, output, status, stop
 from floyd.cli.run import run
 from floyd.client.version import VersionClient
 from floyd.exceptions import FloydException
@@ -44,12 +44,16 @@ New version of CLI ({}) is now available. To upgrade run:
             """.format(server_version.latest_version))
 
 
-cli.add_command(data)
-cli.add_command(init)
-cli.add_command(login)
-cli.add_command(logout)
-cli.add_command(logs)
-cli.add_command(output)
-cli.add_command(status)
-cli.add_command(stop)
-cli.add_command(run)
+def add_commands(cli):
+    cli.add_command(data)
+    cli.add_command(info)
+    cli.add_command(init)
+    cli.add_command(login)
+    cli.add_command(logout)
+    cli.add_command(logs)
+    cli.add_command(output)
+    cli.add_command(status)
+    cli.add_command(stop)
+    cli.add_command(run)
+
+add_commands(cli)
