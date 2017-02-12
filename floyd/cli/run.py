@@ -7,8 +7,7 @@ from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.experiment_config import ExperimentConfigManager
-from floyd.constants import (CPU_INSTANCE_TYPE, GPU_INSTANCE_TYPE,
-                             TENSORFLOW_CPU_DOCKER_IMAGE, TENSORFLOW_GPU_DOCKER_IMAGE)
+from floyd.constants import CPU_INSTANCE_TYPE, GPU_INSTANCE_TYPE, DOCKER_IMAGES
 from floyd.model.module import Module
 from floyd.model.experiment import ExperimentRequest
 from floyd.log import logger as floyd_logger
@@ -21,9 +20,13 @@ from floyd.log import logger as floyd_logger
               help='Different floyd modes',
               default='default',
               type=click.Choice(['default', 'jupyter', 'serving']))
+@click.option('--env',
+              help='Environment type to use',
+              default='default',
+              type=click.Choice(['default', 'tensorflow_py3', 'tensorflow_py2']))
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, gpu, data, mode, command):
+def run(ctx, gpu, env, data, mode, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -43,7 +46,7 @@ def run(ctx, gpu, data, mode, command):
                     command=command_str,
                     mode=mode,
                     family_id=experiment_config.family_id,
-                    default_container=TENSORFLOW_GPU_DOCKER_IMAGE if gpu else TENSORFLOW_CPU_DOCKER_IMAGE,
+                    default_container=get_docker_image(env, gpu),
                     version=version)
     module_id = ModuleClient().create(module)
     floyd_logger.debug("Created module with id : {}".format(module_id))
@@ -102,3 +105,8 @@ def get_task_url(id):
     Return the url to proxy to a running task
     """
     return "{}/{}".format(floyd.floyd_proxy_host, id)
+
+
+def get_docker_image(env, gpu):
+    gpu_cpu = "gpu" if gpu else "cpu"
+    return DOCKER_IMAGES.get(gpu_cpu).get(env)

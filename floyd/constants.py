@@ -1,7 +1,19 @@
 from pytz import timezone
 
-TENSORFLOW_CPU_DOCKER_IMAGE = "tensorflow/tensorflow:0.12.1-py3"
-TENSORFLOW_GPU_DOCKER_IMAGE = "tensorflow/tensorflow:0.12.1-gpu-py3"
+DOCKER_IMAGES = {
+    "cpu": {
+        "default": "tensorflow/tensorflow:0.12.1-py3",
+        "tensorflow_py3": "tensorflow/tensorflow:0.12.1-py3",
+        "tensorflow_py2": "tensorflow/tensorflow:0.12.1",
+    },
+    "gpu": {
+        "default": "tensorflow/tensorflow:0.12.1-gpu-py3",
+        "tensorflow_py3": "tensorflow/tensorflow:0.12.1-gpu-py3",
+        "tensorflow_py2": "tensorflow/tensorflow:0.12.1-gpu",
+    }
+}
+
+DEFAULT_DOCKER_IMAGE = "tensorflow/tensorflow:0.12.1-py3"
 
 PST_TIMEZONE = timezone("America/Los_Angeles")
 

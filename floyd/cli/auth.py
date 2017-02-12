@@ -17,7 +17,7 @@ def login():
     click.confirm('Access token page will now open in your browser. Continue?', abort=True, default=True)
 
     webbrowser.open(cli_info_url)
-    access_code = click.prompt('Please paste the code here', type=str)
+    access_code = click.prompt('Please paste the code here', type=str, hide_input=True)
 
     user = AuthClient().get_user(access_code)
     access_token = AccessToken(username=user.username,
