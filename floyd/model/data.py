@@ -34,7 +34,7 @@ class DataSchema(Schema):
     description = fields.Str()
     created = fields.DateTime(load_from="date_created")
     data = fields.Nested(DataDetailsSchema)
-    version = fields.Integer(allow_none=True)
+    version = fields.Str(allow_none=True)
     resource_id = fields.Str(allow_none=True)
 
     @post_load
@@ -60,7 +60,7 @@ class Data(BaseModel):
         self.size = data.size
         self.state = data.state
         self.uri = data.uri
-        self.version = version
+        self.version = int(float(version))
         self.resource_id = resource_id
 
     def localize_date(self, date):
