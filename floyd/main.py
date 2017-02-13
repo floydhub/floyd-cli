@@ -13,7 +13,7 @@ from floyd.log import configure_logger
 
 
 @click.group()
-@click.option('-h', '--host', default='https://beta.floydhub.com', help='Floyd server endpoint')
+@click.option('-h', '--host', default='https://www.floydhub.com', help='Floyd server endpoint')
 @click.option('-v', '--verbose', count=True, help='Turn on debug logging')
 def cli(host, verbose):
     """

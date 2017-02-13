@@ -102,7 +102,7 @@ def logs(id, url, tail, sleep_duration=1):
         floyd_logger.info(log_url)
         return
     if tail:
-        floyd_logger.info("Launching your job ...")
+        floyd_logger.info("Launching job ...")
         current_shell_output = ""
         while True:
             # Get the logs in a loop and log the new lines
@@ -117,7 +117,7 @@ def logs(id, url, tail, sleep_duration=1):
         if len(log_file_contents.strip()):
             floyd_logger.info(log_file_contents)
         else:
-            floyd_logger.info("No logs available yet. Try after a few seconds.")
+            floyd_logger.info("Launching job now. Try after a few seconds.")
 
 
 @click.command()
