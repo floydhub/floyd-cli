@@ -2,14 +2,20 @@ from pytz import timezone
 
 DOCKER_IMAGES = {
     "cpu": {
-        "default": "tensorflow/tensorflow:0.12.1-py3",
-        "tensorflow_py3": "tensorflow/tensorflow:0.12.1-py3",
-        "tensorflow_py2": "tensorflow/tensorflow:0.12.1",
+        "keras": "floydhub/keras:latest-py3",
+        "tensorflow": "floydhub/tensorflow:latest-py3",
+        "caffe": "floydhub/caffe:latest-py3",
+        "keras:py2": "floydhub/keras:latest-py2",
+        "tensorflow:py2": "floydhub/tensorflow:latest-py2",
+        "caffe:py2": "floydhub/caffe:latest-py2",
     },
     "gpu": {
-        "default": "tensorflow/tensorflow:0.12.1-gpu-py3",
-        "tensorflow_py3": "tensorflow/tensorflow:0.12.1-gpu-py3",
-        "tensorflow_py2": "tensorflow/tensorflow:0.12.1-gpu",
+        "keras": "floydhub/keras:latest-gpu-py3",
+        "tensorflow": "floydhub/tensorflow:latest-gpu-py3",
+        "caffe": "floydhub/caffe:latest-gpu-py3",
+        "keras:py2": "floydhub/keras:latest-gpu-py2",
+        "tensorflow:py2": "floydhub/tensorflow:latest-gpu-py2",
+        "caffe:py2": "floydhub/caffe:latest-gpu-py2",
     }
 }
 

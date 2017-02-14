@@ -1,4 +1,5 @@
 import requests
+import sys
 
 import floyd
 from floyd.manager.auth_config import AuthConfigManager
@@ -27,15 +28,18 @@ class FloydHttpClient(object):
         request_url = self.base_url + url
         floyd_logger.debug("Starting request to url: {} with params: {}, data: {}".format(request_url, params, data))
 
-        response = requests.request(method,
-                                    request_url,
-                                    params=params,
-                                    headers={"Authorization": "Bearer {}".format(
-                                        self.access_token.token if self.access_token else None)
-                                    },
-                                    data=data,
-                                    files=files,
-                                    timeout=timeout)
+        try:
+            response = requests.request(method,
+                                        request_url,
+                                        params=params,
+                                        headers={"Authorization": "Bearer {}".format(
+                                            self.access_token.token if self.access_token else None)
+                                        },
+                                        data=data,
+                                        files=files,
+                                        timeout=timeout)
+        except requests.exceptions.ConnectionError:
+            sys.exit("Cannot connect to the Floyd server. Check your internet connection.")
 
         try:
             floyd_logger.debug("Response Content: {}, Headers: {}".format(response.json(), response.headers))
