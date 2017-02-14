@@ -4,7 +4,7 @@ from tabulate import tabulate
 from time import sleep
 
 import floyd
-from floyd.cli.run import get_task_url
+from floyd.cli.utils import get_task_url, get_module_task_instance_id
 from floyd.client.common import get_url_contents
 from floyd.client.experiment import ExperimentClient
 from floyd.client.task_instance import TaskInstanceClient
@@ -70,7 +70,7 @@ def info(id):
     Prints detailed info for the run
     """
     experiment = ExperimentClient().get(id)
-    task_instance = TaskInstanceClient().get(experiment.task_instances[0])
+    task_instance = TaskInstanceClient().get(get_module_task_instance_id(experiment.task_instances))
     mode = url = None
     if experiment.state == "running":
         if task_instance.mode in ['jupyter', 'serving']:
@@ -96,7 +96,7 @@ def logs(id, url, tail, sleep_duration=1):
     Print the logs of the run.
     """
     experiment = ExperimentClient().get(id)
-    task_instance = TaskInstanceClient().get(experiment.task_instances[0])
+    task_instance = TaskInstanceClient().get(get_module_task_instance_id(experiment.task_instances))
     log_url = "{}/api/v1/resources/{}?content=true".format(floyd.floyd_host, task_instance.log_id)
     if url:
         floyd_logger.info(log_url)
@@ -129,7 +129,7 @@ def output(id, url):
     By default opens the output page in your default browser.
     """
     experiment = ExperimentClient().get(id)
-    task_instance = TaskInstanceClient().get(experiment.task_instances[0])
+    task_instance = TaskInstanceClient().get(get_module_task_instance_id(experiment.task_instances))
     if "output" in task_instance.output_ids:
         output_dir_url = "{}/api/v1/resources/{}?content=true".format(floyd.floyd_host,
                                                                       task_instance.output_ids["output"])

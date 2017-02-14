@@ -46,9 +46,9 @@ class Experiment(BaseModel):
         self.log_id = log_id
         if canvas:
             nodes = canvas.get('nodes', {})
-            self.task_instances = [nodes[key].get("taskInstanceId") for key in nodes]
-        else:
-            self.task_instances = []
+            self.task_instances = {}
+            for key in nodes:
+                self.task_instances[nodes[key].get("taskInstanceId")] = nodes[key].get("type")
         self.instance_type = instance_type
 
     def localize_date(self, date):

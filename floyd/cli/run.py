@@ -2,12 +2,12 @@ import click
 from tabulate import tabulate
 from time import sleep
 
-import floyd
+from floyd.cli.utils import get_task_url, get_docker_image, get_module_task_instance_id
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.experiment_config import ExperimentConfigManager
-from floyd.constants import CPU_INSTANCE_TYPE, GPU_INSTANCE_TYPE, DOCKER_IMAGES
+from floyd.constants import CPU_INSTANCE_TYPE, GPU_INSTANCE_TYPE
 from floyd.model.module import Module
 from floyd.model.experiment import ExperimentRequest
 from floyd.log import logger as floyd_logger
@@ -88,25 +88,15 @@ def run(ctx, gpu, env, data, mode, command):
 
         # Print the path to jupyter notebook
         if mode == 'jupyter':
-            floyd_logger.info("Path to jupyter notebook: {}".format(get_task_url(experiment.task_instances[0])))
+            floyd_logger.info("Path to jupyter notebook: {}".format(
+                get_task_url(get_module_task_instance_id(experiment.task_instances))))
 
         # Print the path to serving endpoint
         if mode == 'serving':
-            floyd_logger.info("Path to service endpoint: {}".format(get_task_url(experiment.task_instances[0])))
+            floyd_logger.info("Path to service endpoint: {}".format(
+                get_task_url(get_module_task_instance_id(experiment.task_instances))))
 
     floyd_logger.info("""
 To view logs enter:
     floyd logs {}
         """.format(experiment_id))
-
-
-def get_task_url(id):
-    """
-    Return the url to proxy to a running task
-    """
-    return "{}/{}".format(floyd.floyd_proxy_host, id)
-
-
-def get_docker_image(env, gpu):
-    gpu_cpu = "gpu" if gpu else "cpu"
-    return DOCKER_IMAGES.get(gpu_cpu).get(env)
