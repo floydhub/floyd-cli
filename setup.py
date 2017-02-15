@@ -2,7 +2,7 @@
 from setuptools import find_packages, setup
 
 project = "floyd-cli"
-version = "0.6.2"
+version = "0.7.0"
 
 setup(
     name=project,
