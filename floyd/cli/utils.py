@@ -22,3 +22,15 @@ def get_module_task_instance_id(task_instances):
         if task_instances[id] == 'module_node':
             return id
     return None
+
+
+def get_mode_parameter(mode):
+    """
+    Map the mode parameter to the server parameter
+    """
+    if mode == 'job':
+        return 'cli'
+    elif mode == 'serve':
+        return 'serving'
+    else:
+        return mode

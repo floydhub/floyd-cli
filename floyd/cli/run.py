@@ -2,7 +2,7 @@ import click
 from tabulate import tabulate
 from time import sleep
 
-from floyd.cli.utils import get_task_url, get_docker_image, get_module_task_instance_id
+from floyd.cli.utils import get_task_url, get_docker_image, get_module_task_instance_id, get_mode_parameter
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.manager.auth_config import AuthConfigManager
@@ -19,7 +19,7 @@ from floyd.log import logger as floyd_logger
 @click.option('--mode',
               help='Different floyd modes',
               default='job',
-              type=click.Choice(['job', 'jupyter', 'serving']))
+              type=click.Choice(['job', 'jupyter', 'serve']))
 @click.option('--env',
               help='Environment type to use',
               default='keras',
@@ -45,7 +45,7 @@ def run(ctx, gpu, env, data, mode, command):
     module = Module(name=experiment_name,
                     description=version,
                     command=command_str,
-                    mode='cli' if mode == 'job' else mode,
+                    mode=get_mode_parameter(mode),
                     family_id=experiment_config.family_id,
                     default_container=get_docker_image(env, gpu),
                     version=version)
