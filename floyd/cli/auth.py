@@ -13,11 +13,11 @@ def login():
     """
     Log into Floyd via Auth0.
     """
-    cli_info_url = "{}/cli".format(floyd.floyd_web_host)
-    click.confirm('Access token page will now open in your browser. Continue?', abort=True, default=True)
+    cli_info_url = "{}/welcome".format(floyd.floyd_web_host)
+    click.confirm('Authentication token page will now open in your browser. Continue?', abort=True, default=True)
 
     webbrowser.open(cli_info_url)
-    access_code = click.prompt('Please paste the code here', type=str, hide_input=True)
+    access_code = click.prompt('Please copy and paste the token here', type=str, hide_input=True)
 
     user = AuthClient().get_user(access_code)
     access_token = AccessToken(username=user.username,
