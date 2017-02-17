@@ -9,14 +9,17 @@ from floyd.log import logger as floyd_logger
 
 
 @click.command()
-def login():
+@click.option('--token', is_flag=True, default=False, help='Just enter token')
+def login(token):
     """
     Log into Floyd via Auth0.
     """
-    cli_info_url = "{}/welcome".format(floyd.floyd_web_host)
-    click.confirm('Authentication token page will now open in your browser. Continue?', abort=True, default=True)
+    if not token:
+        cli_info_url = "{}/welcome".format(floyd.floyd_web_host)
+        click.confirm('Authentication token page will now open in your browser. Continue?', abort=True, default=True)
 
-    webbrowser.open(cli_info_url)
+        webbrowser.open(cli_info_url)
+
     access_code = click.prompt('Please copy and paste the token here', type=str, hide_input=True)
 
     user = AuthClient().get_user(access_code)
