@@ -1,3 +1,6 @@
+from time import sleep
+import requests
+
 import floyd
 from floyd.constants import DOCKER_IMAGES
 
@@ -34,3 +37,15 @@ def get_mode_parameter(mode):
         return 'serving'
     else:
         return mode
+
+
+def wait_for_url(url, status_code=200, sleep_duration_seconds=1, iterations=120):
+    """
+    Wait for the url to become available
+    """
+    for _ in range(iterations):
+        response = requests.get(url)
+        if response.status_code == status_code:
+            return True
+        sleep(sleep_duration_seconds)
+    return False

@@ -2,7 +2,8 @@ import click
 from tabulate import tabulate
 from time import sleep
 
-from floyd.cli.utils import get_task_url, get_docker_image, get_module_task_instance_id, get_mode_parameter
+from floyd.cli.utils import (get_task_url, get_docker_image, get_module_task_instance_id,
+                             get_mode_parameter, wait_for_url)
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.manager.auth_config import AuthConfigManager
@@ -89,8 +90,12 @@ def run(ctx, gpu, env, data, mode, command):
 
         # Print the path to jupyter notebook
         if mode == 'jupyter':
-            floyd_logger.info("Path to jupyter notebook: {}".format(
-                get_task_url(get_module_task_instance_id(experiment.task_instances))))
+            jupyter_url = get_task_url(get_module_task_instance_id(experiment.task_instances))
+            floyd_logger.info("Waiting for Jupyter notebook to become available ...")
+            if wait_for_url(jupyter_url):
+                floyd_logger.info("\nPath to jupyter notebook: {}".format(jupyter_url))
+            else:
+                floyd_logger.info("Problem starting the notebook. View logs for more information")
 
         # Print the path to serving endpoint
         if mode == 'serving':
