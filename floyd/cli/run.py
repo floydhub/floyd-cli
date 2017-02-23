@@ -2,6 +2,7 @@ import click
 from tabulate import tabulate
 from time import sleep
 
+from floyd.constants import DOCKER_IMAGES
 from floyd.cli.utils import (get_task_url, get_docker_image, get_module_task_instance_id,
                              get_mode_parameter, wait_for_url)
 from floyd.client.experiment import ExperimentClient
@@ -24,8 +25,7 @@ from floyd.log import logger as floyd_logger
 @click.option('--env',
               help='Environment type to use',
               default='keras',
-              type=click.Choice(['keras', 'tensorflow', 'caffe',
-                                 'keras:py2', 'tensorflow:py2', 'caffe:py2']))
+              type=click.Choice(sorted(DOCKER_IMAGES["cpu"].keys())))
 @click.argument('command', nargs=-1)
 @click.pass_context
 def run(ctx, gpu, env, data, mode, command):
