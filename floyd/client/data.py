@@ -17,7 +17,7 @@ class DataClient(FloydHttpClient):
 
     def create(self, data):
         try:
-            upload_files, total_file_size = get_files_in_directory(path='.', file_type='code')
+            upload_files, total_file_size = get_files_in_directory(path='.', file_type='data')
         except OSError:
             sys.exit("Directory contains too many files to upload. Add unused directories to .floydignore file. "
                      "Or download data directly from the internet into FloydHub")
