@@ -110,6 +110,25 @@ def output(id, url):
         floyd_logger.info("Opening output directory in your browser ...")
         webbrowser.open(data_url)
 
+
+@click.command()
+@click.argument('id', nargs=1)
+@click.option('-y', '--yes', is_flag=True, default=False, help='Skip confirmation')
+def delete(id, yes):
+    """
+    Delete data set.
+    """
+    data_source = DataClient().get(id)
+
+    if not yes:
+        click.confirm('Delete Data: {}?'.format(data_source.name), abort=True, default=False)
+
+    if DataClient().delete(id):
+        floyd_logger.info("Data deleted")
+    else:
+        floyd_logger.error("Failed to delete data")
+
+data.add_command(delete)
 data.add_command(init)
 data.add_command(upload)
 data.add_command(status)

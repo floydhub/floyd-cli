@@ -98,7 +98,7 @@ def run(ctx, gpu, env, data, mode, command):
                 floyd_logger.info("Problem starting the notebook. View logs for more information")
 
         # Print the path to serving endpoint
-        if mode == 'serving':
+        if mode == 'serve':
             floyd_logger.info("Path to service endpoint: {}".format(
                 get_task_url(get_module_task_instance_id(experiment.task_instances))))
 

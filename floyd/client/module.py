@@ -31,3 +31,8 @@ class ModuleClient(FloydHttpClient):
                                 files=upload_files,
                                 timeout=3600)
         return response.json().get("id")
+
+    def delete(self, id):
+        self.request("DELETE",
+                     "{}{}".format(self.url, id))
+        return True

@@ -7,6 +7,7 @@ import floyd
 from floyd.cli.utils import get_task_url, get_module_task_instance_id
 from floyd.client.common import get_url_contents
 from floyd.client.experiment import ExperimentClient
+from floyd.client.module import ModuleClient
 from floyd.client.task_instance import TaskInstanceClient
 from floyd.config import generate_uuid
 from floyd.manager.experiment_config import ExperimentConfigManager
@@ -153,3 +154,29 @@ def stop(id):
         floyd_logger.info("Experiment shutdown request submitted. Check status to confirm shutdown")
     else:
         floyd_logger.error("Failed to stop experiment")
+
+
+@click.command()
+@click.argument('id', nargs=1)
+@click.option('-y', '--yes', is_flag=True, default=False, help='Skip confirmation')
+def delete(id, yes):
+    """
+    Delete project run
+    """
+    experiment = ExperimentClient().get(id)
+    task_instance = TaskInstanceClient().get(get_module_task_instance_id(experiment.task_instances))
+
+    if experiment.state in ["queued", "running"]:
+        floyd_logger.info("Experiment in {} state cannot be deleted. Stop it first".format(experiment.state))
+        return
+
+    if not yes:
+        click.confirm('Delete Run: {}?'.format(experiment.name), abort=True, default=False)
+
+    if task_instance.module_id:
+        ModuleClient().delete(task_instance.module_id)
+
+    if ExperimentClient().delete(id):
+        floyd_logger.info("Experiment deleted")
+    else:
+        floyd_logger.error("Failed to delete experiment")

@@ -68,6 +68,6 @@ class FloydHttpClient(object):
             elif response.status_code == 400:
                 raise BadRequestException()
             elif response.status_code == 429:
-                raise OverLimitException()
+                raise OverLimitException(response.json().get("message"))
             else:
                 response.raise_for_status()

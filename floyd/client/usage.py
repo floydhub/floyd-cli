@@ -45,8 +45,3 @@ class DataClient(FloydHttpClient):
                                 params="module_type=data")
         experiments_dict = response.json()
         return [Data.from_dict(expt) for expt in experiments_dict]
-
-    def delete(self, id):
-        self.request("DELETE",
-                     "{}{}".format(self.url, id))
-        return True

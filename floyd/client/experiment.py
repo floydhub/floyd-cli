@@ -38,3 +38,8 @@ class ExperimentClient(FloydHttpClient):
                                 data=json.dumps(experiment_request.to_dict()),
                                 timeout=3600)
         return response.json().get("id")
+
+    def delete(self, id):
+        self.request("DELETE",
+                     "{}{}".format(self.url, id))
+        return True
