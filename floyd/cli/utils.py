@@ -1,9 +1,9 @@
+from __future__ import print_function
 from time import sleep
-import random
 import requests
 
 import floyd
-from floyd.constants import DOCKER_IMAGES, LOADING_MESSAGES
+from floyd.constants import DOCKER_IMAGES
 
 
 def get_task_url(id):

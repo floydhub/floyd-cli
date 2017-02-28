@@ -20,7 +20,8 @@ def login(token):
 
         webbrowser.open(cli_info_url)
 
-    access_code = click.prompt('Please copy and paste the token here', type=str, hide_input=True)
+    floyd_logger.info("Please copy and paste the token from the welcome page.")
+    access_code = click.prompt('This is an invisible field. Paste token and press ENTER', type=str, hide_input=True)
 
     user = AuthClient().get_user(access_code)
     access_token = AccessToken(username=user.username,

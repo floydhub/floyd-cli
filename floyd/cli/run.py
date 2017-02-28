@@ -1,3 +1,4 @@
+from __future__ import print_function
 import click
 from tabulate import tabulate
 from time import sleep
