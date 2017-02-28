@@ -91,11 +91,12 @@ def run(ctx, gpu, env, data, mode, command):
         # Print the path to jupyter notebook
         if mode == 'jupyter':
             jupyter_url = get_task_url(get_module_task_instance_id(experiment.task_instances))
-            floyd_logger.info("Waiting for Jupyter notebook to become available ...")
-            if wait_for_url(jupyter_url):
+            print("Waiting for Jupyter notebook to become available ...", end='')
+            if wait_for_url(jupyter_url, sleep_duration_seconds=2, iterations=600):
                 floyd_logger.info("\nPath to jupyter notebook: {}".format(jupyter_url))
             else:
-                floyd_logger.info("Problem starting the notebook. View logs for more information")
+                floyd_logger.info("\nPath to jupyter notebook: {}".format(jupyter_url))
+                floyd_logger.info("Notebook is still loading. View logs to track progress")
 
         # Print the path to serving endpoint
         if mode == 'serve':

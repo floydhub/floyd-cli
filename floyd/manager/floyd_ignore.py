@@ -13,6 +13,10 @@ class FloydIgnoreManager(object):
 
     @classmethod
     def init(cls):
+        if os.path.isfile(cls.CONFIG_FILE_PATH):
+            floyd_logger.debug("floyd ignore file already present at {}".format(cls.CONFIG_FILE_PATH))
+            return
+
         floyd_logger.debug("Setting default floyd ignore in the file {}".format(cls.CONFIG_FILE_PATH))
 
         with open(cls.CONFIG_FILE_PATH, "w") as config_file:

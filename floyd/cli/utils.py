@@ -1,8 +1,9 @@
 from time import sleep
+import random
 import requests
 
 import floyd
-from floyd.constants import DOCKER_IMAGES
+from floyd.constants import DOCKER_IMAGES, LOADING_MESSAGES
 
 
 def get_task_url(id):
@@ -39,13 +40,19 @@ def get_mode_parameter(mode):
         return mode
 
 
-def wait_for_url(url, status_code=200, sleep_duration_seconds=1, iterations=120):
+def wait_for_url(url, status_code=200, sleep_duration_seconds=1, iterations=120, message_frequency=15):
     """
     Wait for the url to become available
     """
-    for _ in range(iterations):
+    for iteration in range(iterations):
+        # if(iteration % message_frequency == 0):
+        #     print("\n{}".format(random.choice(LOADING_MESSAGES)), end='', flush=True)
+
+        print(".", end='', flush=True)
         response = requests.get(url)
         if response.status_code == status_code:
+            print(".", flush=True)
             return True
         sleep(sleep_duration_seconds)
+    print(".", flush=True)
     return False
