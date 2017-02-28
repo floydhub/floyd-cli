@@ -1,6 +1,7 @@
 from __future__ import print_function
 from time import sleep
 import requests
+import sys
 
 import floyd
 from floyd.constants import DOCKER_IMAGES
@@ -48,11 +49,12 @@ def wait_for_url(url, status_code=200, sleep_duration_seconds=1, iterations=120,
         # if(iteration % message_frequency == 0):
         #     print("\n{}".format(random.choice(LOADING_MESSAGES)), end='', flush=True)
 
-        print(".", end='', flush=True)
+        print(".", end='')
+        sys.stdout.flush()
         response = requests.get(url)
         if response.status_code == status_code:
-            print(".", flush=True)
+            print(".")
             return True
         sleep(sleep_duration_seconds)
-    print(".", flush=True)
+    print(".")
     return False
