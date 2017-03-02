@@ -92,8 +92,8 @@ def run(ctx, gpu, env, data, mode, command):
         # Print the path to jupyter notebook
         if mode == 'jupyter':
             jupyter_url = get_task_url(get_module_task_instance_id(experiment.task_instances))
-            print("Waiting for Jupyter notebook to become available ...", end='')
-            if wait_for_url(jupyter_url, sleep_duration_seconds=2, iterations=600):
+            print("Setting up your instance and waiting for Jupyter notebook to become available ...", end='')
+            if wait_for_url(jupyter_url, sleep_duration_seconds=2, iterations=900):
                 floyd_logger.info("\nPath to jupyter notebook: {}".format(jupyter_url))
             else:
                 floyd_logger.info("\nPath to jupyter notebook: {}".format(jupyter_url))
