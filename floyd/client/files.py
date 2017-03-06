@@ -1,5 +1,8 @@
 import os
-from pathlib import PurePath
+try:
+    from pathlib import PurePath
+except ImportError:
+    from pathlib2 import PurePath
 
 from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.log import logger as floyd_logger
