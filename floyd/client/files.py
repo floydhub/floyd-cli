@@ -13,15 +13,19 @@ def get_files_in_directory(path, file_type):
     local_files = []
     separator = os.path.sep
     ignore_list = FloydIgnoreManager.get_list()
+
+    # make sure that subdirectories are also excluded
+    ignore_list_expanded = ignore_list + ["{}/**".format(item) for item in ignore_list]
     floyd_logger.debug("Ignoring list : {}".format(ignore_list))
     total_file_size = 0
 
     for root, dirs, files in os.walk(path):
         ignore_dir = False
         normalized_path = normalize_path(path, root)
-        for item in ignore_list:
+        for item in ignore_list_expanded:
             if PurePath(normalized_path).match(item):
                 ignore_dir = True
+                break
 
         if ignore_dir:
             floyd_logger.debug("Ignoring directory : {}".format(root))
@@ -30,9 +34,10 @@ def get_files_in_directory(path, file_type):
         for file_name in files:
             ignore_file = False
             normalized_path = normalize_path(path, os.path.join(root, file_name))
-            for item in ignore_list:
+            for item in ignore_list_expanded:
                 if PurePath(normalized_path).match(item):
                     ignore_file = True
+                    break
 
             if ignore_file:
                 floyd_logger.debug("Ignoring file : {}".format(normalized_path))
