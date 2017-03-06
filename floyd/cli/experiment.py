@@ -157,26 +157,35 @@ def stop(id):
 
 
 @click.command()
-@click.argument('id', nargs=1)
+@click.argument('id', required=False, nargs=1)
 @click.option('-y', '--yes', is_flag=True, default=False, help='Skip confirmation')
-def delete(id, yes):
+@click.option('-a', '--all', 'delete_all', is_flag=True, default=False, help='Delete all experiments for the current project')
+def delete(id, yes, delete_all):
     """
     Delete project run
     """
-    experiment = ExperimentClient().get(id)
-    task_instance = TaskInstanceClient().get(get_module_task_instance_id(experiment.task_instances))
-
-    if experiment.state in ["queued", "running"]:
-        floyd_logger.info("Experiment in {} state cannot be deleted. Stop it first".format(experiment.state))
+    if (id and delete_all) or (not id and not delete_all):
+        floyd_logger.info("You need to either specify experiment id or the --all flag")
         return
 
-    if not yes:
-        click.confirm('Delete Run: {}?'.format(experiment.name), abort=True, default=False)
-
-    if task_instance.module_id:
-        ModuleClient().delete(task_instance.module_id)
-
-    if ExperimentClient().delete(id):
-        floyd_logger.info("Experiment deleted")
+    if delete_all:
+        experiment_ids = [experiment.id for experiment in ExperimentClient().get_all()]
     else:
-        floyd_logger.error("Failed to delete experiment")
+        experiment_ids = [id, ]
+
+    for experiment_id in experiment_ids:
+        experiment = ExperimentClient().get(experiment_id)
+        task_instance = TaskInstanceClient().get(get_module_task_instance_id(experiment.task_instances))
+
+        if experiment.state in ["queued", "running"]:
+            floyd_logger.info("Experiment {} in {} state cannot be deleted. Stop it first".format(experiment.name, experiment.state))
+            continue
+
+        if yes or click.confirm('Delete Run: {}?'.format(experiment.name), default=False):
+            if task_instance.module_id:
+                ModuleClient().delete(task_instance.module_id)
+
+            if ExperimentClient().delete(experiment.id):
+                floyd_logger.info("Experiment {} deleted".format(experiment.name))
+            else:
+                floyd_logger.error("Failed to delete experiment {}".format(experiment.name))
