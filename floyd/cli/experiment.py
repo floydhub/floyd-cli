@@ -157,23 +157,21 @@ def stop(id):
 
 
 @click.command()
-@click.argument('id', required=False, nargs=1)
+@click.argument('ids', required=False, nargs=-1)
 @click.option('-y', '--yes', is_flag=True, default=False, help='Skip confirmation')
 @click.option('-a', '--all', 'delete_all', is_flag=True, default=False, help='Delete all experiments for the current project')
-def delete(id, yes, delete_all):
+def delete(ids, yes, delete_all):
     """
     Delete project run
     """
-    if (id and delete_all) or (not id and not delete_all):
-        floyd_logger.info("You need to either specify experiment id or the --all flag")
+    if (ids and delete_all) or (not ids and not delete_all):
+        floyd_logger.info("You need to either specify (one or more) experiment ids or the --all flag")
         return
 
     if delete_all:
-        experiment_ids = [experiment.id for experiment in ExperimentClient().get_all()]
-    else:
-        experiment_ids = [id, ]
+        ids = [experiment.id for experiment in ExperimentClient().get_all()]
 
-    for experiment_id in experiment_ids:
+    for experiment_id in ids:
         experiment = ExperimentClient().get(experiment_id)
         task_instance = TaskInstanceClient().get(get_module_task_instance_id(experiment.task_instances))
 
