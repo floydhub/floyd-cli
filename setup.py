@@ -22,6 +22,7 @@ setup(
         "pytz>=2016.10",
         "shortuuid>=0.4.3",
         "tabulate>=0.7.7",
+        "pathlib2; python_version < '3.4'",
     ],
     setup_requires=[
         "nose>=1.0",
