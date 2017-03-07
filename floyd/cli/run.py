@@ -78,16 +78,15 @@ def run(ctx, gpu, env, data, mode, command):
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
     floyd_logger.info("")
 
-    if mode != 'default':
+    if mode in ['jupyter', 'serve']:
         while True:
-            # Wait for the experiment to become available
-            try:
-                experiment = ExperimentClient().get(experiment_id)
+            # Wait for the experiment / task instances to become available
+            experiment = ExperimentClient().get(experiment_id)
+            if experiment.task_instances:
                 break
-            except Exception:
-                floyd_logger.debug("Experiment not available yet: {}".format(experiment_id))
-                sleep(1)
-                continue
+            floyd_logger.debug("Experiment not available yet: {}".format(experiment_id))
+            sleep(1)
+            continue
 
         # Print the path to jupyter notebook
         if mode == 'jupyter':
