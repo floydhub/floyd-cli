@@ -1,8 +1,5 @@
 import os
-try:
-    from pathlib import PurePath
-except ImportError:
-    from pathlib2 import PurePath
+from pathlib2 import PurePath
 
 from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.log import logger as floyd_logger
@@ -70,7 +67,6 @@ def normalize_path(project_root, path):
     path = '/' + path if not path.startswith('/') else path
 
     return path
-
 
 
 def sizeof_fmt(num, suffix='B'):

@@ -88,6 +88,8 @@ ENV/
 # Rope project settings
 .ropeproject
 
+.DS_Store
+
 # Floyd config
 .floydexpt
 .floydconfig
