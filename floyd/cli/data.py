@@ -112,21 +112,19 @@ def output(id, url):
 
 
 @click.command()
-@click.argument('id', nargs=1)
+@click.argument('ids', required=True, nargs=-1)
 @click.option('-y', '--yes', is_flag=True, default=False, help='Skip confirmation')
-def delete(id, yes):
+def delete(ids, yes):
     """
-    Delete data set.
+    Delete data sets.
     """
-    data_source = DataClient().get(id)
-
-    if not yes:
-        click.confirm('Delete Data: {}?'.format(data_source.name), abort=True, default=False)
-
-    if DataClient().delete(id):
-        floyd_logger.info("Data deleted")
-    else:
-        floyd_logger.error("Failed to delete data")
+    for dataset_id in ids:
+        data_source = DataClient().get(dataset_id)
+        if yes or click.confirm('Delete Data: {}?'.format(data_source.name), default=False):
+            if DataClient().delete(data_source.id):
+                floyd_logger.info("Data {} deleted".format(data_source.name))
+            else:
+                floyd_logger.error("Failed to delete data: {}".format(data_source.name))
 
 data.add_command(delete)
 data.add_command(init)
