@@ -81,9 +81,13 @@ def run(ctx, gpu, env, data, mode, command):
     if mode in ['jupyter', 'serve']:
         while True:
             # Wait for the experiment / task instances to become available
-            experiment = ExperimentClient().get(experiment_id)
-            if experiment.task_instances:
-                break
+            try:
+                experiment = ExperimentClient().get(experiment_id)
+                if experiment.task_instances:
+                    break
+            except Exception:
+                floyd_logger.debug("Experiment not available yet: {}".format(experiment_id))
+
             floyd_logger.debug("Experiment not available yet: {}".format(experiment_id))
             sleep(1)
             continue
