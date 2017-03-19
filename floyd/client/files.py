@@ -14,32 +14,27 @@ def get_files_in_directory(path, file_type):
     separator = os.path.sep
     ignore_list = FloydIgnoreManager.get_list()
 
-    # make sure that subdirectories are also excluded
-    ignore_list_expanded = ignore_list + ["{}/**".format(item) for item in ignore_list]
     floyd_logger.debug("Ignoring list : {}".format(ignore_list))
     total_file_size = 0
 
-    for root, dirs, files in os.walk(path):
-        ignore_dir = False
-        normalized_path = normalize_path(path, root)
-        for item in ignore_list_expanded:
+    def ignore_path(target):
+        normalized_path = normalize_path(path, target)
+        for item in ignore_list:
             if PurePath(normalized_path).match(item):
-                ignore_dir = True
-                break
+                return True
+        return False
 
-        if ignore_dir:
-            floyd_logger.debug("Ignoring directory : {}".format(root))
-            continue
+    for root, dirs, files in os.walk(path):
+
+        # Iterate a copy of the directories, in reverse order, because
+        # we're going to be deleting elements as we go.
+        for i, dir in reversed(list(enumerate(dirs))):
+            if ignore_path(os.path.join(root, dir)):
+                floyd_logger.debug("Ignoring directory : {}".format(os.path.join(root, dir)))
+                del dirs[i]
 
         for file_name in files:
-            ignore_file = False
-            normalized_path = normalize_path(path, os.path.join(root, file_name))
-            for item in ignore_list_expanded:
-                if PurePath(normalized_path).match(item):
-                    ignore_file = True
-                    break
-
-            if ignore_file:
+            if ignore_path(os.path.join(root, file_name)):
                 floyd_logger.debug("Ignoring file : {}".format(normalized_path))
                 continue
 
