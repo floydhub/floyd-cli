@@ -9,6 +9,6 @@ def get_url_contents(url):
     """
     response = requests.get(url)
     if response.status_code == 200:
-        return response.content.decode()
+        return response.content.decode(response.encoding)
     else:
         raise FloydException("Failed to get contents of the url : {}".format(url))
