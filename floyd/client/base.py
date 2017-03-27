@@ -21,24 +21,32 @@ class FloydHttpClient(object):
                 params=None,
                 data=None,
                 files=None,
-                timeout=5):
+                timeout=5,
+                headers=None):
         """
         Execute the request using requests library
         """
         request_url = self.base_url + url
         floyd_logger.debug("Starting request to url: {} with params: {}, data: {}".format(request_url, params, data))
 
+        # Auth headers if access_token is present
+        request_headers = {"Authorization": "Bearer {}".format(
+            self.access_token.token if self.access_token else None),
+        }
+        # Add any additional headers
+        if headers:
+            request_headers.update(headers)
+
         try:
             response = requests.request(method,
                                         request_url,
                                         params=params,
-                                        headers={"Authorization": "Bearer {}".format(
-                                            self.access_token.token if self.access_token else None)
-                                        },
                                         data=data,
+                                        headers=request_headers,
                                         files=files,
                                         timeout=timeout)
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.ConnectionError as exception:
+            floyd_logger.debug("Exception: {}".format(exception))
             sys.exit("Cannot connect to the Floyd server. Check your internet connection.")
 
         try:
