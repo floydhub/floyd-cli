@@ -17,7 +17,9 @@ setup(
     keywords="floyd",
     install_requires=[
         "click>=6.7",
+        "clint>=0.5.1",
         "requests>=2.12.4",
+        "requests-toolbelt>=0.7.1",
         "marshmallow>=2.11.1",
         "pytz>=2016.10",
         "shortuuid>=0.4.3",

@@ -18,9 +18,6 @@ def create_callback(encoder):
         bar.show(monitor.bytes_read)
     return callback
 
-def upload_callback(monitor):
-    print("bytes read_so far: {}".format(monitor.bytes_read))
-
 
 class DataClient(FloydHttpClient):
     """
