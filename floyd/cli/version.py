@@ -20,7 +20,7 @@ def version():
 @click.command()
 def upgrade():
     """
-    Upgrade floyd-cli
+    Upgrade floyd command line
     """
     try:
         pip.main(["install", "--upgrade", PROJECT_NAME])

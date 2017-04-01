@@ -39,7 +39,6 @@ class ModuleClient(FloydHttpClient):
 
         # Add request data
         upload_files.append(("json", json.dumps(module.to_dict())))
-        print(upload_files)
         multipart_encoder = MultipartEncoder(
             fields=upload_files
         )
