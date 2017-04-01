@@ -81,7 +81,7 @@ def sizeof_fmt(num, suffix='B'):
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
 
-def create_tarfile(source_dir, filename="/tmp/data.tar"):
+def create_tarfile(source_dir, filename="/tmp/contents.tar.gz"):
     """
     Create a tar file with the contents of the current directory
     """
