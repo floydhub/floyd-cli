@@ -1,10 +1,23 @@
 import json
-import sys
+import os
+from tempfile import TemporaryDirectory
+
+from clint.textui.progress import Bar as ProgressBar
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
 from floyd.client.base import FloydHttpClient
-from floyd.client.files import get_files_in_directory
+from floyd.client.files import create_tarfile, sizeof_fmt
 from floyd.model.data import Data
 from floyd.log import logger as floyd_logger
+
+
+def create_progress_callback(encoder):
+    encoder_len = encoder.len
+    bar = ProgressBar(expected_size=encoder_len, filled_char='=')
+
+    def callback(monitor):
+        bar.show(monitor.bytes_read)
+    return callback
 
 
 class DataClient(FloydHttpClient):
@@ -16,22 +29,43 @@ class DataClient(FloydHttpClient):
         super(DataClient, self).__init__()
 
     def create(self, data):
-        try:
-            upload_files, total_file_size = get_files_in_directory(path='.', file_type='data')
-        except OSError:
-            sys.exit("Directory contains too many files to upload. Add unused files and directories to .floydignore file. "
-                     "Or download data directly from the internet into FloydHub")
+        """
+        Create a temporary directory for the tar file that will be removed at the
+        end of the operation.
+        """
+        with TemporaryDirectory() as temp_directory:
+            floyd_logger.info("Compressing data ...")
+            compressed_file_path = os.path.join(temp_directory, "data.tar.gz")
 
-        request_data = {"json": json.dumps(data.to_dict())}
-        floyd_logger.info("Creating data source. Total upload size: {}".format(total_file_size))
-        floyd_logger.debug("Total files: {}".format(len(upload_files)))
-        floyd_logger.info("Uploading files ...".format(len(upload_files)))
-        response = self.request("POST",
-                                self.url,
-                                data=request_data,
-                                files=upload_files,
-                                timeout=3600)
-        return response.json().get("id")
+            # Create tarfile
+            floyd_logger.debug("Creating tarfile with contents of current directory: {}".format(compressed_file_path))
+            create_tarfile(source_dir='.', filename=compressed_file_path)
+
+            total_file_size = os.path.getsize(compressed_file_path)
+            floyd_logger.info("Creating data source. Total upload size: {}".format(sizeof_fmt(total_file_size)))
+            floyd_logger.info("Uploading compressed data ...")
+
+            # Add request data
+            request_data = []
+            request_data.append(("data", ('data.tar', open(compressed_file_path, 'rb'), 'text/plain')))
+            request_data.append(("json", json.dumps(data.to_dict())))
+
+            multipart_encoder = MultipartEncoder(
+                fields=request_data
+            )
+
+            # Attach progress bar
+            progress_callback = create_progress_callback(multipart_encoder)
+            multipart_encoder_monitor = MultipartEncoderMonitor(multipart_encoder, progress_callback)
+
+            response = self.request("POST",
+                                    self.url,
+                                    data=multipart_encoder_monitor,
+                                    headers={"Content-Type": multipart_encoder.content_type},
+                                    timeout=3600)
+
+            floyd_logger.info("Done")
+            return response.json().get("id")
 
     def get(self, id):
         response = self.request("GET",

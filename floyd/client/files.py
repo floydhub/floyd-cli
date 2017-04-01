@@ -1,5 +1,6 @@
 import os
 from pathlib2 import PurePath
+import tarfile
 
 from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.log import logger as floyd_logger
@@ -78,3 +79,11 @@ def sizeof_fmt(num, suffix='B'):
             return "%3.1f%s%s" % (num, unit, suffix)
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
+
+
+def create_tarfile(source_dir, filename="/tmp/contents.tar.gz"):
+    """
+    Create a tar file with the contents of the current directory
+    """
+    with tarfile.open(filename, "w:gz") as tar:
+        tar.add(source_dir, arcname=os.path.basename(source_dir))

@@ -53,6 +53,7 @@ def upload():
                                   version)
     data = DataRequest(name=data_name,
                        description=version,
+                       data_type='gzip',
                        version=version)
     data_id = DataClient().create(data)
     floyd_logger.debug("Created data with id : {}".format(data_id))
