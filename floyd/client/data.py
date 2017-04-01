@@ -34,6 +34,7 @@ class DataClient(FloydHttpClient):
         end of the operation.
         """
         with TemporaryDirectory() as temp_directory:
+            floyd_logger.info("Compressing data ...")
             compressed_file_path = os.path.join(temp_directory, "data.tar.gz")
 
             # Create tarfile
