@@ -1,9 +1,21 @@
 import json
 import sys
+from clint.textui.progress import Bar as ProgressBar
+
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
 from floyd.client.base import FloydHttpClient
 from floyd.client.files import get_files_in_directory
 from floyd.log import logger as floyd_logger
+
+
+def create_progress_callback(encoder):
+    encoder_len = encoder.len
+    bar = ProgressBar(expected_size=encoder_len, filled_char='=')
+
+    def callback(monitor):
+        bar.show(monitor.bytes_read)
+    return callback
 
 
 class ModuleClient(FloydHttpClient):
@@ -19,17 +31,30 @@ class ModuleClient(FloydHttpClient):
             upload_files, total_file_size = get_files_in_directory(path='.', file_type='code')
         except OSError:
             sys.exit("Directory contains too many files to upload. Add unused files and directories to .floydignore file."
-                     "Or download data directly from the internet into FloydHub")
+                     "Or upload data separately using floyd data command")
 
-        request_data = {"json": json.dumps(module.to_dict())}
         floyd_logger.info("Creating project run. Total upload size: {}".format(total_file_size))
         floyd_logger.debug("Creating module. Uploading: {} files".format(len(upload_files)))
         floyd_logger.info("Syncing code ...")
+
+        # Add request data
+        upload_files.append(("json", json.dumps(module.to_dict())))
+        print(upload_files)
+        multipart_encoder = MultipartEncoder(
+            fields=upload_files
+        )
+
+        # Attach progress bar
+        progress_callback = create_progress_callback(multipart_encoder)
+        multipart_encoder_monitor = MultipartEncoderMonitor(multipart_encoder, progress_callback)
+
         response = self.request("POST",
                                 self.url,
-                                data=request_data,
-                                files=upload_files,
+                                data=multipart_encoder_monitor,
+                                headers={"Content-Type": multipart_encoder.content_type},
                                 timeout=3600)
+
+        floyd_logger.info("Done")
         return response.json().get("id")
 
     def delete(self, id):

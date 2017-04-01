@@ -1,16 +1,16 @@
 import json
-import sys
+import os
 from clint.textui.progress import Bar as ProgressBar
 
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
 from floyd.client.base import FloydHttpClient
-from floyd.client.files import get_files_in_directory
+from floyd.client.files import create_tarfile, sizeof_fmt
 from floyd.model.data import Data
 from floyd.log import logger as floyd_logger
 
 
-def create_callback(encoder):
+def create_progress_callback(encoder):
     encoder_len = encoder.len
     bar = ProgressBar(expected_size=encoder_len, filled_char='=')
 
@@ -29,29 +29,38 @@ class DataClient(FloydHttpClient):
 
     def create(self, data):
         try:
-            upload_files, total_file_size = get_files_in_directory(path='.', file_type='data')
-        except OSError:
-            sys.exit("Directory contains too many files to upload. Add unused files and directories to .floydignore file. "
-                     "Or download data directly from the internet into FloydHub")
+            floyd_logger.debug("Creating tarfile with contents of current directory")
+            create_tarfile(source_dir='.')
+        except OSError as e:
+            floyd_logger.info(e)
 
-        # request_data = {"json": json.dumps(data.to_dict())}
-        floyd_logger.info("Creating data source. Total upload size: {}".format(total_file_size))
-        floyd_logger.debug("Total files: {}".format(len(upload_files)))
-        floyd_logger.info("Uploading files ...")
+        compressed_file_path = '/tmp/data.tar'
+        total_file_size = os.path.getsize(compressed_file_path)
+        floyd_logger.info("Creating data source. Total upload size: {}".format(sizeof_fmt(total_file_size)))
+        floyd_logger.info("Uploading compressed data ...")
 
+        # Add the tar file to the data
+        upload_files = []
+        upload_files.append(("data", ('data.tar', open(compressed_file_path, 'rb'), 'text/plain')))
+
+        # Add request data
         upload_files.append(("json", json.dumps(data.to_dict())))
+
         multipart_encoder = MultipartEncoder(
             fields=upload_files
         )
 
-        callback = create_callback(multipart_encoder)
-        multipart_encoder_monitor = MultipartEncoderMonitor(multipart_encoder, callback)
+        # Attach progress bar
+        progress_callback = create_progress_callback(multipart_encoder)
+        multipart_encoder_monitor = MultipartEncoderMonitor(multipart_encoder, progress_callback)
 
         response = self.request("POST",
                                 self.url,
                                 data=multipart_encoder_monitor,
                                 headers={"Content-Type": multipart_encoder.content_type},
                                 timeout=3600)
+
+        floyd_logger.info("Done")
         return response.json().get("id")
 
     def get(self, id):
