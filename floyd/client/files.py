@@ -21,6 +21,8 @@ def get_files_in_directory(path, file_type):
     total_file_size = 0
 
     for root, dirs, files in os.walk(path):
+        dirs[:] = [d for d in dirs if d not in ignore_list]
+        
         ignore_dir = False
         normalized_path = normalize_path(path, root)
         for item in ignore_list_expanded:

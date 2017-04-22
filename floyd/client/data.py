@@ -1,6 +1,7 @@
 import json
 import os
-from tempfile import TemporaryDirectory
+#from tempfile import TemporaryDirectory
+from backports import tempfile
 
 from clint.textui.progress import Bar as ProgressBar
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
@@ -33,7 +34,7 @@ class DataClient(FloydHttpClient):
         Create a temporary directory for the tar file that will be removed at the
         end of the operation.
         """
-        with TemporaryDirectory() as temp_directory:
+        with tempfile.TemporaryDirectory() as temp_directory:
             floyd_logger.info("Compressing data ...")
             compressed_file_path = os.path.join(temp_directory, "data.tar.gz")
 
