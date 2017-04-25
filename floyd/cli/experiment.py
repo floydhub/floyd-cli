@@ -164,9 +164,12 @@ def delete(ids, yes):
     """
     Delete project runs
     """
+    
     for id in ids:
         experiment = ExperimentClient().get(id)
-        task_instance = TaskInstanceClient().get(get_module_task_instance_id(experiment.task_instances))
+        task_instance_id = get_module_task_instance_id(experiment.task_instances)
+        task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
+
 
         if experiment.state in ["queued", "running"]:
             floyd_logger.info("Experiment {}: In {} state and cannot be deleted. Stop it first".format(experiment.name, experiment.state))
@@ -177,7 +180,7 @@ def delete(ids, yes):
                 floyd_logger.info("Experiment {}: Skipped.".format(experiment.name))
                 continue
 
-        if task_instance.module_id:
+        if task_instance and task_instance.module_id:
             ModuleClient().delete(task_instance.module_id)
 
         if ExperimentClient().delete(id):

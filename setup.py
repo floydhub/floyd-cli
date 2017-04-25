@@ -2,7 +2,7 @@
 from setuptools import find_packages, setup
 
 project = "floyd-cli"
-version = "0.9.0"
+version = "0.9.2"
 
 setup(
     name=project,
@@ -25,6 +25,7 @@ setup(
         "shortuuid>=0.4.3",
         "tabulate>=0.7.7",
         "pathlib2>=2.2.1",
+        "backports.tempfile",
     ],
     setup_requires=[
         "nose>=1.0",

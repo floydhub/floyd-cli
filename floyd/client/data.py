@@ -1,6 +1,5 @@
 import json
 import os
-from tempfile import TemporaryDirectory
 
 from clint.textui.progress import Bar as ProgressBar
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
@@ -9,6 +8,11 @@ from floyd.client.base import FloydHttpClient
 from floyd.client.files import create_tarfile, sizeof_fmt
 from floyd.model.data import Data
 from floyd.log import logger as floyd_logger
+
+try:
+    from tempfile import TemporaryDirectory
+except ImportError:
+    from backports.tempfile import TemporaryDirectory
 
 
 def create_progress_callback(encoder):
