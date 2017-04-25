@@ -2,13 +2,12 @@ from click.testing import CliRunner
 import unittest
 from mock import patch, call
 
-import floyd
 from floyd.cli.experiment import delete
 from tests.cli.experiment.mocks import mock_exp, mock_running_exp, \
                                        mock_queued_exp, mock_task_inst
 
 
-class TestExperiementDelete(unittest.TestCase):
+class TestExperimentDelete(unittest.TestCase):
     """
     Tests Experiment CLI delete functionality `floyd delete`
     """
