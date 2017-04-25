@@ -93,3 +93,6 @@ ENV/
 # Floyd config
 .floydexpt
 .floydconfig
+
+# Editor-specific files
+*.swp
