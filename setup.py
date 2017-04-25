@@ -40,6 +40,7 @@ setup(
         ],
     },
     tests_require=[
+        "nose>=1.0",
         "mock>=1.0.1",
     ],
 )
