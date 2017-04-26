@@ -23,9 +23,3 @@ def mock_queued_exp(exp_id):
         name = 'queued experiment'
         task_instances = []
     return Experiment()
-
-
-def mock_task_inst(exp_id):
-    class TaskInstance:
-        module_id = 'module id'
-    return TaskInstance()
