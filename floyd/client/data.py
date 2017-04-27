@@ -1,8 +1,10 @@
 import json
 import os
 
+from click import ClickException
 from clint.textui.progress import Bar as ProgressBar
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
+from requests import HTTPError
 
 from floyd.client.base import FloydHttpClient
 from floyd.client.files import create_tarfile, sizeof_fmt
@@ -72,10 +74,19 @@ class DataClient(FloydHttpClient):
             return response.json().get("id")
 
     def get(self, id):
-        response = self.request("GET",
-                                "{}{}".format(self.url, id))
-        data_dict = response.json()
-        return Data.from_dict(data_dict)
+        try:
+            response = self.request("GET",
+                                    "{}{}".format(self.url, id))
+            data_dict = response.json()
+            return Data.from_dict(data_dict)
+        except ClickException as e:
+            floyd_logger.info("Data {}: {}".format(id, e.message))
+            return None
+        except HTTPError as e:
+            floyd_logger.info(
+                    "Data {}: Error fetching id from server.".format(id)
+            )
+            return None
 
     def get_all(self):
         response = self.request("GET",
@@ -85,6 +96,16 @@ class DataClient(FloydHttpClient):
         return [Data.from_dict(expt) for expt in experiments_dict]
 
     def delete(self, id):
-        self.request("DELETE",
-                     "{}{}".format(self.url, id))
-        return True
+        try:
+            self.request("DELETE",
+                         "{}{}".format(self.url, id, timeout=10))
+            floyd_logger.info("Data {}: Deleted".format(id))
+            return True
+        except ClickException as e:
+            floyd_logger.info("Data {}: {}".format(id, e.message))
+            return False
+        except HTTPError as e:
+            floyd_logger.info(
+                    "Data {}: Error while attempting to delete!".format(id)
+            )
+            return False
