@@ -124,17 +124,12 @@ def delete(ids, yes):
     failures = False
 
     for id in ids:
-        data_source = DataClient().get(id)
-        if not data_source:
-            failures = True
-            continue
-
         if not yes and not click.confirm(
-                                   "Delete Data: {}?".format(data_source.name),
+                                   "Delete Data: {}?".format(id),
                                    abort=False,
                                    default=False
                                  ):
-            floyd_logger.info("Data {}: Skipped".format(data_source.name))
+            floyd_logger.info("Data {}: Skipped".format(id))
             continue
 
         if not DataClient().delete(id):
