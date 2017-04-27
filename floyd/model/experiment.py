@@ -79,7 +79,7 @@ class ExperimentRequestSchema(Schema):
     name = fields.Str()
     description = fields.Str()
     module_id = fields.Str()
-    data_id = fields.Str()
+    data_ids = fields.List(fields.Str)
     family_id = fields.Str(allow_none=True)
     version = fields.Integer(allow_none=True)
     predecessor = fields.Str(allow_none=True)
@@ -97,7 +97,7 @@ class ExperimentRequest(BaseModel):
                  name,
                  description,
                  module_id,
-                 data_id=None,
+                 data_ids=[],
                  predecessor=None,
                  family_id=None,
                  version=None,
@@ -105,7 +105,7 @@ class ExperimentRequest(BaseModel):
         self.name = name
         self.description = description
         self.module_id = module_id
-        self.data_id = data_id
+        self.data_ids = data_ids
         self.family_id = family_id
         self.version = version
         self.instance_type = instance_type

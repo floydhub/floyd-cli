@@ -59,7 +59,7 @@ def run(ctx, gpu, env, data, mode, command):
     experiment_request = ExperimentRequest(name=experiment_name,
                                            description=version,
                                            module_id=module_id,
-                                           data_id=data,
+                                           data_ids=[data],
                                            predecessor=experiment_config.experiment_predecessor,
                                            family_id=experiment_config.family_id,
                                            version=version,
