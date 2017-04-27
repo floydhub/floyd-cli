@@ -84,7 +84,7 @@ class DataClient(FloydHttpClient):
             return None
         except HTTPError as e:
             floyd_logger.info(
-                    "Data {}: Error fetching from server.".format(id)
+                    "Data {}: Error fetching id from server.".format(id)
             )
             return None
 
