@@ -3,13 +3,11 @@ import sys
 
 import floyd
 from floyd.manager.auth_config import AuthConfigManager
-from floyd.exceptions import AuthenticationException, BadRequestException, NotFoundException, OverLimitException
-
-from floyd.exceptions import AuthenticationException, AuthorizationException, \
-                             BadGatewayException, BadRequestException,        \
-                             FloydException, GatewayTimeoutException,         \
-                             NotFoundException, OverLimitException,           \
-                             ServerException
+from floyd.exceptions import (AuthenticationException, AuthorizationException,
+                              BadGatewayException, BadRequestException,
+                              FloydException, GatewayTimeoutException,
+                              NotFoundException, OverLimitException,
+                              ServerException)
 
 from floyd.log import logger as floyd_logger
 

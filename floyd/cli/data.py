@@ -129,11 +129,9 @@ def delete(ids, yes):
             failures = True
             continue
 
-        if not yes and not click.confirm(
-                                   "Delete Data: {}?".format(data_source.name),
-                                   abort=False,
-                                   default=False
-                                 ):
+        if not yes and not click.confirm("Delete Data: {}?".format(data_source.name),
+                                         abort=False,
+                                         default=False):
             floyd_logger.info("Data {}: Skipped".format(data_source.name))
             continue
 

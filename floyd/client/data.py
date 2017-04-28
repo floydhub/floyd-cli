@@ -90,9 +90,7 @@ class DataClient(FloydHttpClient):
             experiments_dict = response.json()
             return [Data.from_dict(expt) for expt in experiments_dict]
         except FloydException as e:
-            floyd_logger.info(
-               "Error while retrieving data: {}".format(e.message)
-            )
+            floyd_logger.info("Error while retrieving data: {}".format(e.message))
             return None
 
     def delete(self, id):
