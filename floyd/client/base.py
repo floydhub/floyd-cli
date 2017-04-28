@@ -4,6 +4,13 @@ import sys
 import floyd
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.exceptions import AuthenticationException, BadRequestException, NotFoundException, OverLimitException
+
+from floyd.exceptions import AuthenticationException, AuthorizationException, \
+                             BadGatewayException, BadRequestException,        \
+                             FloydException, GatewayTimeoutException,         \
+                             NotFoundException, OverLimitException,           \
+                             ServerException
+
 from floyd.log import logger as floyd_logger
 
 
@@ -69,13 +76,22 @@ class FloydHttpClient(object):
             floyd_logger.debug("Error received : status_code: {}, message: {}".format(response.status_code,
                                                                                       message or response.content))
 
-            if response.status_code == 401:
+            if response.status_code == 400:
+                raise BadRequestException()
+            elif response.status_code == 401:
                 raise AuthenticationException()
+            elif response.status_code == 403:
+                raise AuthorizationException()
             elif response.status_code == 404:
                 raise NotFoundException()
-            elif response.status_code == 400:
-                raise BadRequestException()
             elif response.status_code == 429:
                 raise OverLimitException(response.json().get("message"))
+            elif response.status_code == 502:
+                raise BadGatewayException()
+            elif response.status_code == 504:
+                raise GatewayTimeoutException()
+            elif 500 <= response.status_code < 600:
+                raise ServerException()
             else:
-                response.raise_for_status()
+                msg = "An error occurred. Server response: {}".format(response.status_code)
+                raise FloydException(message=msg)

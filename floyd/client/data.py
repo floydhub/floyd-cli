@@ -1,11 +1,10 @@
 import json
 import os
 
-from click import ClickException
 from clint.textui.progress import Bar as ProgressBar
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
-from requests import HTTPError
 
+from floyd.exceptions import FloydException
 from floyd.client.base import FloydHttpClient
 from floyd.client.files import create_tarfile, sizeof_fmt
 from floyd.model.data import Data
@@ -79,21 +78,22 @@ class DataClient(FloydHttpClient):
                                     "{}{}".format(self.url, id))
             data_dict = response.json()
             return Data.from_dict(data_dict)
-        except ClickException as e:
-            floyd_logger.info("Data {}: {}".format(id, e.message))
-            return None
-        except HTTPError as e:
-            floyd_logger.info(
-                    "Data {}: Error fetching id from server.".format(id)
-            )
+        except FloydException as e:
+            floyd_logger.info("Data {}: ERROR! {}".format(id, e.message))
             return None
 
     def get_all(self):
-        response = self.request("GET",
-                                self.url,
-                                params="module_type=data")
-        experiments_dict = response.json()
-        return [Data.from_dict(expt) for expt in experiments_dict]
+        try:
+            response = self.request("GET",
+                                    self.url,
+                                    params="module_type=data")
+            experiments_dict = response.json()
+            return [Data.from_dict(expt) for expt in experiments_dict]
+        except FloydException as e:
+            floyd_logger.info(
+               "Error while retrieving data: {}".format(e.message)
+            )
+            return None
 
     def delete(self, id):
         try:
@@ -101,11 +101,6 @@ class DataClient(FloydHttpClient):
                          "{}{}".format(self.url, id, timeout=10))
             floyd_logger.info("Data {}: Deleted".format(id))
             return True
-        except ClickException as e:
-            floyd_logger.info("Data {}: {}".format(id, e.message))
-            return False
-        except HTTPError as e:
-            floyd_logger.info(
-                    "Data {}: Error while attempting to delete!".format(id)
-            )
+        except FloydException as e:
+            floyd_logger.info("Data {}: ERROR! {}".format(id, e.message))
             return False
