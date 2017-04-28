@@ -5,7 +5,7 @@ from time import sleep
 
 from floyd.constants import DOCKER_IMAGES
 from floyd.cli.utils import (get_task_url, get_docker_image, get_module_task_instance_id,
-                             get_mode_parameter, wait_for_url)
+                             get_mode_parameter, wait_for_url, get_data_name)
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.manager.auth_config import AuthConfigManager
@@ -18,7 +18,7 @@ from floyd.log import logger as floyd_logger
 
 @click.command()
 @click.option('--gpu/--cpu', default=False, help='Run on a gpu instance')
-@click.option('--data', help='Data source id to use')
+@click.option('--data', multiple=True, help='Data source id to use')
 @click.option('--mode',
               help='Different floyd modes',
               default='job',
@@ -44,13 +44,22 @@ def run(ctx, gpu, env, data, mode, command):
                                         version)
 
     # Create module
+    if len(data) > 5:
+        floyd_logger.error("Cannot attach more than 5 datasets to an experiment")
+        return
+
+    default_name = 'input' if len(data) <= 1 else None
+    module_inputs = [{'name': get_data_name(data_str, default_name),
+                      'type': 'dir'} for data_str in data]
+
     module = Module(name=experiment_name,
                     description=version,
                     command=command_str,
                     mode=get_mode_parameter(mode),
                     family_id=experiment_config.family_id,
                     default_container=get_docker_image(env, gpu),
-                    version=version)
+                    version=version,
+                    inputs=module_inputs)
     module_id = ModuleClient().create(module)
     floyd_logger.debug("Created module with id : {}".format(module_id))
 
@@ -59,7 +68,7 @@ def run(ctx, gpu, env, data, mode, command):
     experiment_request = ExperimentRequest(name=experiment_name,
                                            description=version,
                                            module_id=module_id,
-                                           data_id=data,
+                                           data_ids=data,
                                            predecessor=experiment_config.experiment_predecessor,
                                            family_id=experiment_config.family_id,
                                            version=version,

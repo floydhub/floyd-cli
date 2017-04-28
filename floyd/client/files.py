@@ -21,6 +21,7 @@ def get_files_in_directory(path, file_type):
     total_file_size = 0
 
     for root, dirs, files in os.walk(path):
+        floyd_logger.debug("Root:{}, Dirs:{}".format(root, dirs))
         ignore_dir = False
         normalized_path = normalize_path(path, root)
         for item in ignore_list_expanded:
@@ -29,6 +30,8 @@ def get_files_in_directory(path, file_type):
                 break
 
         if ignore_dir:
+            # Reset dirs to avoid going further down this directory
+            dirs[:] = []
             floyd_logger.debug("Ignoring directory : {}".format(root))
             continue
 

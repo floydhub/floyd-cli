@@ -3,8 +3,7 @@ import unittest
 from mock import patch, call
 
 from floyd.cli.experiment import delete
-from tests.cli.experiment.mocks import mock_exp, mock_running_exp, \
-                                       mock_queued_exp
+from tests.cli.mocks import mock_exp, mock_running_exp, mock_queued_exp
 
 
 class TestExperimentDelete(unittest.TestCase):

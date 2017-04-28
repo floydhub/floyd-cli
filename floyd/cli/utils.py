@@ -46,9 +46,6 @@ def wait_for_url(url, status_code=200, sleep_duration_seconds=1, iterations=120,
     Wait for the url to become available
     """
     for iteration in range(iterations):
-        # if(iteration % message_frequency == 0):
-        #     print("\n{}".format(random.choice(LOADING_MESSAGES)), end='', flush=True)
-
         print(".", end='')
         sys.stdout.flush()
         response = requests.get(url)
@@ -58,3 +55,16 @@ def wait_for_url(url, status_code=200, sleep_duration_seconds=1, iterations=120,
         sleep(sleep_duration_seconds)
     print(".")
     return False
+
+
+def get_data_name(data_str, default=None):
+    """
+    If data_str is of the format <ID>:<NAME>, return <NAME>
+    Else return default if default is present
+    Otherwise return ID itself
+    """
+    if ':' in data_str:
+        _, name = data_str.split(':')
+    else:
+        name = default if default else data_str
+    return name
