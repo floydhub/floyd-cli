@@ -80,13 +80,19 @@ def status(id):
     """
     if id:
         data_source = DataClient().get(id)
-        print_data([data_source])
+        print_data([data_source] if data_source else [])
     else:
         data_sources = DataClient().get_all()
         print_data(data_sources)
 
 
 def print_data(data_sources):
+    """
+    Print data information in tabular form
+    """
+    if not data_sources:
+        return
+
     headers = ["DATA ID", "CREATED", "DISK USAGE", "NAME", "VERSION"]
     data_list = []
     for data_source in data_sources:
@@ -104,6 +110,10 @@ def output(id, url):
     By default opens the output page in your default browser.
     """
     data_source = DataClient().get(id)
+
+    if not data_source:
+        sys.exit()
+
     data_url = "{}/api/v1/resources/{}?content=true".format(floyd.floyd_host,
                                                             data_source.resource_id)
     if url:
