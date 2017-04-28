@@ -4,6 +4,7 @@ import os
 from clint.textui.progress import Bar as ProgressBar
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
+from floyd.exceptions import FloydException
 from floyd.client.base import FloydHttpClient
 from floyd.client.files import create_tarfile, sizeof_fmt
 from floyd.model.data import Data
@@ -72,19 +73,32 @@ class DataClient(FloydHttpClient):
             return response.json().get("id")
 
     def get(self, id):
-        response = self.request("GET",
-                                "{}{}".format(self.url, id))
-        data_dict = response.json()
-        return Data.from_dict(data_dict)
+        try:
+            response = self.request("GET",
+                                    "{}{}".format(self.url, id))
+            data_dict = response.json()
+            return Data.from_dict(data_dict)
+        except FloydException as e:
+            floyd_logger.info("Data {}: ERROR! {}".format(id, e.message))
+            return None
 
     def get_all(self):
-        response = self.request("GET",
-                                self.url,
-                                params="module_type=data")
-        experiments_dict = response.json()
-        return [Data.from_dict(expt) for expt in experiments_dict]
+        try:
+            response = self.request("GET",
+                                    self.url,
+                                    params="module_type=data")
+            experiments_dict = response.json()
+            return [Data.from_dict(expt) for expt in experiments_dict]
+        except FloydException as e:
+            floyd_logger.info("Error while retrieving data: {}".format(e.message))
+            return None
 
     def delete(self, id):
-        self.request("DELETE",
-                     "{}{}".format(self.url, id))
-        return True
+        try:
+            self.request("DELETE",
+                         "{}{}".format(self.url, id, timeout=10))
+            floyd_logger.info("Data {}: Deleted".format(id))
+            return True
+        except FloydException as e:
+            floyd_logger.info("Data {}: ERROR! {}".format(id, e.message))
+            return False

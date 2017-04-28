@@ -1,6 +1,7 @@
 import click
 import webbrowser
 from tabulate import tabulate
+import sys
 
 import floyd
 from floyd.client.data import DataClient
@@ -113,21 +114,32 @@ def output(id, url):
 
 
 @click.command()
-@click.argument('id', nargs=1)
-@click.option('-y', '--yes', is_flag=True, default=False, help='Skip confirmation')
-def delete(id, yes):
+@click.argument('ids', nargs=-1)
+@click.option('-y', '--yes', is_flag=True, default=False,
+              help='Skip confirmation')
+def delete(ids, yes):
     """
-    Delete data set.
+    Delete data sets.
     """
-    data_source = DataClient().get(id)
+    failures = False
 
-    if not yes:
-        click.confirm('Delete Data: {}?'.format(data_source.name), abort=True, default=False)
+    for id in ids:
+        data_source = DataClient().get(id)
+        if not data_source:
+            failures = True
+            continue
 
-    if DataClient().delete(id):
-        floyd_logger.info("Data deleted")
-    else:
-        floyd_logger.error("Failed to delete data")
+        if not yes and not click.confirm("Delete Data: {}?".format(data_source.name),
+                                         abort=False,
+                                         default=False):
+            floyd_logger.info("Data {}: Skipped".format(data_source.name))
+            continue
+
+        if not DataClient().delete(id):
+            failures = True
+
+    if failures:
+        sys.exit(1)
 
 data.add_command(delete)
 data.add_command(init)
