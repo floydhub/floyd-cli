@@ -46,9 +46,6 @@ def wait_for_url(url, status_code=200, sleep_duration_seconds=1, iterations=120,
     Wait for the url to become available
     """
     for iteration in range(iterations):
-        # if(iteration % message_frequency == 0):
-        #     print("\n{}".format(random.choice(LOADING_MESSAGES)), end='', flush=True)
-
         print(".", end='')
         sys.stdout.flush()
         response = requests.get(url)
