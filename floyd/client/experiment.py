@@ -3,6 +3,8 @@ import json
 from floyd.client.base import FloydHttpClient
 from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.model.experiment import Experiment
+from floyd.exceptions import FloydException, NotFoundException
+from floyd.log import logger as floyd_logger
 
 
 class ExperimentClient(FloydHttpClient):
@@ -40,6 +42,19 @@ class ExperimentClient(FloydHttpClient):
         return response.json().get("id")
 
     def delete(self, id):
-        self.request("DELETE",
-                     "{}{}".format(self.url, id))
-        return True
+        try:
+            self.request("DELETE",
+                         "{}{}".format(self.url, id))
+            floyd_logger.info("Experiment {}: Deleted".format(id))
+            return True
+        except NotFoundException as e:
+            floyd_logger.info(
+                    ("Experiment {}: ERROR! A deletable experiment with this "
+                     "id was not found. Make sure you have the correct id and "
+                     "that the experiment is not "
+                     "queued or running.".format(id))
+            )
+            return False
+        except FloydException as e:
+            floyd_logger.info("Experiment {}: ERROR! {}".format(id, e.message))
+            return False
