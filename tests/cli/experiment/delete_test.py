@@ -3,7 +3,7 @@ import unittest
 from mock import patch, call
 
 from floyd.cli.experiment import delete
-from tests.cli.mocks import mock_exp
+from tests.cli.mocks import mock_exp, mock_task_inst
 
 
 class TestExperimentDelete(unittest.TestCase):
@@ -41,10 +41,6 @@ class TestExperimentDelete(unittest.TestCase):
         calls = [call(id_1), call(id_2), call(id_3)]
         get_experiment.assert_has_calls(calls, any_order=True)
         delete_experiment.assert_has_calls(calls, any_order=True)
-
-        # Does not call TaskInstanceClient or ModuleClient
-        task_instance_client.assert_not_called()
-        module_client.assert_not_called()
 
         assert(result.exit_code == 0)
 
@@ -111,6 +107,27 @@ class TestExperimentDelete(unittest.TestCase):
         get_module_task_instance_id.assert_called_once()
         get_task_instance.assert_called_once_with('123')
         module_client.assert_not_called()
+
+        # Exit 0 for successful experiment delete
+        assert(result.exit_code == 0)
+
+    @patch('floyd.cli.experiment.TaskInstanceClient.get', side_effect=mock_task_inst)
+    @patch('floyd.cli.experiment.get_module_task_instance_id', return_value='123')
+    @patch('floyd.cli.experiment.ModuleClient.delete')
+    @patch('floyd.cli.experiment.ExperimentClient')
+    def test_with_found_task_instance(self,
+                                      experiment_client,
+                                      delete_module,
+                                      get_module_task_instance_id,
+                                      get_task_instance):
+        id_1 = '1'
+        result = self.runner.invoke(delete, ['-y', id_1])
+
+        # Get the module_id of the experiment's task instance and call delete
+        # on it. '999999' is the module_id of the mocked TaskInstance
+        get_module_task_instance_id.assert_called_once()
+        get_task_instance.assert_called_once_with('123')
+        delete_module.assert_called_once_with('999999')
 
         # Exit 0 for successful experiment delete
         assert(result.exit_code == 0)
