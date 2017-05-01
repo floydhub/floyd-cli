@@ -91,7 +91,7 @@ class TestExperimentDelete(unittest.TestCase):
         # Exit 1 for failed deletes
         assert(result.exit_code == 1)
 
-    @patch('floyd.cli.experiment.TaskInstanceClient.get', return_value=False)
+    @patch('floyd.cli.experiment.TaskInstanceClient.get', return_value=None)
     @patch('floyd.cli.experiment.get_module_task_instance_id', return_value='123')
     @patch('floyd.cli.experiment.ModuleClient')
     @patch('floyd.cli.experiment.ExperimentClient')
