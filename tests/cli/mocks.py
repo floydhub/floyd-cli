@@ -11,6 +11,12 @@ def mock_exp(exp_id):
     return Experiment()
 
 
+def mock_task_inst(exp_id):
+    class TaskInstance:
+        module_id = '999999'
+    return TaskInstance()
+
+
 def mock_experiment_config():
     return ExperimentConfig(name="name", family_id="family_id")
 
