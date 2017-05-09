@@ -6,70 +6,79 @@ from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.log import logger as floyd_logger
 
 
+def get_unignored_file_paths(path, ignore_list=[], whitelist=[]):
+    """
+    Given an ignore_list and a whitelist of glob patterns, returns the list of
+    file paths in a directory and its subdirectories that are not ignored.
+    """
+    unignored_files = []
+
+    for root, dirs, files in os.walk(path):
+        floyd_logger.debug("Root:{}, Dirs:{}".format(root, dirs))
+
+        if ignore_path(unix_stle_path(root), ignore_list, whitelist):
+            # Reset dirs to avoid going further down this directory.
+            # Then continue to the next iteration of os.walk, which causes
+            # everything in this directory to be ignored.
+            dirs[:] = []
+            floyd_logger.debug("Ignoring directory : {}".format(root))
+            continue
+
+        for file_name in files:
+            file_path = unix_stle_path(os.path.join(root, file_name))
+            if ignore_path(file_path, ignore_list, whitelist):
+                floyd_logger.debug("Ignoring file : {}".format(file_name))
+                continue
+
+            unignored_files.append(os.path.join(root, file_name))
+
+    return unignored_files
+
+def ignore_path(path, ignore_list=[], whitelist=[]):
+    """
+    Returns a boolean indicating if a path should be ignored given an
+    ignore_list and a whitelist of glob patterns.
+    """
+    return matches_glob_list(path, ignore_list) and not matches_glob_list(path, whitelist)
+
+def matches_glob_list(path, glob_list):
+    """
+    Given a list of glob patterns, returns a boolean
+    indicating if a path matches any glob in the list
+    """
+    for glob in glob_list:
+        try:
+            if PurePath(path).match(glob):
+                return True
+        except TypeError:
+            pass
+    return False
+
 def get_files_in_directory(path, file_type):
     """
     Gets the list of files in the directory and subdirectories
     Respects .floydignore file if present
     """
     local_files = []
-    separator = os.path.sep
-    ignore_list = FloydIgnoreManager.get_list()
-
-    # make sure that subdirectories are also excluded
-    ignore_list_expanded = ignore_list + ["{}/**".format(item) for item in ignore_list]
-    floyd_logger.debug("Ignoring list : {}".format(ignore_list))
     total_file_size = 0
 
-    for root, dirs, files in os.walk(path):
-        floyd_logger.debug("Root:{}, Dirs:{}".format(root, dirs))
-        ignore_dir = False
-        normalized_path = normalize_path(path, root)
-        for item in ignore_list_expanded:
-            if PurePath(normalized_path).match(item):
-                ignore_dir = True
-                break
+    ignore_list, whitelist = FloydIgnoreManager.get_lists()
 
-        if ignore_dir:
-            # Reset dirs to avoid going further down this directory
-            dirs[:] = []
-            floyd_logger.debug("Ignoring directory : {}".format(root))
-            continue
+    floyd_logger.debug("Ignoring: {}".format(ignore_list))
+    floyd_logger.debug("Whitelisting: {}".format(whitelist))
 
-        for file_name in files:
-            ignore_file = False
-            normalized_path = normalize_path(path, os.path.join(root, file_name))
-            for item in ignore_list_expanded:
-                if PurePath(normalized_path).match(item):
-                    ignore_file = True
-                    break
+    file_paths = get_unignored_file_paths(path, ignore_list, whitelist)
 
-            if ignore_file:
-                floyd_logger.debug("Ignoring file : {}".format(normalized_path))
-                continue
-
-            file_relative_path = os.path.join(root, file_name)
-            if separator != '/':  # convert relative paths to Unix style
-                file_relative_path = file_relative_path.replace(os.path.sep, '/')
-            file_full_path = os.path.join(os.getcwd(), root, file_name)
-
-            local_files.append((file_type, (file_relative_path, open(file_full_path, 'rb'), 'text/plain')))
-            total_file_size += os.path.getsize(file_full_path)
+    for file_path in file_paths:
+        local_files.append((file_type, (unix_stle_path(file_path), open(file_path, 'rb'), 'text/plain')))
+        total_file_size += os.path.getsize(file_path)
 
     return (local_files, sizeof_fmt(total_file_size))
 
 
-def normalize_path(project_root, path):
-    """
-    Convert `path` to a UNIX style path, where `project_root` becomes the root
-    of an imaginery file system (i.e. becomes just an initial "/").
-    """
+def unix_stle_path(path):
     if os.path.sep != '/':
-        path = path.replace(os.path.sep, '/')
-        project_root = project_root.replace(os.path.sep, '/')
-
-    path = path[len(project_root):] if path.startswith(project_root) else path
-    path = '/' + path if not path.startswith('/') else path
-
+        return path.replace(os.path.sep, '/')
     return path
 
 
