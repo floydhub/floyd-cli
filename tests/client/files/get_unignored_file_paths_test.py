@@ -23,6 +23,18 @@ class TestFilesClientGetUnignoredFilePaths(unittest.TestCase):
         self.assertEqual(result, expected)
 
     @patch('floyd.client.files.os.walk', side_effect=mock_fs1)
+    def test_ignoring_a_directory_with_a_trailing_slash(self, pure_path):
+        ignore_list = ['*.py', '*.h5', 'baz_dir_2/']
+        white_list = []
+        result = get_unignored_file_paths('.', ignore_list, white_list)
+        # Does not include the files in baz_dir_2
+        expected = ['./README.md']
+        result.sort()
+        expected.sort()
+
+        self.assertEqual(result, expected)
+
+    @patch('floyd.client.files.os.walk', side_effect=mock_fs1)
     def test_whitelist_does_not_reinclude_files_in_excluded_directories(self, pure_path):
         ignore_list = ['*']
         white_list = ['*.md']
