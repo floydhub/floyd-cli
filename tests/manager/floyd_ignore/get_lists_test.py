@@ -34,9 +34,7 @@ class TestFloydIgnoreManagerGetLists(unittest.TestCase):
 
     @patch('floyd.manager.floyd_ignore.os.path.isfile', return_value=True)
     @patch('floyd.manager.floyd_ignore.open', new_callable=mock_open)
-    def test_allows_escaping_of_file_names_that_start_with_reserved_chars(self,
-                                                                          mopen,
-                                                                          _):
+    def test_escaping_of_globs_that_start_with_reserved_chars(self, mopen, _):
         # Manually mock the iterator that imitates the lines read from the file
         file_data = ['', '# comment', '\#file_name', '\!file_name']
         mopen.return_value.__iter__.return_value = file_data
