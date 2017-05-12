@@ -181,11 +181,13 @@ def delete(ids, yes):
         task_instance_id = get_module_task_instance_id(experiment.task_instances)
         task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
 
-        if task_instance and task_instance.module_id:
-            ModuleClient().delete(task_instance.module_id)
-
         if not ExperimentClient().delete(id):
             failures = True
+            continue
+
+        if task_instance and task_instance.module_id:
+            if not ModuleClient().delete(task_instance.module_id):
+                failures = True
 
     if failures:
         sys.exit(1)
