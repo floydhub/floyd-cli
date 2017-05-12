@@ -131,3 +131,26 @@ class TestExperimentDelete(unittest.TestCase):
 
         # Exit 0 for successful experiment delete
         assert(result.exit_code == 0)
+
+    @patch('floyd.cli.experiment.TaskInstanceClient.get', side_effect=mock_task_inst)
+    @patch('floyd.cli.experiment.get_module_task_instance_id', return_value='123')
+    @patch('floyd.cli.experiment.ModuleClient.delete')
+    @patch('floyd.cli.experiment.ExperimentClient.delete', return_value=False)
+    @patch('floyd.cli.experiment.ExperimentClient.get')
+    def test_does_not_del_module_if_exp_del_fails(self,
+                                                  get_experiment,
+                                                  delete_experiment,
+                                                  delete_module,
+                                                  get_module_task_instance_id,
+                                                  get_task_instance):
+        id_1 = '1'
+        result = self.runner.invoke(delete, ['-y', id_1])
+
+        # Call delete on the experiment
+        delete_experiment.assert_called_once()
+
+        # Do not attempt to delete the module after a failed delete
+        delete_module.assert_not_called()
+
+        # Exit 1 for failed experiment delete
+        assert(result.exit_code == 1)
