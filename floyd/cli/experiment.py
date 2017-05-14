@@ -8,9 +8,8 @@ import floyd
 from floyd.cli.utils import get_task_url, get_module_task_instance_id
 from floyd.client.common import get_url_contents
 from floyd.client.experiment import ExperimentClient
-from floyd.client.module import ModuleClient
+from floyd.client.project import ProjectClient
 from floyd.client.task_instance import TaskInstanceClient
-from floyd.config import generate_uuid
 from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.model.experiment_config import ExperimentConfig
@@ -26,8 +25,14 @@ def init(project):
 
         floyd run python tensorflow.py > /output/model.1
     """
+    project_obj = ProjectClient().get_project_matching_name(project)
+    if not project_obj:
+        floyd_logger.error("Project name does not match your list of projects. "
+                           "Create your new project in the dashboard")
+        return
+
     experiment_config = ExperimentConfig(name=project,
-                                         family_id=generate_uuid())
+                                         family_id=project_obj.id)
     ExperimentConfigManager.set_config(experiment_config)
     FloydIgnoreManager.init()
     floyd_logger.info("Project \"{}\" initialized in current directory".format(project))
@@ -178,16 +183,16 @@ def delete(ids, yes):
             floyd_logger.info("Experiment {}: Skipped.".format(experiment.name))
             continue
 
-        task_instance_id = get_module_task_instance_id(experiment.task_instances)
-        task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
+        # task_instance_id = get_module_task_instance_id(experiment.task_instances)
+        # task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
 
         if not ExperimentClient().delete(id):
             failures = True
             continue
 
-        if task_instance and task_instance.module_id:
-            if not ModuleClient().delete(task_instance.module_id):
-                failures = True
+        # if task_instance and task_instance.module_id:
+        #     if not ModuleClient().delete(task_instance.module_id):
+        #         failures = True
 
     if failures:
         sys.exit(1)
