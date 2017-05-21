@@ -7,7 +7,7 @@ class TestFilesClientMatchesGlobList(unittest.TestCase):
     """
     Tests FileClient matches_glob_list()
     """
-    @patch('floyd.client.files.PurePath.match', side_effect=[False, True])
+    @patch('floyd.client.files.PurePath.match', side_effect=[True])
     def test_returns_true_with_matching_glob(self, pure_path):
         glob = '*.py'
         result = matches_glob_list('./hello.py', [glob])
@@ -16,9 +16,9 @@ class TestFilesClientMatchesGlobList(unittest.TestCase):
         pure_path.assert_called_with(glob)
 
         # Returns True for one matching glob
-        self.assertTrue(True)
+        self.assertTrue(result)
 
-    @patch('floyd.client.files.PurePath.match', side_effect=[False, False])
+    @patch('floyd.client.files.PurePath.match', side_effect=[False])
     def test_returns_false_with_no_matching_globs(self, pure_path):
         glob = '*.py'
         result = matches_glob_list('./hello.py', [glob])
@@ -40,3 +40,15 @@ class TestFilesClientMatchesGlobList(unittest.TestCase):
 
         # Returns False for no matches
         self.assertFalse(result)
+
+    @patch('floyd.client.files.PurePath.match', side_effect=[False, True])
+    def test_returns_true_if_one_matching_glob(self, pure_path):
+        globs = ['foo', '*bar']
+        result = matches_glob_list('./hello.bar', globs)
+
+        # Called with each glob
+        calls = [call(x) for x in globs]
+        pure_path.assert_has_calls(calls, any_order=True)
+
+        # Returns False for no matches
+        self.assertTrue(result)

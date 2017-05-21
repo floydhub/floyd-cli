@@ -16,16 +16,23 @@ def get_unignored_file_paths(path, ignore_list=[], whitelist=[]):
     for root, dirs, files in os.walk(path):
         floyd_logger.debug("Root:{}, Dirs:{}".format(root, dirs))
 
-        if ignore_path(unix_stle_path(root), ignore_list, whitelist):
+        if ignore_path(unix_style_path(root), ignore_list, whitelist):
             # Reset dirs to avoid going further down this directory.
             # Then continue to the next iteration of os.walk, which causes
             # everything in this directory to be ignored.
+            #
+            # Note that whitelisted files that are within directories that are
+            # ignored will not be whitelisted. This follows the expected
+            # behavior established by .gitignore logic:
+            # "It is not possible to re-include a file if a parent directory of
+            # that file is excluded."
+            # https://git-scm.com/docs/gitignore#_pattern_format
             dirs[:] = []
             floyd_logger.debug("Ignoring directory : {}".format(root))
             continue
 
         for file_name in files:
-            file_path = unix_stle_path(os.path.join(root, file_name))
+            file_path = unix_style_path(os.path.join(root, file_name))
             if ignore_path(file_path, ignore_list, whitelist):
                 floyd_logger.debug("Ignoring file : {}".format(file_name))
                 continue
@@ -70,13 +77,13 @@ def get_files_in_directory(path, file_type):
     file_paths = get_unignored_file_paths(path, ignore_list, whitelist)
 
     for file_path in file_paths:
-        local_files.append((file_type, (unix_stle_path(file_path), open(file_path, 'rb'), 'text/plain')))
+        local_files.append((file_type, (unix_style_path(file_path), open(file_path, 'rb'), 'text/plain')))
         total_file_size += os.path.getsize(file_path)
 
     return (local_files, sizeof_fmt(total_file_size))
 
 
-def unix_stle_path(path):
+def unix_style_path(path):
     if os.path.sep != '/':
         return path.replace(os.path.sep, '/')
     return path
