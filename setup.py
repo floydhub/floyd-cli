@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 from setuptools import find_packages, setup
-project = "floyd-cli"
+project = "mckay-floyd-cli"
 version = "0.9.2"
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
