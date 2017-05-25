@@ -26,6 +26,7 @@ setup(
         "tabulate>=0.7.7",
         "pathlib2>=2.2.1",
         "backports.tempfile>=1.0rc1",
+        "backports.weakref>=1.0rc1",
     ],
     setup_requires=[
         "nose>=1.0",
