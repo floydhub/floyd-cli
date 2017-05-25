@@ -2,6 +2,7 @@ import click
 import webbrowser
 from tabulate import tabulate
 from time import sleep
+import sys
 
 import floyd
 from floyd.cli.utils import get_task_url, get_module_task_instance_id
@@ -164,26 +165,29 @@ def delete(ids, yes):
     """
     Delete project runs
     """
-    
+    failures = False
     for id in ids:
         experiment = ExperimentClient().get(id)
+        if not experiment:
+            failures = True
+            continue
+
+        if not yes and not click.confirm("Delete Run: {}?".format(experiment.name),
+                                         abort=False,
+                                         default=False):
+            floyd_logger.info("Experiment {}: Skipped.".format(experiment.name))
+            continue
+
         task_instance_id = get_module_task_instance_id(experiment.task_instances)
         task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
 
-
-        if experiment.state in ["queued", "running"]:
-            floyd_logger.info("Experiment {}: In {} state and cannot be deleted. Stop it first".format(experiment.name, experiment.state))
+        if not ExperimentClient().delete(id):
+            failures = True
             continue
 
-        if not yes:
-            if not click.confirm("Delete Run: {}?".format(experiment.name), abort=False, default=False):
-                floyd_logger.info("Experiment {}: Skipped.".format(experiment.name))
-                continue
-
         if task_instance and task_instance.module_id:
-            ModuleClient().delete(task_instance.module_id)
+            if not ModuleClient().delete(task_instance.module_id):
+                failures = True
 
-        if ExperimentClient().delete(id):
-            floyd_logger.info("Experiment {}: Deleted".format(experiment.name))
-        else:
-            floyd_logger.error("Experiment {}: Failed to delete experiment")
+    if failures:
+        sys.exit(1)

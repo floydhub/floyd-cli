@@ -6,6 +6,7 @@ from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
 from floyd.client.base import FloydHttpClient
 from floyd.client.files import get_files_in_current_directory
+from floyd.exceptions import FloydException
 from floyd.log import logger as floyd_logger
 
 
@@ -57,6 +58,10 @@ class ModuleClient(FloydHttpClient):
         return response.json().get("id")
 
     def delete(self, id):
-        self.request("DELETE",
-                     "{}{}".format(self.url, id))
-        return True
+        try:
+            self.request("DELETE",
+                         "{}{}".format(self.url, id))
+            return True
+        except FloydException as e:
+            floyd_logger.info("Module {}: ERROR! {}".format(id, e.message))
+            return False
