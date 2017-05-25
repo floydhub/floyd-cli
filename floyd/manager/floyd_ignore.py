@@ -23,15 +23,29 @@ class FloydIgnoreManager(object):
             config_file.write(DEFAULT_FLOYD_IGNORE_LIST)
 
     @classmethod
-    def get_list(cls):
-        if not os.path.isfile(cls.CONFIG_FILE_PATH):
-            return []
+    def get_lists(cls, config_file_path=None):
+        config_file_path = config_file_path or cls.CONFIG_FILE_PATH
 
-        ignore_dirs = []
-        with open(cls.CONFIG_FILE_PATH, "r") as floyd_ignore_file:
+        if not os.path.isfile(config_file_path):
+            return ([], [])
+
+        ignore_list = []
+        whitelist = []
+        with open(config_file_path, "r") as floyd_ignore_file:
             for line in floyd_ignore_file:
                 line = line.strip()
-                if line and not line.startswith('#'):
-                    ignore_dirs.append(line)
+                if not line or line.startswith('#'):
+                    continue
 
-        return ignore_dirs
+                if line.startswith('!'):
+                    whitelist.append(line[1:])
+                    continue
+
+                # To allow escaping file names that start with !, #, or \,
+                # remove the escaping \
+                if line.startswith('\\'):
+                    line = line[1:]
+
+                ignore_list.append(line)
+
+        return (ignore_list, whitelist)
