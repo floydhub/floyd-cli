@@ -6,14 +6,14 @@ from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.log import logger as floyd_logger
 
 
-def get_unignored_file_paths(path, ignore_list=[], whitelist=[]):
+def get_unignored_file_paths(ignore_list=[], whitelist=[]):
     """
     Given an ignore_list and a whitelist of glob patterns, returns the list of
-    file paths in a directory and its subdirectories that are not ignored.
+    unignored file paths in the current directory and its subdirectories
     """
     unignored_files = []
 
-    for root, dirs, files in os.walk(path):
+    for root, dirs, files in os.walk("."):
         floyd_logger.debug("Root:{}, Dirs:{}".format(root, dirs))
 
         if ignore_path(unix_style_path(root), ignore_list, whitelist):
@@ -61,9 +61,9 @@ def matches_glob_list(path, glob_list):
             pass
     return False
 
-def get_files_in_directory(path, file_type):
+def get_files_in_current_directory(file_type):
     """
-    Gets the list of files in the directory and subdirectories
+    Gets the list of files in the current directory and subdirectories.
     Respects .floydignore file if present
     """
     local_files = []
@@ -74,7 +74,7 @@ def get_files_in_directory(path, file_type):
     floyd_logger.debug("Ignoring: {}".format(ignore_list))
     floyd_logger.debug("Whitelisting: {}".format(whitelist))
 
-    file_paths = get_unignored_file_paths(path, ignore_list, whitelist)
+    file_paths = get_unignored_file_paths(ignore_list, whitelist)
 
     for file_path in file_paths:
         local_files.append((file_type, (unix_style_path(file_path), open(file_path, 'rb'), 'text/plain')))
