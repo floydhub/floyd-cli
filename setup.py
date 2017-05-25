@@ -1,13 +1,18 @@
 #!/usr/bin/env python
+import os
 from setuptools import find_packages, setup
 
 project = "floyd-cli"
 version = "0.9.2"
 
+with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
+    long_description = readme.read()
+
 setup(
     name=project,
     version=version,
     description="Command line tool for Floyd",
+    long_description=long_description,
     author="Floyd",
     author_email="support@floydhub.com",
     url="https://github.com/floydhub/floyd-cli",
