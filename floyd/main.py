@@ -14,7 +14,7 @@ from floyd.log import configure_logger
 
 
 @click.group()
-@click.option('-h', '--host', default='https://www.floydhub.com', help='Floyd server endpoint')
+@click.option('-h', '--host', default='http://localhost:5000', help='Floyd server endpoint')
 @click.option('-v', '--verbose', count=True, help='Turn on debug logging')
 def cli(host, verbose):
     """
@@ -30,6 +30,7 @@ def check_cli_version():
     """
     Check if the current cli version satisfies the server requirements
     """
+    return True
     server_version = VersionClient().get_cli_version()
     current_version = pkg_resources.require("floyd-cli")[0].version
     if LooseVersion(current_version) < LooseVersion(server_version.min_version):
