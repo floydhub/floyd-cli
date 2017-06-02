@@ -2,10 +2,10 @@ from __future__ import print_function
 import click
 from tabulate import tabulate
 from time import sleep
+import webbrowser
 
 from floyd.constants import DOCKER_IMAGES
-from floyd.cli.utils import (get_task_url, get_docker_image, get_module_task_instance_id,
-                             get_mode_parameter, wait_for_url, get_data_name)
+from floyd.cli.utils import get_docker_image, get_mode_parameter, wait_for_url, get_data_name
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.manager.auth_config import AuthConfigManager
@@ -23,6 +23,9 @@ from floyd.log import logger as floyd_logger
               help='Different floyd modes',
               default='job',
               type=click.Choice(['job', 'jupyter', 'serve']))
+@click.option('--open/--no-open',
+              help='Automatically open the notebook url',
+              default=True)
 @click.option('--env',
               help='Environment type to use',
               default='keras',
@@ -31,7 +34,7 @@ from floyd.log import logger as floyd_logger
               help='Experiment commit message')
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, gpu, env, message, data, mode, command):
+def run(ctx, gpu, env, message, data, mode, open, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -105,18 +108,20 @@ def run(ctx, gpu, env, message, data, mode, command):
 
         # Print the path to jupyter notebook
         if mode == 'jupyter':
-            jupyter_url = get_task_url(get_module_task_instance_id(experiment.task_instances))
+            jupyter_url = experiment.service_url
             print("Setting up your instance and waiting for Jupyter notebook to become available ...", end='')
             if wait_for_url(jupyter_url, sleep_duration_seconds=2, iterations=900):
                 floyd_logger.info("\nPath to jupyter notebook: {}".format(jupyter_url))
+                if open:
+                    print("Opening the jupyter notebook in your browser now ...", end='')
+                    webbrowser.open(jupyter_url)
             else:
                 floyd_logger.info("\nPath to jupyter notebook: {}".format(jupyter_url))
                 floyd_logger.info("Notebook is still loading. View logs to track progress")
 
         # Print the path to serving endpoint
         if mode == 'serve':
-            floyd_logger.info("Path to service endpoint: {}".format(
-                get_task_url(get_module_task_instance_id(experiment.task_instances))))
+            floyd_logger.info("Path to service endpoint: {}".format(experiment.service_url))
 
     floyd_logger.info("""
 To view logs enter:

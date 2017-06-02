@@ -9,7 +9,7 @@ class ProjectSchema(Schema):
     """
     name = fields.Str()
     id = fields.Str()
-    description = fields.Str()
+    description = fields.Str(allow_none=True)
     public = fields.Boolean()
 
     @post_load

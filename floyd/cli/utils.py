@@ -3,15 +3,7 @@ from time import sleep
 import requests
 import sys
 
-import floyd
 from floyd.constants import DOCKER_IMAGES
-
-
-def get_task_url(id):
-    """
-    Return the url to proxy to a running task
-    """
-    return "{}/{}".format(floyd.floyd_proxy_host, id)
 
 
 def get_docker_image(env, gpu):

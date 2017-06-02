@@ -1,11 +1,11 @@
 import click
-import webbrowser
 from tabulate import tabulate
 from time import sleep
 import sys
+import webbrowser
 
 import floyd
-from floyd.cli.utils import get_task_url, get_module_task_instance_id
+from floyd.cli.utils import get_module_task_instance_id
 from floyd.client.common import get_url_contents
 from floyd.client.experiment import ExperimentClient
 from floyd.client.project import ProjectClient
@@ -75,19 +75,13 @@ def info(id):
     experiment = ExperimentClient().get(id)
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
-    mode = url = None
-    if experiment.state == "running":
-        if task_instance and task_instance.mode in ['jupyter', 'serving']:
-            mode = task_instance.mode
-            url = get_task_url(task_instance.id)
     table = [["Run ID", experiment.id], ["Name", experiment.name], ["Created", experiment.created_pretty],
              ["Status", experiment.state], ["Duration(s)", experiment.duration_rounded],
              ["Output ID", task_instance.id if task_instance else None], ["Instance", experiment.instance_type_trimmed],
              ["Version", experiment.description]]
-    if mode:
-        table.append(["Mode", mode])
-    if url:
-        table.append(["Url", url])
+    if task_instance and task_instance.mode in ['jupyter', 'serving']:
+        table.append(["Mode", task_instance.mode])
+        table.append(["Url", experiment.service_url])
     floyd_logger.info(tabulate(table))
 
 
