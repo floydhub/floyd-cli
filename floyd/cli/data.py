@@ -3,6 +3,7 @@ import os
 import sys
 from tabulate import tabulate
 import tempfile
+from tusclient import client
 import webbrowser
 
 import floyd
@@ -13,6 +14,8 @@ from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.data_config import DataConfig, DataConfigManager
 from floyd.model.data import DataRequest
 from floyd.log import logger as floyd_logger
+from floyd.upload_utils import (opt_to_resume, upload_is_resumable,
+                                start_new_upload, finish_upload)
 
 
 @click.group()
@@ -50,54 +53,13 @@ def upload(resume):
     """
     data_config = DataConfigManager.get_config()
     access_token = AuthConfigManager.get_access_token()
-    data_path = data_config.data_path or ""
-    version = data_config.version
-    data_name = "{}/{}:{}".format(access_token.username,
-                                  data_config.name,
-                                  version)
 
-    if not os.path.isfile(data_path):
-        # A previous data tarball was not found.
-        # Starting the upload process from scratch
+    if upload_is_resumable(data_config) and opt_to_resume(resume):
+        pass
+    else:
+        start_new_upload(data_config, access_token)
 
-        data_config.set_data_path("")
-        # Create data object
-        data = DataRequest(name=data_name,
-                           description=version,
-                           data_type='gzip',
-                           version=version)
-        data_id = DataClient().create(data)
-        if not data_id:
-            exit(1)
-
-        # Create tarfile
-        temp_dir = tempfile.mkdtemp()
-        data_path = os.path.join(temp_dir, "{}.data.tar.gz".format(data_id))
-
-        floyd_logger.debug("Creating tarfile with contents of current directory: {}".format(data_path))
-        floyd_logger.info("Compressing data...")
-
-        create_tarfile(source_dir='.', filename=data_path)
-
-        total_file_size = os.path.getsize(data_path)
-
-        data_config.increment_version()
-        floyd_logger.info("Uploading compressed data. Total upload size: {}".format(sizeof_fmt(total_file_size)))
-    data_id = data_config.data_predecessor
-
-
-    floyd_logger.debug("Created data with id : {}".format(data_id))
-    floyd_logger.info("Upload finished")
-
-    # Update expt config including predecessor
-    data_config.set_data_predecessor(data_id)
-    data_config.set_data_path(data_path)
-    DataConfigManager.set_config(data_config)
-
-    # Print output
-    table_output = [["DATA ID", "NAME", "VERSION"],
-                    [data_id, data_name, version]]
-    floyd_logger.info(tabulate(table_output, headers="firstrow"))
+    finish_upload(data_config, access_token)
 
 
 @click.command()

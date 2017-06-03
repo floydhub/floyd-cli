@@ -14,7 +14,7 @@ class DataConfigSchema(Schema):
     version = fields.Integer()
     family_id = fields.Str()
     data_predecessor = fields.Str(allow_none=True)
-    data_path = fields.Str(allow_none=True)
+    tarball_path = fields.Str(allow_none=True)
 
     @post_load
     def make_access_token(self, data):
@@ -27,15 +27,15 @@ class DataConfig(BaseModel):
 
     def __init__(self,
                  name,
-                 version=1,
+                 version=0,
                  family_id=None,
                  data_predecessor=None,
-                 data_path=None):
+                 tarball_path=None):
         self.name = name
         self.version = version
         self.family_id = family_id
         self.data_predecessor = data_predecessor
-        self.data_path = data_path
+        self.tarball_path = tarball_path
 
     def increment_version(self):
         self.version = self.version + 1
@@ -43,8 +43,8 @@ class DataConfig(BaseModel):
     def set_data_predecessor(self, data_predecessor):
         self.data_predecessor = data_predecessor
 
-    def set_data_path(self, data_path):
-        self.data_path = data_path
+    def set_tarball_path(self, tarball_path):
+        self.tarball_path = tarball_path
 
 
 class DataConfigManager(object):
