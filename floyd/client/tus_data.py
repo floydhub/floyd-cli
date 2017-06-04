@@ -1,6 +1,7 @@
 from __future__ import print_function
-import os
 import base64
+from clint.textui.progress import Bar as ProgressBar
+import os
 import requests
 
 from floyd.log import logger as floyd_logger
@@ -30,6 +31,7 @@ def initialize_upload(file_path, headers=None, metadata=None):
         ]
         h["Upload-Metadata"] = ','.join(pairs)
 
+    # TODO: Exception handling
     response = requests.post(TUS_SERVER_URL, headers=h)
     response.raise_for_status()
 
@@ -50,12 +52,18 @@ def resume_upload(file_path,
     file_size = os.path.getsize(file_path)
 
     with open(file_path, 'rb') as f:
-        while offset < file_size:
-            f.seek(offset)
-            data = f.read(chunk_size)
-            offset = _upload_chunk(data, offset, file_endpoint, headers=headers)
-            total_sent += len(data)
-            floyd_logger.debug("{} bytes sent".format(total_sent))
+
+        # TODO: Don't fill progress bar when exited early
+        with ProgressBar(filled_char="=", expected_size=file_size) as pb:
+            while offset < file_size:
+                pb.show(offset)
+                f.seek(offset)
+                data = f.read(chunk_size)
+                offset = _upload_chunk(data, offset, file_endpoint, headers=headers)
+                total_sent += len(data)
+                import time; time.sleep(2) # TODO: Remove!
+                floyd_logger.debug("{} bytes sent".format(total_sent))
+            pb.show(offset)
 
 
 def _get_offset(file_endpoint, headers=None):

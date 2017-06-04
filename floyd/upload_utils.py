@@ -18,7 +18,8 @@ def opt_to_resume(resume_flag):
     return click.confirm(msg, abort=False, default=False)
 
 def upload_is_resumable(data_config):
-    return os.path.isfile(data_config.tarball_path or "")
+    # TODO: Check to make sure server says the upload is resumable
+    return os.path.isfile(data_config.tarball_path or "") and data_config.data_endpoint
 
 def initialize_new_upload(data_config, access_token):
     data_config.increment_version()
