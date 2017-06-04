@@ -51,7 +51,7 @@ def initialize_new_upload(data_config, access_token):
 
     DataConfigManager.set_config(data_config)
 
-def complete_upload(data_config, access_token):
+def complete_upload(data_config):
     data_endpoint = data_config.data_endpoint
     path = data_config.tarball_path
     file_size = os.path.getsize(path)
