@@ -27,9 +27,11 @@ from floyd.log import logger as floyd_logger
               help='Environment type to use',
               default='keras',
               type=click.Choice(sorted(DOCKER_IMAGES["cpu"].keys())))
+@click.option('--message', '-m',
+              help='Experiment commit message')
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, gpu, env, data, mode, command):
+def run(ctx, gpu, env, message, data, mode, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -53,7 +55,7 @@ def run(ctx, gpu, env, data, mode, command):
                       'type': 'dir'} for data_str in data]
 
     module = Module(name=experiment_name,
-                    description=version,
+                    description=message if message else version,
                     command=command_str,
                     mode=get_mode_parameter(mode),
                     family_id=experiment_config.family_id,
@@ -66,7 +68,7 @@ def run(ctx, gpu, env, data, mode, command):
     # Create experiment request
     instance_type = GPU_INSTANCE_TYPE if gpu else CPU_INSTANCE_TYPE
     experiment_request = ExperimentRequest(name=experiment_name,
-                                           description=version,
+                                           description=message if message else version,
                                            module_id=module_id,
                                            data_ids=data,
                                            predecessor=experiment_config.experiment_predecessor,
