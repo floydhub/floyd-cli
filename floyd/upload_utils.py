@@ -3,10 +3,10 @@ import os
 import sys
 from tabulate import tabulate
 import tempfile
-from tusclient import client
 
 from floyd.client.data import DataClient
 from floyd.client.files import create_tarfile, sizeof_fmt
+from floyd.client.tus_data import initialize_upload, resume_upload
 from floyd.log import logger as floyd_logger
 from floyd.manager.data_config import DataConfigManager
 from floyd.model.data import DataRequest
@@ -18,9 +18,9 @@ def opt_to_resume(resume_flag):
     return click.confirm(msg, abort=False, default=False)
 
 def upload_is_resumable(data_config):
-    os.path.isfile(data_config.tarball_path or "")
+    return os.path.isfile(data_config.tarball_path or "")
 
-def start_new_upload(data_config, access_token):
+def initialize_new_upload(data_config, access_token):
     data_config.increment_version()
     version = data_config.version
     data_name = "{}/{}:{}".format(access_token.username,
@@ -43,19 +43,21 @@ def start_new_upload(data_config, access_token):
 
     create_tarfile(source_dir='.', filename=tarball_path)
 
+    data_endpoint = initialize_upload(tarball_path)
     data_config.set_tarball_path(tarball_path)
+    data_config.set_data_endpoint(data_endpoint)
     data_config.set_data_predecessor(data_id)
 
-def finish_upload(data_config, access_token):
-    total_file_size = os.path.getsize(data_config.tarball_path)
-    floyd_logger.info("Uploading compressed data. Total upload size: {}".format(sizeof_fmt(total_file_size)))
-    my_client = client.TusClient('http://localhost:8080/upload/')
+    DataConfigManager.set_config(data_config)
 
+def complete_upload(data_config, access_token):
+    data_endpoint = data_config.data_endpoint
     path = data_config.tarball_path
-    # A file stream may also be passed in place of a file path.
-    uploader = my_client.uploader(file_path=path, chunk_size=100)
+    file_size = os.path.getsize(path)
 
-    uploader.upload()
+    floyd_logger.info("Uploading compressed data. Total upload size: {}".format(sizeof_fmt(file_size)))
+
+    resume_upload(path, data_endpoint)
 
     try:
         os.remove(path)
@@ -66,9 +68,10 @@ def finish_upload(data_config, access_token):
     floyd_logger.debug("Created data with id : {}".format(data_id))
     floyd_logger.info("Upload finished")
 
-    # Update expt config including predecessor
+    # Update data config
     data_config.set_data_predecessor(data_id)
     data_config.set_tarball_path("")
+    data_config.set_data_endpoint("")
     DataConfigManager.set_config(data_config)
 
     # Print output

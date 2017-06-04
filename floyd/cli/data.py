@@ -15,7 +15,7 @@ from floyd.manager.data_config import DataConfig, DataConfigManager
 from floyd.model.data import DataRequest
 from floyd.log import logger as floyd_logger
 from floyd.upload_utils import (opt_to_resume, upload_is_resumable,
-                                start_new_upload, finish_upload)
+                                initialize_new_upload, complete_upload)
 
 
 @click.group()
@@ -55,11 +55,12 @@ def upload(resume):
     access_token = AuthConfigManager.get_access_token()
 
     if upload_is_resumable(data_config) and opt_to_resume(resume):
+        # Don't initialize new upload
         pass
     else:
-        start_new_upload(data_config, access_token)
+        initialize_new_upload(data_config, access_token)
 
-    finish_upload(data_config, access_token)
+    complete_upload(data_config, access_token)
 
 
 @click.command()
