@@ -52,6 +52,8 @@ DOCKER_IMAGES = {
 }
 
 DEFAULT_DOCKER_IMAGE = "floydhub/tensorflow:latest-py3"
+DEFAULT_ENV = "default"
+DEFAULT_ARCH = "cpu"
 
 PST_TIMEZONE = timezone("America/Los_Angeles")
 
