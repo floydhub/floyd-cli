@@ -49,7 +49,7 @@ def upload():
     version = data_config.version
 
     # Create data object
-    data_name = "{}/{}:{}".format(access_token.username,
+    data_name = "{}/{}/{}".format(access_token.username,
                                   data_config.name,
                                   version)
     data = DataRequest(name=data_name,
@@ -75,7 +75,7 @@ def upload():
 @click.argument('id', required=False, nargs=1)
 def status(id):
     """
-    Show the status of a run with id.
+    Show the status of a run with id. or a friendly name.
     It can also list status of all the runs in the project.
     """
     if id:
@@ -106,7 +106,7 @@ def print_data(data_sources):
 @click.argument('id', nargs=1)
 def output(id, url):
     """
-    Shows the output url of the run.
+    Shows the url of the dataset. You can use id or a friendly URI.
     By default opens the output page in your default browser.
     """
     data_source = DataClient().get(id)

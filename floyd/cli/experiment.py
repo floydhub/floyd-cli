@@ -1,8 +1,8 @@
 import click
 from tabulate import tabulate
 from time import sleep
-import sys
 import webbrowser
+import sys
 
 import floyd
 from floyd.cli.utils import get_module_task_instance_id
@@ -94,6 +94,10 @@ def logs(id, url, tail, sleep_duration=1):
     Print the logs of the run.
     """
     experiment = ExperimentClient().get(id)
+    if experiment.state == 'queued':
+        floyd_logger.info("Experiment is currently in a queue")
+        return
+
     task_instance = TaskInstanceClient().get(get_module_task_instance_id(experiment.task_instances))
     log_url = "{}/api/v1/resources/{}?content=true".format(floyd.floyd_host, task_instance.log_id)
     if url:

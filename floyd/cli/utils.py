@@ -60,3 +60,15 @@ def get_data_name(data_str, default=None):
     else:
         name = default if default else data_str
     return name
+
+
+def get_data_id(data_str):
+    """
+    If data_str is of the format <ID>:<NAME>, or <URI>/<PATH>:<NAME>
+    return ID or URI
+    """
+    if ':' in data_str:
+        name_or_id, _ = data_str.split(':')
+        return name_or_id
+    else:
+        return data_str

@@ -5,7 +5,8 @@ from time import sleep
 import webbrowser
 
 from floyd.constants import DOCKER_IMAGES
-from floyd.cli.utils import get_docker_image, get_mode_parameter, wait_for_url, get_data_name
+from floyd.cli.utils import (get_docker_image, get_mode_parameter, wait_for_url, get_data_name)
+from floyd.client.data import DataClient
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.manager.auth_config import AuthConfigManager
@@ -44,7 +45,7 @@ def run(ctx, gpu, env, message, data, mode, open, command):
     experiment_config = ExperimentConfigManager.get_config()
     access_token = AuthConfigManager.get_access_token()
     version = experiment_config.version
-    experiment_name = "{}/{}:{}".format(access_token.username,
+    experiment_name = "{}/{}/{}".format(access_token.username,
                                         experiment_config.name,
                                         version)
 
@@ -53,9 +54,23 @@ def run(ctx, gpu, env, message, data, mode, open, command):
         floyd_logger.error("Cannot attach more than 5 datasets to an experiment")
         return
 
-    default_name = 'input' if len(data) <= 1 else None
+    # Get the data entity from the server to:
+    # 1. Confirm that the data id or uri exists and has the right permissions
+    # 2. If uri is used, get the id of the dataset
+    data_ids = []
+    for data_name_or_id in data:
+        path = None
+        if ':' in data_name_or_id:
+            data_name_or_id, path = data_name_or_id.split(':')
+        data_obj = DataClient().get(data_name_or_id)
+        if not data_obj:
+            floyd_logger.error("Data not found for name or id: {}".format(data_name_or_id))
+            return
+        data_ids.append("{}:{}".format(data_obj.id, path) if path else data_obj.id)
+
+    default_name = 'input' if len(data_ids) <= 1 else None
     module_inputs = [{'name': get_data_name(data_str, default_name),
-                      'type': 'dir'} for data_str in data]
+                      'type': 'dir'} for data_str in data_ids]
 
     module = Module(name=experiment_name,
                     description=message if message else version,
@@ -73,7 +88,7 @@ def run(ctx, gpu, env, message, data, mode, open, command):
     experiment_request = ExperimentRequest(name=experiment_name,
                                            description=message if message else version,
                                            module_id=module_id,
-                                           data_ids=data,
+                                           data_ids=data_ids,
                                            predecessor=experiment_config.experiment_predecessor,
                                            family_id=experiment_config.family_id,
                                            version=version,
