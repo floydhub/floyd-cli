@@ -53,17 +53,16 @@ def resume_upload(file_path,
 
     with open(file_path, 'rb') as f:
 
-        # TODO: Don't fill progress bar when exited early
-        with ProgressBar(filled_char="=", expected_size=file_size) as pb:
-            while offset < file_size:
-                pb.show(offset)
-                f.seek(offset)
-                data = f.read(chunk_size)
-                offset = _upload_chunk(data, offset, file_endpoint, headers=headers)
-                total_sent += len(data)
-                import time; time.sleep(2) # TODO: Remove!
-                floyd_logger.debug("{} bytes sent".format(total_sent))
+        pb = ProgressBar(filled_char="=", expected_size=file_size)
+        while offset < file_size:
             pb.show(offset)
+            f.seek(offset)
+            data = f.read(chunk_size)
+            offset = _upload_chunk(data, offset, file_endpoint, headers=headers)
+            total_sent += len(data)
+            import time; time.sleep(2) # TODO: Remove!
+            floyd_logger.debug("{} bytes sent".format(total_sent))
+        pb.show(offset)
 
 
 def _get_offset(file_endpoint, headers=None):

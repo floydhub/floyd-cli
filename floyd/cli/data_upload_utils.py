@@ -44,7 +44,7 @@ def initialize_new_upload(data_config, access_token):
 
     create_tarfile(source_dir='.', filename=tarball_path)
 
-    data_endpoint = initialize_upload(tarball_path)
+    data_endpoint = initialize_upload(tarball_path, metadata={"filename": data_id})
     data_config.set_tarball_path(tarball_path)
     data_config.set_data_endpoint(data_endpoint)
     data_config.set_data_predecessor(data_id)
