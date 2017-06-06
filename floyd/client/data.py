@@ -41,6 +41,17 @@ class DataClient(FloydHttpClient):
             floyd_logger.info("Data create: ERROR! {}".format(e.message))
             return None
 
+    def new_tus_credentials(self, id):
+        try:
+            response = self.request("POST",
+                                    "{}new_credentials/".format(self.url),
+                                    data=json.dumps({"id": id}))
+            data_dict = response.json()
+            return (data_dict["id"], data_dict["token"])
+        except FloydException as e:
+            floyd_logger.info("Error while fetching data upload credentials! {}".format(id, e.message))
+            return ()
+
     def get(self, id):
         try:
             response = self.request("GET",

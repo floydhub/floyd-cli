@@ -11,7 +11,7 @@ TUS_VERSION = '1.0.0'
 TUS_SERVER_URL = 'http://localhost:8080/uploads/'
 
 
-def initialize_upload(file_path, headers=None, metadata=None):
+def initialize_upload(file_path, headers=None, metadata=None, auth=()):
     floyd_logger.info("Initializing upload...")
 
     file_size = os.path.getsize(file_path)
@@ -32,7 +32,7 @@ def initialize_upload(file_path, headers=None, metadata=None):
         h["Upload-Metadata"] = ','.join(pairs)
 
     # TODO: Exception handling
-    response = requests.post(TUS_SERVER_URL, headers=h)
+    response = requests.post(TUS_SERVER_URL, headers=h, auth=auth)
     response.raise_for_status()
 
     location = response.headers["Location"]
@@ -44,9 +44,10 @@ def resume_upload(file_path,
                   file_endpoint,
                   chunk_size=DEFAULT_CHUNK_SIZE,
                   headers=None,
+                  auth=(),
                   offset=None):
 
-    offset = _get_offset(file_endpoint, headers=headers)
+    offset = _get_offset(file_endpoint, headers=headers, auth=auth)
 
     total_sent = 0
     file_size = os.path.getsize(file_path)
@@ -58,14 +59,14 @@ def resume_upload(file_path,
             pb.show(offset)
             f.seek(offset)
             data = f.read(chunk_size)
-            offset = _upload_chunk(data, offset, file_endpoint, headers=headers)
+            offset = _upload_chunk(data, offset, file_endpoint, headers=headers, auth=auth)
             total_sent += len(data)
             import time; time.sleep(2) # TODO: Remove!
             floyd_logger.debug("{} bytes sent".format(total_sent))
         pb.show(offset)
 
 
-def _get_offset(file_endpoint, headers=None):
+def _get_offset(file_endpoint, headers=None, auth=()):
     floyd_logger.debug("Getting offset")
 
     h = {"Tus-Resumable": TUS_VERSION}
@@ -73,7 +74,7 @@ def _get_offset(file_endpoint, headers=None):
     if headers:
         h.update(headers)
 
-    response = requests.head(file_endpoint, headers=h)
+    response = requests.head(file_endpoint, headers=h, auth=auth)
     response.raise_for_status()
 
     offset = int(response.headers["Upload-Offset"])
@@ -81,7 +82,7 @@ def _get_offset(file_endpoint, headers=None):
     return offset
 
 
-def _upload_chunk(data, offset, file_endpoint, headers=None):
+def _upload_chunk(data, offset, file_endpoint, headers=None, auth=()):
     floyd_logger.debug("Uploading {} bytes chunk from offset: {}".format(len(data), offset))
 
     h = {
@@ -93,7 +94,7 @@ def _upload_chunk(data, offset, file_endpoint, headers=None):
     if headers:
         h.update(headers)
 
-    response = requests.patch(file_endpoint, headers=h, data=data)
+    response = requests.patch(file_endpoint, headers=h, data=data, auth=auth)
     if response.status_code != 204:
         raise TusError("Upload chunk failed: Status: {}".format(response.status_code),
                        response=response)

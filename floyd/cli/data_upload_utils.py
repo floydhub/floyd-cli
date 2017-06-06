@@ -44,7 +44,8 @@ def initialize_new_upload(data_config, access_token):
 
     create_tarfile(source_dir='.', filename=tarball_path)
 
-    data_endpoint = initialize_upload(tarball_path, metadata={"filename": data_id})
+    creds = DataClient().new_tus_credentials(data_id) or sys.exit(1)
+    data_endpoint = initialize_upload(tarball_path, metadata={"filename": data_id}, auth=creds)
     data_config.set_tarball_path(tarball_path)
     data_config.set_data_endpoint(data_endpoint)
     data_config.set_data_predecessor(data_id)
@@ -53,12 +54,16 @@ def initialize_new_upload(data_config, access_token):
 
 def complete_upload(data_config):
     data_endpoint = data_config.data_endpoint
+    data_id = data_config.data_predecessor
     path = data_config.tarball_path
     file_size = os.path.getsize(path)
 
+    floyd_logger.debug("Getting fresh upload credentials")
+    creds = DataClient().new_tus_credentials(data_id)
+
     floyd_logger.info("Uploading compressed data. Total upload size: {}".format(sizeof_fmt(file_size)))
 
-    resume_upload(path, data_endpoint)
+    resume_upload(path, data_endpoint, auth=creds)
 
     try:
         os.remove(path)
