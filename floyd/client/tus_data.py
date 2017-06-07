@@ -68,7 +68,7 @@ class TusDataClient(FloydHttpClient):
                       headers={},
                       auth=(),
                       offset=None):
-        chunk_size = chunk_size or self.DEFAULT_CHUNK_SIZE
+        chunk_size = chunk_size or self.chunk_size
 
         try:
             offset = self._get_offset(file_endpoint, headers=headers, auth=auth)
