@@ -53,9 +53,7 @@ def upload(resume):
     """
     data_config = DataConfigManager.get_config()
 
-    if upload_is_resumable(data_config) and opt_to_resume(resume):
-        pass  # Don't initialize new upload
-    else:
+    if not upload_is_resumable(data_config) or not opt_to_resume(resume):
         access_token = AuthConfigManager.get_access_token()
         initialize_new_upload(data_config, access_token)
 
