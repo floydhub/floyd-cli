@@ -6,7 +6,7 @@ import tempfile
 
 from floyd.client.data import DataClient
 from floyd.client.files import create_tarfile, sizeof_fmt
-from floyd.client.tus_data import initialize_upload, resume_upload
+from floyd.client.tus_data import TusDataClient
 from floyd.log import logger as floyd_logger
 from floyd.manager.data_config import DataConfigManager
 from floyd.model.data import DataRequest
@@ -45,7 +45,7 @@ def initialize_new_upload(data_config, access_token):
     create_tarfile(source_dir='.', filename=tarball_path)
 
     creds = DataClient().new_tus_credentials(data_id) or sys.exit(1)
-    data_endpoint = initialize_upload(tarball_path, metadata={"filename": data_id}, auth=creds)
+    data_endpoint = TusDataClient().initialize_upload(tarball_path, metadata={"filename": data_id}, auth=creds)
     data_config.set_tarball_path(tarball_path)
     data_config.set_data_endpoint(data_endpoint)
     data_config.set_data_predecessor(data_id)
@@ -63,7 +63,7 @@ def complete_upload(data_config):
 
     floyd_logger.info("Uploading compressed data. Total upload size: {}".format(sizeof_fmt(file_size)))
 
-    resume_upload(path, data_endpoint, auth=creds)
+    TusDataClient().resume_upload(path, data_endpoint, auth=creds)
 
     try:
         os.remove(path)
