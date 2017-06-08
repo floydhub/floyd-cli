@@ -33,7 +33,12 @@ def initialize_new_upload(data_config, access_token):
                        description=version,
                        data_type='gzip',
                        version=version)
-    data_id = DataClient().create(data) or sys.exit(1)
+    data_id = DataClient().create(data)
+    if not data_id:
+        sys.exit(1)
+
+    data_config.set_data_predecessor(data_id)
+    DataConfigManager.set_config(data_config)
 
     # Create tarball of the data using the ID returned from the API
     temp_dir = tempfile.mkdtemp()
@@ -44,12 +49,22 @@ def initialize_new_upload(data_config, access_token):
 
     create_tarfile(source_dir='.', filename=tarball_path)
 
-    creds = DataClient().new_tus_credentials(data_id) or sys.exit(1)
-    data_endpoint = TusDataClient().initialize_upload(tarball_path, metadata={"filename": data_id}, auth=creds)
+    # If starting a new upload fails for some reason down the line, we don't
+    # want to re-tar, so save off the tarball path now
     data_config.set_tarball_path(tarball_path)
-    data_config.set_data_endpoint(data_endpoint)
-    data_config.set_data_predecessor(data_id)
+    DataConfigManager.set_config(data_config)
 
+    creds = DataClient().new_tus_credentials(data_id)
+    if not creds:
+        sys.exit(1)
+
+    data_endpoint = TusDataClient().initialize_upload(tarball_path,
+                                                      metadata={"filename": data_id},
+                                                      auth=creds)
+    if not data_endpoint:
+        sys.exit(1)
+
+    data_config.set_data_endpoint(data_endpoint)
     DataConfigManager.set_config(data_config)
 
 def complete_upload(data_config):
