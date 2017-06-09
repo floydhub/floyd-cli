@@ -100,3 +100,13 @@ def complete_upload(data_config):
                     [data_id, "nm", data_config.version]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
 
+def abort_previous_upload(data_config):
+    try:
+        os.remove(data_config.tarball_path)
+        floyd_logger.info("Aborting previous upload...")
+    except OSError:
+        pass
+
+    data_config.set_tarball_path("")
+    data_config.set_data_endpoint("")
+    DataConfigManager.set_config(data_config)

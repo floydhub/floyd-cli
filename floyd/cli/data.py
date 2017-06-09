@@ -15,6 +15,7 @@ from floyd.manager.data_config import DataConfig, DataConfigManager
 from floyd.model.data import DataRequest
 from floyd.log import logger as floyd_logger
 from floyd.cli.data_upload_utils import (opt_to_resume, upload_is_resumable,
+                                         abort_previous_upload,
                                          initialize_new_upload, complete_upload)
 
 
@@ -54,7 +55,10 @@ def upload(resume):
     data_config = DataConfigManager.get_config()
 
     if not upload_is_resumable(data_config) or not opt_to_resume(resume):
+        abort_previous_upload(data_config)
+
         access_token = AuthConfigManager.get_access_token()
+
         initialize_new_upload(data_config, access_token)
 
     complete_upload(data_config)
