@@ -30,7 +30,6 @@ setup(
         "shortuuid>=0.4.3",
         "tabulate>=0.7.7",
         "pathlib2>=2.2.1",
-        "tus.py>=1.3.0",
     ],
     setup_requires=[
         "nose>=1.0",
