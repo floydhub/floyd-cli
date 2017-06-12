@@ -155,7 +155,7 @@ def stop(id):
         floyd_logger.info("Experiment in {} state cannot be stopped".format(experiment.state))
         return
 
-    if ExperimentClient().stop(id):
+    if ExperimentClient().stop(experiment.id):
         floyd_logger.info("Experiment shutdown request submitted. Check status to confirm shutdown")
     else:
         floyd_logger.error("Failed to stop experiment")
@@ -181,7 +181,7 @@ def delete(ids, yes):
             floyd_logger.info("Experiment {}: Skipped.".format(experiment.name))
             continue
 
-        if not ExperimentClient().delete(id):
+        if not ExperimentClient().delete(experiment.id):
             failures = True
 
     if failures:
