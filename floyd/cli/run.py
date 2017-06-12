@@ -33,9 +33,11 @@ from floyd.log import logger as floyd_logger
               type=click.Choice(sorted(DOCKER_IMAGES["cpu"].keys())))
 @click.option('--message', '-m',
               help='Experiment commit message')
+@click.option('--tensorboard/--no-tensorboard',
+              help='Run tensorboard in the experiment environment')
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, gpu, env, message, data, mode, open, command):
+def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -76,6 +78,7 @@ def run(ctx, gpu, env, message, data, mode, open, command):
                     description=message if message else version,
                     command=command_str,
                     mode=get_mode_parameter(mode),
+                    enable_tensorboard=tensorboard,
                     family_id=experiment_config.family_id,
                     default_container=get_docker_image(env, gpu),
                     version=version,

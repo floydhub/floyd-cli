@@ -9,6 +9,7 @@ class ModuleSchema(Schema):
     description = fields.Str()
     command = fields.Str()
     mode = fields.Str(allow_none=True)
+    enable_tensorboard = fields.Boolean()
     module_type = fields.Str()
     default_container = fields.Str()
     family_id = fields.Str(allow_none=True)
@@ -31,6 +32,7 @@ class Module(BaseModel):
                  description,
                  command,
                  mode="cli",
+                 enable_tensorboard=False,
                  module_type="code",
                  default_container=DEFAULT_DOCKER_IMAGE,
                  family_id=None,
@@ -41,6 +43,7 @@ class Module(BaseModel):
         self.description = description
         self.command = command
         self.mode = mode
+        self.enable_tensorboard = enable_tensorboard
         self.module_type = module_type
         self.default_container = default_container
         self.family_id = family_id
