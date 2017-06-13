@@ -82,7 +82,7 @@ def complete_upload(data_config):
 
     try:
         os.remove(path)
-    except OSError:
+    except (OSError, TypeError):
         pass
 
     data_id = data_config.data_predecessor
