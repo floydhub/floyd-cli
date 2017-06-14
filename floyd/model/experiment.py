@@ -19,6 +19,7 @@ class ExperimentSchema(Schema):
     task_instances = fields.List(fields.Str(), dump_only=True)
     instance_type = fields.Str(load_from="instanceType", allow_none=True)
     service_url = fields.Str(load_from="serviceUrl", allow_none=True)
+    tensorboard_url = fields.Str(load_from="tensorboardUrl", allow_none=True)
     output_id = fields.Str(load_from="instanceOutputId", allow_none=True)
 
     @post_load
@@ -40,6 +41,7 @@ class Experiment(BaseModel):
                  canvas=None,
                  instance_type=None,
                  service_url=None,
+                 tensorboard_url=None,
                  output_id=None):
         self.id = id
         self.name = name
@@ -55,6 +57,7 @@ class Experiment(BaseModel):
                 self.task_instances[nodes[key].get("taskInstanceId")] = nodes[key].get("type")
         self.instance_type = instance_type
         self.service_url = service_url
+        self.tensorboard_url = tensorboard_url
         self.output_id = output_id
 
     def localize_date(self, date):

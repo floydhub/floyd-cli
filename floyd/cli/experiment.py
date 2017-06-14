@@ -82,6 +82,8 @@ def info(id):
     if task_instance and task_instance.mode in ['jupyter', 'serving']:
         table.append(["Mode", task_instance.mode])
         table.append(["Url", experiment.service_url])
+    if experiment.tensorboard_url:
+        table.append(["Tensorboard", experiment.tensorboard_url])
     floyd_logger.info(tabulate(table))
 
 
