@@ -1,4 +1,5 @@
 # Floyd session parameters
-floyd_host = "http://localhost:5000"
+
+floyd_host = "https://www.floydhub.com"
 floyd_web_host = floyd_host
-floyd_proxy_host = "http://localhost:8000"
+floyd_proxy_host = "https://www.floydhub.com:8000"

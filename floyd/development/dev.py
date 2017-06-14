@@ -12,8 +12,8 @@ def cli(verbose):
     Floyd CLI interacts with Floyd server and executes your commands.
     More help is available under each command listed below.
     """
-    floyd.floyd_host = floyd.floyd_web_host = "http://localhost:5000"
-    floyd.floyd_proxy_host = "http://localhost:5000"
+    floyd.floyd_host = floyd.floyd_web_host = "https://dev.floydhub.com"
+    floyd.floyd_proxy_host = "https://dev.floydhub.com:8000"
     configure_logger(verbose)
     check_cli_version()
 
