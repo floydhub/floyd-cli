@@ -52,22 +52,24 @@ class DataClient(FloydHttpClient):
 
             # Add request data
             request_data = []
-            request_data.append(("data", ('data.tar', open(compressed_file_path, 'rb'), 'text/plain')))
-            request_data.append(("json", json.dumps(data.to_dict())))
 
-            multipart_encoder = MultipartEncoder(
-                fields=request_data
-            )
+            with open(compressed_file_path, 'rb') as compressed_file:
+                request_data.append(("data", ('data.tar', compressed_file, 'text/plain')))
+                request_data.append(("json", json.dumps(data.to_dict())))
 
-            # Attach progress bar
-            progress_callback = create_progress_callback(multipart_encoder)
-            multipart_encoder_monitor = MultipartEncoderMonitor(multipart_encoder, progress_callback)
+                multipart_encoder = MultipartEncoder(
+                    fields=request_data
+                )
 
-            response = self.request("POST",
-                                    self.url,
-                                    data=multipart_encoder_monitor,
-                                    headers={"Content-Type": multipart_encoder.content_type},
-                                    timeout=3600)
+                # Attach progress bar
+                progress_callback = create_progress_callback(multipart_encoder)
+                multipart_encoder_monitor = MultipartEncoderMonitor(multipart_encoder, progress_callback)
+
+                response = self.request("POST",
+                                        self.url,
+                                        data=multipart_encoder_monitor,
+                                        headers={"Content-Type": multipart_encoder.content_type},
+                                        timeout=3600)
 
             floyd_logger.info("Done")
             return response.json().get("id")
