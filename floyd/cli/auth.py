@@ -28,6 +28,7 @@ def login(token):
         floyd_logger.info("See FAQ for help: http://docs.floydhub.com/faq/")
         return
 
+    access_code = access_code.strip(" ")
     user = AuthClient().get_user(access_code)
     access_token = AccessToken(username=user.username,
                                token=access_code)
