@@ -3,11 +3,12 @@ import click
 from tabulate import tabulate
 from time import sleep
 
-from floyd.constants import DOCKER_IMAGES
-from floyd.cli.utils import (get_task_url, get_docker_image, get_module_task_instance_id,
+from floyd.constants import DEFAULT_ENV
+from floyd.cli.utils import (get_task_url, get_module_task_instance_id,
                              get_mode_parameter, wait_for_url, get_data_name)
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
+from floyd.client.env import EnvClient
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.constants import CPU_INSTANCE_TYPE, GPU_INSTANCE_TYPE
@@ -25,11 +26,12 @@ from floyd.log import logger as floyd_logger
               type=click.Choice(['job', 'jupyter', 'serve']))
 @click.option('--env',
               help='Environment type to use',
-              default='keras',
-              type=click.Choice(sorted(DOCKER_IMAGES["cpu"].keys())))
+              default=DEFAULT_ENV)
+@click.option('--message', '-m',
+              help='Experiment commit message')
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, gpu, env, data, mode, command):
+def run(ctx, gpu, env, message, data, mode, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -45,28 +47,48 @@ def run(ctx, gpu, env, data, mode, command):
 
     # Create module
     if len(data) > 5:
-        floyd_logger.error("Cannot attach more than 5 datasets to an experiment")
+        floyd_logger.error(
+            "Cannot attach more than 5 datasets to an experiment")
         return
 
     default_name = 'input' if len(data) <= 1 else None
     module_inputs = [{'name': get_data_name(data_str, default_name),
                       'type': 'dir'} for data_str in data]
 
+    if gpu:
+        arch = 'gpu'
+        instance_type = GPU_INSTANCE_TYPE
+    else:
+        arch = 'cpu'
+        instance_type = CPU_INSTANCE_TYPE
+
+    env_map = EnvClient().get_all()
+    envs = env_map.get(arch)
+    if envs:
+        if env not in envs:
+            floyd_logger.error(
+                "{} is not in the list of supported environments: {}".format(
+                    env, ', '.join(envs.keys())))
+            return
+    else:
+        floyd_logger.error("{} is not a supported architecture".format(arch))
+        return
+
     module = Module(name=experiment_name,
-                    description=version,
+                    description=message if message else version,
                     command=command_str,
                     mode=get_mode_parameter(mode),
                     family_id=experiment_config.family_id,
-                    default_container=get_docker_image(env, gpu),
                     version=version,
-                    inputs=module_inputs)
+                    inputs=module_inputs,
+                    env=env,
+                    arch=arch)
     module_id = ModuleClient().create(module)
     floyd_logger.debug("Created module with id : {}".format(module_id))
 
     # Create experiment request
-    instance_type = GPU_INSTANCE_TYPE if gpu else CPU_INSTANCE_TYPE
     experiment_request = ExperimentRequest(name=experiment_name,
-                                           description=version,
+                                           description=message if message else version,
                                            module_id=module_id,
                                            data_ids=data,
                                            predecessor=experiment_config.experiment_predecessor,

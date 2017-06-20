@@ -5,7 +5,8 @@ from clint.textui.progress import Bar as ProgressBar
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
 from floyd.client.base import FloydHttpClient
-from floyd.client.files import get_files_in_directory
+from floyd.client.files import get_files_in_current_directory
+from floyd.exceptions import FloydException
 from floyd.log import logger as floyd_logger
 
 
@@ -28,7 +29,7 @@ class ModuleClient(FloydHttpClient):
 
     def create(self, module):
         try:
-            upload_files, total_file_size = get_files_in_directory(path='.', file_type='code')
+            upload_files, total_file_size = get_files_in_current_directory(file_type='code')
         except OSError:
             sys.exit("Directory contains too many files to upload. Add unused files and directories to .floydignore file."
                      "Or upload data separately using floyd data command")
@@ -57,6 +58,10 @@ class ModuleClient(FloydHttpClient):
         return response.json().get("id")
 
     def delete(self, id):
-        self.request("DELETE",
-                     "{}{}".format(self.url, id))
-        return True
+        try:
+            self.request("DELETE",
+                         "{}{}".format(self.url, id))
+            return True
+        except FloydException as e:
+            floyd_logger.info("Module {}: ERROR! {}".format(id, e.message))
+            return False

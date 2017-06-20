@@ -52,12 +52,13 @@ DOCKER_IMAGES = {
 }
 
 DEFAULT_DOCKER_IMAGE = "floydhub/tensorflow:latest-py3"
+DEFAULT_ENV = "default"
+DEFAULT_ARCH = "cpu"
 
 PST_TIMEZONE = timezone("America/Los_Angeles")
 
 DEFAULT_FLOYD_IGNORE_LIST = """
-# Directories to ignore when uploading code to floyd
-# Do not add a trailing slash for directories
+# Directories and files to ignore when uploading code to floyd
 
 .git
 .eggs
