@@ -33,7 +33,9 @@ class DataClient(FloydHttpClient):
         """
         try:
             floyd_logger.info("Making create request to server...")
-            response = self.request("POST", self.url)
+            response = self.request("POST",
+                                    self.url,
+                                    data={"resumable": "true"})
 
             floyd_logger.info("Done")
             return response.json().get("id")
