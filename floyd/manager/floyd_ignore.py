@@ -24,6 +24,15 @@ class FloydIgnoreManager(object):
 
     @classmethod
     def get_lists(cls, config_file_path=None):
+        # Remove a preceding '/'. The glob matcher we use will interpret a
+        # pattern starging with a '/' as an absolute path, so we remove the
+        # '/'. For details on the glob matcher, see:
+        # https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.match
+        def trim_slash_prefix(path):
+            if path.startswith('/'):
+                return line[1:]
+            return line
+
         config_file_path = config_file_path or cls.CONFIG_FILE_PATH
 
         if not os.path.isfile(config_file_path):
@@ -38,7 +47,8 @@ class FloydIgnoreManager(object):
                     continue
 
                 if line.startswith('!'):
-                    whitelist.append(line[1:])
+                    line = line[1:]
+                    whitelist.append(trim_slash_prefix(line))
                     continue
 
                 # To allow escaping file names that start with !, #, or \,
@@ -46,6 +56,6 @@ class FloydIgnoreManager(object):
                 if line.startswith('\\'):
                     line = line[1:]
 
-                ignore_list.append(line)
+                ignore_list.append(trim_slash_prefix(line))
 
         return (ignore_list, whitelist)
