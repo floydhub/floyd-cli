@@ -4,6 +4,7 @@ from clint.textui.progress import Bar as ProgressBar
 import os
 import requests
 
+import floyd
 from floyd.exceptions import FloydException
 from floyd.client.base import FloydHttpClient
 from floyd.log import logger as floyd_logger
@@ -14,7 +15,7 @@ class TusDataClient(FloydHttpClient):
     Client to interact with Data api
     """
     DEFAULT_CHUNK_SIZE = 4 * 1024 * 1024
-    TUS_SERVER_URL = 'http://localhost:8080/uploads/'  # TODO: update this
+    TUS_SERVER_URL = floyd.tus_server_endpoint
     TUS_VERSION = '1.0.0'
 
     def __init__(self, chunk_size=None, base_url=""):
