@@ -92,7 +92,6 @@ class TusDataClient(FloydHttpClient):
                 try:
                     offset = self._upload_chunk(data, offset, file_endpoint, headers=headers, auth=auth)
                     total_sent += len(data)
-                    import time; time.sleep(2) # TODO: Remove!
                     floyd_logger.debug("{} bytes sent".format(total_sent))
                 except FloydException as e:
                     floyd_logger.error("Failed to fetch offset data from Tus server! {}".format(e.message))

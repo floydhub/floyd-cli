@@ -3,7 +3,6 @@ import os
 import sys
 from tabulate import tabulate
 import tempfile
-from tusclient import client
 import webbrowser
 
 import floyd

@@ -103,7 +103,7 @@ def complete_upload(data_config):
 def abort_previous_upload(data_config):
     try:
         os.remove(data_config.tarball_path)
-    except OSError:
+    except (OSError, TypeError):
         pass
 
     data_config.set_tarball_path("")
