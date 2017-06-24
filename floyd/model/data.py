@@ -79,6 +79,7 @@ class DataRequestSchema(Schema):
     module_type = fields.Str()
     data_type = fields.Str()
     version = fields.Integer(allow_none=True)
+    family_id = fields.Str(allow_none=True)
 
     @post_load
     def make_data(self, data):
@@ -93,9 +94,11 @@ class DataRequest(BaseModel):
                  description,
                  module_type="data",
                  data_type="dir",
+                 family_id=None,
                  version=None):
         self.name = name
         self.description = description
         self.module_type = module_type
         self.data_type = data_type
+        self.family_id = family_id
         self.version = version

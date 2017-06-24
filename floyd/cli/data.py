@@ -5,7 +5,7 @@ import sys
 
 import floyd
 from floyd.client.data import DataClient
-from floyd.config import generate_uuid
+from floyd.client.dataset import DatasetClient
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.data_config import DataConfig, DataConfigManager
 from floyd.model.data import DataRequest
@@ -21,18 +21,24 @@ def data():
 
 
 @click.command()
-@click.argument('name', nargs=1)
-def init(name):
+@click.argument('dataset-name', nargs=1)
+def init(dataset_name):
     """
-    Initialize a new data upload.
+    Initialize a new dataset at the current dir.
     After init ensure that your data files are in this directory.
     Then you can upload them to Floyd. Example:
 
         floyd data upload
     """
-    data_config = DataConfig(name=name, family_id=generate_uuid())
+    dataset_obj = DatasetClient().get_dataset_matching_name(dataset_name)
+    if not dataset_obj:
+        floyd_logger.error("Dataset name does not match your list of datasets. "
+                           "Create your new dataset in the web dashboard")
+        return
+
+    data_config = DataConfig(name=dataset_name, family_id=dataset_obj.id)
     DataConfigManager.set_config(data_config)
-    floyd_logger.info("Data source \"{}\" initialized in current directory".format(name))
+    floyd_logger.info("Data source \"{}\" initialized in current directory".format(dataset_name))
     floyd_logger.info("""
     You can now upload your data to Floyd by:
         floyd data upload
@@ -55,6 +61,7 @@ def upload():
     data = DataRequest(name=data_name,
                        description=version,
                        data_type='gzip',
+                       family_id=data_config.family_id,
                        version=version)
     data_id = DataClient().create(data)
     floyd_logger.debug("Created data with id : {}".format(data_id))

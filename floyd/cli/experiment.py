@@ -28,7 +28,7 @@ def init(project):
     project_obj = ProjectClient().get_project_matching_name(project)
     if not project_obj:
         floyd_logger.error("Project name does not match your list of projects. "
-                           "Create your new project in the dashboard")
+                           "Create your new project in the web dashboard")
         return
 
     experiment_config = ExperimentConfig(name=project,
