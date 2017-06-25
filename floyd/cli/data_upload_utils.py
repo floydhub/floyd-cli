@@ -10,6 +10,8 @@ from floyd.client.tus_data import TusDataClient
 from floyd.log import logger as floyd_logger
 from floyd.manager.data_config import DataConfigManager
 from floyd.model.data import DataRequest
+
+
 def opt_to_resume(resume_flag):
     if resume_flag:
         return True
@@ -17,9 +19,11 @@ def opt_to_resume(resume_flag):
     msg = "An unfinished upload exists. Would you like to resume it?"
     return click.confirm(msg, abort=False, default=False)
 
+
 def upload_is_resumable(data_config):
     # TODO: Check to make sure server says the upload is resumable
     return os.path.isfile(data_config.tarball_path or "") and data_config.data_endpoint
+
 
 def initialize_new_upload(data_config, access_token):
     data_config.increment_version()
@@ -99,6 +103,7 @@ def complete_upload(data_config):
     table_output = [["DATA ID", "NAME", "VERSION"],
                     [data_id, "nm", data_config.version]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
+
 
 def abort_previous_upload(data_config):
     try:
