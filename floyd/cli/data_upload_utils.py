@@ -60,16 +60,21 @@ def initialize_new_upload(data_config, access_token):
 
     creds = DataClient().new_tus_credentials(data_id)
     if not creds:
+        # TODO: clean up
         sys.exit(1)
 
-    data_endpoint = TusDataClient().initialize_upload(tarball_path,
-                                                      metadata={"filename": data_id},
-                                                      auth=creds)
+    data_resource_id = creds[0]
+    data_endpoint = TusDataClient().initialize_upload(
+        tarball_path,
+        metadata={"filename": data_resource_id},
+        auth=creds)
     if not data_endpoint:
+        # TODO: clean up
         sys.exit(1)
 
     data_config.set_data_endpoint(data_endpoint)
     DataConfigManager.set_config(data_config)
+
 
 def complete_upload(data_config):
     data_endpoint = data_config.data_endpoint
