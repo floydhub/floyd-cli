@@ -85,9 +85,11 @@ def complete_upload(data_config):
     floyd_logger.debug("Getting fresh upload credentials")
     creds = DataClient().new_tus_credentials(data_id)
 
-    floyd_logger.info("Uploading compressed data. Total upload size: {}".format(sizeof_fmt(file_size)))
+    floyd_logger.info("Uploading compressed data. Total upload size: %s",
+                      sizeof_fmt(file_size))
 
-    TusDataClient().resume_upload(path, data_endpoint, auth=creds)
+    if not TusDataClient().resume_upload(path, data_endpoint, auth=creds):
+        return
 
     try:
         os.remove(path)
