@@ -15,17 +15,14 @@ class TusDataClient(FloydHttpClient):
     Client to interact with Data api
     """
     DEFAULT_CHUNK_SIZE = 4 * 1024 * 1024
-    TUS_SERVER_URL = floyd.tus_server_endpoint
     TUS_VERSION = '1.0.0'
 
-    def __init__(self, chunk_size=None, base_url=""):
+    def __init__(self, chunk_size=None, base_url=None):
         super(TusDataClient, self).__init__()
         self.chunk_size = chunk_size or self.DEFAULT_CHUNK_SIZE
-        self.base_url = base_url or self.TUS_SERVER_URL
+        self.base_url = base_url or floyd.tus_server_endpoint
 
-
-
-    def initialize_upload(self, file_path, base_url="", headers={}, metadata=None, auth=()):
+    def initialize_upload(self, file_path, base_url=None, headers=None, metadata=None, auth=None):
         base_url = base_url or self.base_url
         floyd_logger.info("Initializing upload...")
 
@@ -61,13 +58,12 @@ class TusDataClient(FloydHttpClient):
 
         return location
 
-
     def resume_upload(self,
                       file_path,
                       file_endpoint,
                       chunk_size=None,
-                      headers={},
-                      auth=(),
+                      headers=None,
+                      auth=None,
                       offset=None):
         chunk_size = chunk_size or self.chunk_size
 
@@ -105,8 +101,7 @@ class TusDataClient(FloydHttpClient):
             pb.show(offset)
         return True
 
-
-    def _get_offset(self, file_endpoint, headers={}, auth=()):
+    def _get_offset(self, file_endpoint, headers=None, auth=None):
         floyd_logger.debug("Getting offset")
 
         h = {"Tus-Resumable": self.TUS_VERSION}
@@ -121,8 +116,7 @@ class TusDataClient(FloydHttpClient):
         floyd_logger.debug("offset:{}".format(offset))
         return offset
 
-
-    def _upload_chunk(self, data, offset, file_endpoint, headers={}, auth=()):
+    def _upload_chunk(self, data, offset, file_endpoint, headers=None, auth=None):
         floyd_logger.debug("Uploading {} bytes chunk from offset: {}".format(len(data), offset))
 
         h = {
