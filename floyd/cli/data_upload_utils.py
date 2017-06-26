@@ -3,6 +3,7 @@ import os
 import sys
 from tabulate import tabulate
 import tempfile
+from shutil import rmtree
 
 from floyd.client.data import DataClient
 from floyd.client.files import create_tarfile, sizeof_fmt
@@ -48,7 +49,8 @@ def initialize_new_upload(data_config, access_token):
     temp_dir = tempfile.mkdtemp()
     tarball_path = os.path.join(temp_dir, "{}.data.tar.gz".format(data_id))
 
-    floyd_logger.debug("Creating tarfile with contents of current directory: {}".format(tarball_path))
+    floyd_logger.debug("Creating tarfile with contents of current directory: %s",
+                       tarball_path)
     floyd_logger.info("Compressing data...")
 
     create_tarfile(source_dir='.', filename=tarball_path)
@@ -60,7 +62,8 @@ def initialize_new_upload(data_config, access_token):
 
     creds = DataClient().new_tus_credentials(data_id)
     if not creds:
-        # TODO: clean up
+        floyd_logger.error("Failed to fetch upload credential from Floydhub!")
+        rmtree(temp_dir)
         sys.exit(1)
 
     data_resource_id = creds[0]
@@ -69,7 +72,8 @@ def initialize_new_upload(data_config, access_token):
         metadata={"filename": data_resource_id},
         auth=creds)
     if not data_endpoint:
-        # TODO: clean up
+        floyd_logger.error("Failed to get upload URL from Floydhub!")
+        rmtree(temp_dir)
         sys.exit(1)
 
     data_config.set_data_endpoint(data_endpoint)
@@ -79,8 +83,8 @@ def initialize_new_upload(data_config, access_token):
 def complete_upload(data_config):
     data_endpoint = data_config.data_endpoint
     data_id = data_config.data_predecessor
-    path = data_config.tarball_path
-    file_size = os.path.getsize(path)
+    tarball_path = data_config.tarball_path
+    file_size = os.path.getsize(tarball_path)
 
     floyd_logger.debug("Getting fresh upload credentials")
     creds = DataClient().new_tus_credentials(data_id)
@@ -88,16 +92,18 @@ def complete_upload(data_config):
     floyd_logger.info("Uploading compressed data. Total upload size: %s",
                       sizeof_fmt(file_size))
 
-    if not TusDataClient().resume_upload(path, data_endpoint, auth=creds):
+    tus_client = TusDataClient()
+    if not tus_client.resume_upload(tarball_path, data_endpoint, auth=creds):
         return
 
     try:
-        os.remove(path)
+        floyd_logger.info("Removing compressed data...")
+        rmtree(os.path.dirname(tarball_path))
     except (OSError, TypeError):
         pass
 
     data_id = data_config.data_predecessor
-    floyd_logger.debug("Created data with id : {}".format(data_id))
+    floyd_logger.debug("Created data with id : %s", data_id)
     floyd_logger.info("Upload finished")
 
     # Update data config

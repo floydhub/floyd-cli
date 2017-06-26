@@ -1,21 +1,18 @@
 import click
-import os
 import sys
 from tabulate import tabulate
-import tempfile
 import webbrowser
 
 import floyd
 from floyd.client.data import DataClient
 from floyd.config import generate_uuid
-from floyd.client.files import create_tarfile, sizeof_fmt
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.data_config import DataConfig, DataConfigManager
-from floyd.model.data import DataRequest
 from floyd.log import logger as floyd_logger
-from floyd.cli.data_upload_utils import (opt_to_resume, upload_is_resumable,
-                                         abort_previous_upload,
-                                         initialize_new_upload, complete_upload)
+from floyd.cli.data_upload_utils import (
+    opt_to_resume, upload_is_resumable, abort_previous_upload,
+    initialize_new_upload, complete_upload
+)
 
 
 @click.group()
@@ -46,13 +43,16 @@ def init(name):
 
 
 @click.command()
-@click.option('-r', '--resume', is_flag=True, default=False, help='Resume previous upload')
+@click.option('-r', '--resume',
+              is_flag=True, default=False, help='Resume previous upload')
 def upload(resume):
     """
     Upload data in the current dir to Floyd.
     """
     data_config = DataConfigManager.get_config()
 
+    # TODO: remove previous resumable upload temp directory if we start with a
+    # new one
     if not upload_is_resumable(data_config) or not opt_to_resume(resume):
         abort_previous_upload(data_config)
 
