@@ -15,7 +15,7 @@ def cli(verbose):
     floyd.floyd_host = "http://localhost:8080"
     floyd.floyd_web_host = "http://localhost:3000"
     floyd.floyd_proxy_host = "http://localhost:8000"
-    floyd.tus_server_endpoint = "http://localhost:8082"
+    floyd.tus_server_endpoint = "http://localhost:1080"
     configure_logger(verbose)
     check_cli_version()
 

@@ -94,6 +94,7 @@ def complete_upload(data_config):
 
     tus_client = TusDataClient()
     if not tus_client.resume_upload(tarball_path, data_endpoint, auth=creds):
+        floyd_logger.error("Failed to finish upload!")
         return
 
     try:

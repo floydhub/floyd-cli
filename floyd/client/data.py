@@ -45,10 +45,10 @@ class DataClient(FloydHttpClient):
                 "%s%s/upload_credentials" % (self.url, data_id))
             data_dict = response.json()
             return (data_dict["data_upload_id"], data_dict["token"])
-        except FloydException:
-            floyd_logger.exception(
-                "Error while fetching data upload credentials for %s!",
-                data_id)
+        except FloydException as e:
+            floyd_logger.error(
+                "Error while fetching data upload credentials for %s! %s",
+                data_id, e.message)
             return ()
 
     def get(self, id):
@@ -68,8 +68,8 @@ class DataClient(FloydHttpClient):
                                     params="module_type=data")
             data_dict = response.json()
             return [Data.from_dict(data) for data in data_dict]
-        except FloydException:
-            floyd_logger.exception("Error while retrieving data")
+        except FloydException as e:
+            floyd_logger.error("Error while retrieving data: %s", e.message)
             return []
 
     def delete(self, data_id):
@@ -77,6 +77,6 @@ class DataClient(FloydHttpClient):
             self.request("DELETE", "%s/%s" % (self.url, data_id), timeout=10)
             floyd_logger.info("Data %s: Deleted", data_id)
             return True
-        except FloydException:
-            floyd_logger.exception("Data %s: ERROR!", data_id)
+        except FloydException as e:
+            floyd_logger.error("Data %s: ERROR! %s", data_id, e.message)
             return False
