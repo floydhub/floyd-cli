@@ -47,7 +47,7 @@ class DataClient(FloydHttpClient):
             return (data_dict["data_upload_id"], data_dict["token"])
         except FloydException as e:
             floyd_logger.error(
-                "Error while fetching data upload credentials for %s! %s",
+                "Error while fetching data upload metadata for %s:\n\t%s",
                 data_id, e.message)
             return ()
 
