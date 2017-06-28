@@ -33,21 +33,9 @@ def initialize_new_upload(data_config, access_token):
                                   data_config.name,
                                   version)
 
-    # Create data object using API
-    data = DataRequest(name=data_name,
-                       description=version,
-                       data_type='gzip',
-                       version=version)
-    data_id = DataClient().create(data)
-    if not data_id:
-        sys.exit(1)
-
-    data_config.set_data_predecessor(data_id)
-    DataConfigManager.set_config(data_config)
-
     # Create tarball of the data using the ID returned from the API
     temp_dir = tempfile.mkdtemp()
-    tarball_path = os.path.join(temp_dir, "{}.data.tar.gz".format(data_id))
+    tarball_path = os.path.join(temp_dir, "floydhub_data.tar.gz")
 
     floyd_logger.debug("Creating tarfile with contents of current directory: %s",
                        tarball_path)
@@ -60,6 +48,20 @@ def initialize_new_upload(data_config, access_token):
     data_config.set_tarball_path(tarball_path)
     DataConfigManager.set_config(data_config)
 
+    # Create data object using API
+    data = DataRequest(name=data_name,
+                       description=version,
+                       data_type='gzip',
+                       version=version)
+    data_id = DataClient().create(data)
+    if not data_id:
+        rmtree(temp_dir)
+        sys.exit(1)
+
+    data_config.set_data_predecessor(data_id)
+    DataConfigManager.set_config(data_config)
+
+    # fetch auth token for upload server
     creds = DataClient().new_tus_credentials(data_id)
     if not creds:
         # TODO: delete module from server?
