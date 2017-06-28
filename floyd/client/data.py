@@ -35,7 +35,7 @@ class DataClient(FloydHttpClient):
             response = self.request("POST", self.url, json=post_body)
             return response.json().get("id")
         except FloydException as e:
-            floyd_logger.info("Data create: ERROR! {}".format(e.message))
+            floyd_logger.info("Data create: ERROR! %s", e.message)
             return None
 
     def new_tus_credentials(self, data_id):
@@ -53,12 +53,11 @@ class DataClient(FloydHttpClient):
 
     def get(self, id):
         try:
-            response = self.request("GET",
-                                    "{}{}".format(self.url, id))
+            response = self.request("GET", self.url + id)
             data_dict = response.json()
             return Data.from_dict(data_dict)
         except FloydException as e:
-            floyd_logger.info("Data {}: ERROR! {}".format(id, e.message))
+            floyd_logger.info("Data %s: ERROR! %s", id, e.message)
             return None
 
     def get_all(self):
@@ -74,7 +73,7 @@ class DataClient(FloydHttpClient):
 
     def delete(self, data_id):
         try:
-            self.request("DELETE", "%s/%s" % (self.url, data_id), timeout=10)
+            self.request("DELETE", self.url + data_id, timeout=10)
             floyd_logger.info("Data %s: Deleted", data_id)
             return True
         except FloydException as e:
