@@ -119,7 +119,7 @@ def complete_upload(data_config):
 
     # Print output
     table_output = [["DATA ID", "NAME", "VERSION"],
-                    [data_id, "nm", data_config.version]]
+                    [data_id, data_config.name, data_config.version]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
 
 
