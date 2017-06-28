@@ -51,13 +51,9 @@ def upload(resume):
     """
     data_config = DataConfigManager.get_config()
 
-    # TODO: remove previous resumable upload temp directory if we start with a
-    # new one
     if not upload_is_resumable(data_config) or not opt_to_resume(resume):
         abort_previous_upload(data_config)
-
         access_token = AuthConfigManager.get_access_token()
-
         initialize_new_upload(data_config, access_token)
 
     complete_upload(data_config)
