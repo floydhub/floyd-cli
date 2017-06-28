@@ -63,7 +63,6 @@ def initialize_new_upload(data_config, access_token):
     creds = DataClient().new_tus_credentials(data_id)
     if not creds:
         # TODO: delete module from server?
-        floyd_logger.error("Failed to fetch upload credential from Floydhub!")
         rmtree(temp_dir)
         sys.exit(1)
 
@@ -90,10 +89,11 @@ def complete_upload(data_config):
 
     floyd_logger.debug("Getting fresh upload credentials")
     creds = DataClient().new_tus_credentials(data_id)
+    if not creds:
+        sys.exit(1)
 
     floyd_logger.info("Uploading compressed data. Total upload size: %s",
                       sizeof_fmt(file_size))
-
     tus_client = TusDataClient()
     if not tus_client.resume_upload(tarball_path, data_endpoint, auth=creds):
         floyd_logger.error("Failed to finish upload!")
