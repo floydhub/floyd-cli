@@ -99,6 +99,7 @@ class TusDataClient(FloydHttpClient):
 
             # Complete the progress bar with one more call to show()
             pb.show(offset)
+            pb.done()
         return True
 
     def _get_offset(self, file_endpoint, headers=None, auth=None):

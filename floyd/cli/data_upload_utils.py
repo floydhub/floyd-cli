@@ -62,6 +62,7 @@ def initialize_new_upload(data_config, access_token):
 
     creds = DataClient().new_tus_credentials(data_id)
     if not creds:
+        # TODO: delete module from server?
         floyd_logger.error("Failed to fetch upload credential from Floydhub!")
         rmtree(temp_dir)
         sys.exit(1)
@@ -72,6 +73,7 @@ def initialize_new_upload(data_config, access_token):
         metadata={"filename": data_resource_id},
         auth=creds)
     if not data_endpoint:
+        # TODO: delete module from server?
         floyd_logger.error("Failed to get upload URL from Floydhub!")
         rmtree(temp_dir)
         sys.exit(1)
