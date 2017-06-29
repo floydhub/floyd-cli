@@ -40,7 +40,7 @@ def initialize_new_upload(data_config, access_token):
     floyd_logger.debug("Creating tarfile with contents of current directory: %s",
                        tarball_path)
     floyd_logger.info("Compressing data...")
-
+    # TODO: purge tarball on Ctrl-C
     create_tarfile(source_dir='.', filename=tarball_path)
 
     # If starting a new upload fails for some reason down the line, we don't
@@ -124,10 +124,8 @@ def complete_upload(data_config):
 
 
 def abort_previous_upload(data_config):
-    try:
+    if data_config.tarball_path and os.path.exists(data_config.tarball_path):
         rmtree(os.path.dirname(data_config.tarball_path))
-    except (OSError, TypeError):
-        pass
 
     data_config.set_tarball_path("")
     data_config.set_data_endpoint("")
