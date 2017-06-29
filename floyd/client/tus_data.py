@@ -22,7 +22,12 @@ class TusDataClient(FloydHttpClient):
         self.chunk_size = chunk_size or self.DEFAULT_CHUNK_SIZE
         self.base_url = base_url or floyd.tus_server_endpoint
 
-    def initialize_upload(self, file_path, base_url=None, headers=None, metadata=None, auth=None):
+    def initialize_upload(self,
+                          file_path,
+                          base_url=None,
+                          headers=None,
+                          metadata=None,
+                          auth=None):
         base_url = base_url or self.base_url
         floyd_logger.info("Initializing upload...")
 
@@ -48,12 +53,14 @@ class TusDataClient(FloydHttpClient):
             self.check_response_status(response)
 
             location = response.headers["Location"]
-            floyd_logger.debug("Data upload enpoint: {}".format(location))
+            floyd_logger.debug("Data upload enpoint: %s", location)
         except FloydException as e:
-            floyd_logger.info("Tus Data upload create: ERROR! {}".format(e.message))
+            floyd_logger.info("Data upload create: ERROR! %s", e.message)
             location = ""
         except requests.exceptions.ConnectionError as e:
-            floyd_logger.error("Cannot connect to the Floyd data upload server. Check your internet connection.")
+            floyd_logger.error(
+                "Cannot connect to the Floyd data upload server. "
+                "Check your internet connection.")
             location = ""
 
         return location
@@ -70,10 +77,14 @@ class TusDataClient(FloydHttpClient):
         try:
             offset = self._get_offset(file_endpoint, headers=headers, auth=auth)
         except FloydException as e:
-            floyd_logger.error("Failed to fetch offset data from Tus server! {}".format(e.message))
+            floyd_logger.error(
+                "Failed to fetch offset data from upload server! %s",
+                e.message)
             return False
         except requests.exceptions.ConnectionError as e:
-            floyd_logger.error("Cannot connect to the Floyd data upload server. Check your internet connection.")
+            floyd_logger.error(
+                "Cannot connect to the Floyd data upload server. "
+                "Check your internet connection.")
             return False
 
         total_sent = 0
@@ -89,9 +100,11 @@ class TusDataClient(FloydHttpClient):
                 try:
                     offset = self._upload_chunk(data, offset, file_endpoint, headers=headers, auth=auth)
                     total_sent += len(data)
-                    floyd_logger.debug("{} bytes sent".format(total_sent))
+                    floyd_logger.debug("%s bytes sent", total_sent)
                 except FloydException as e:
-                    floyd_logger.error("Failed to fetch offset data from Tus server! {}".format(e.message))
+                    floyd_logger.error(
+                        "Failed to fetch offset data from upload server! %s",
+                        e.message)
                     return False
                 except requests.exceptions.ConnectionError as e:
                     floyd_logger.error("Cannot connect to the Floyd data upload server. Check your internet connection.")
