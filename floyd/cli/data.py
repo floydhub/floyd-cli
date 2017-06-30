@@ -1,15 +1,18 @@
 import click
-import webbrowser
-from tabulate import tabulate
 import sys
+from tabulate import tabulate
+import webbrowser
 
 import floyd
 from floyd.client.data import DataClient
 from floyd.config import generate_uuid
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.data_config import DataConfig, DataConfigManager
-from floyd.model.data import DataRequest
 from floyd.log import logger as floyd_logger
+from floyd.cli.data_upload_utils import (
+    opt_to_resume, upload_is_resumable, abort_previous_upload,
+    initialize_new_upload, complete_upload
+)
 
 
 @click.group()
@@ -40,35 +43,20 @@ def init(name):
 
 
 @click.command()
-def upload():
+@click.option('-r', '--resume',
+              is_flag=True, default=False, help='Resume previous upload')
+def upload(resume):
     """
     Upload data in the current dir to Floyd.
     """
     data_config = DataConfigManager.get_config()
-    access_token = AuthConfigManager.get_access_token()
-    version = data_config.version
 
-    # Create data object
-    data_name = "{}/{}:{}".format(access_token.username,
-                                  data_config.name,
-                                  version)
-    data = DataRequest(name=data_name,
-                       description=version,
-                       data_type='gzip',
-                       version=version)
-    data_id = DataClient().create(data)
-    floyd_logger.debug("Created data with id : {}".format(data_id))
-    floyd_logger.info("Upload finished")
+    if not upload_is_resumable(data_config) or not opt_to_resume(resume):
+        abort_previous_upload(data_config)
+        access_token = AuthConfigManager.get_access_token()
+        initialize_new_upload(data_config, access_token)
 
-    # Update expt config including predecessor
-    data_config.increment_version()
-    data_config.set_data_predecessor(data_id)
-    DataConfigManager.set_config(data_config)
-
-    # Print output
-    table_output = [["DATA ID", "NAME", "VERSION"],
-                    [data_id, data_name, version]]
-    floyd_logger.info(tabulate(table_output, headers="firstrow"))
+    complete_upload(data_config)
 
 
 @click.command()
