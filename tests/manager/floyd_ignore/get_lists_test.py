@@ -19,6 +19,16 @@ class TestFloydIgnoreManagerGetLists(unittest.TestCase):
 
     @patch('floyd.manager.floyd_ignore.os.path.isfile', return_value=True)
     @patch('floyd.manager.floyd_ignore.open', new_callable=mock_open)
+    def test_trims_slash_prefix_from_abs_paths(self, mopen, _):
+        # Manually mock the iterator that imitates the lines read from the file
+        file_data = ['/hello', '!/world']
+        mopen.return_value.__iter__.return_value = file_data
+
+        result = FloydIgnoreManager.get_lists()
+        self.assertEqual(result, (['hello'], ['world']))
+
+    @patch('floyd.manager.floyd_ignore.os.path.isfile', return_value=True)
+    @patch('floyd.manager.floyd_ignore.open', new_callable=mock_open)
     def test_properly_interprets_whitelisted_globs(self, mopen, _):
         # Manually mock the iterator that imitates the lines read from the file
         file_data = ['', '# comment', '*.py', '!hello.py']
