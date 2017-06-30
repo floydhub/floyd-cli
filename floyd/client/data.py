@@ -1,19 +1,9 @@
-import json
-import os
-
 from clint.textui.progress import Bar as ProgressBar
-from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
 from floyd.exceptions import FloydException
 from floyd.client.base import FloydHttpClient
-from floyd.client.files import create_tarfile, sizeof_fmt
 from floyd.model.data import Data
 from floyd.log import logger as floyd_logger
-
-try:
-    from tempfile import TemporaryDirectory
-except ImportError:
-    from backports.tempfile import TemporaryDirectory
 
 
 def create_progress_callback(encoder):
@@ -35,53 +25,39 @@ class DataClient(FloydHttpClient):
 
     def create(self, data):
         """
-        Create a temporary directory for the tar file that will be removed at the
-        end of the operation.
+        Create a temporary directory for the tar file that will be removed at
+        the end of the operation.
         """
-        with TemporaryDirectory() as temp_directory:
-            floyd_logger.info("Compressing data ...")
-            compressed_file_path = os.path.join(temp_directory, "data.tar.gz")
-
-            # Create tarfile
-            floyd_logger.debug("Creating tarfile with contents of current directory: {}".format(compressed_file_path))
-            create_tarfile(source_dir='.', filename=compressed_file_path)
-
-            total_file_size = os.path.getsize(compressed_file_path)
-            floyd_logger.info("Creating data source. Total upload size: {}".format(sizeof_fmt(total_file_size)))
-            floyd_logger.info("Uploading compressed data ...")
-
-            # Add request data
-            request_data = []
-
-            with open(compressed_file_path, 'rb') as compressed_file:
-                request_data.append(("data", ('data.tar', compressed_file, 'text/plain')))
-                request_data.append(("json", json.dumps(data.to_dict())))
-
-                multipart_encoder = MultipartEncoder(
-                    fields=request_data
-                )
-
-                # Attach progress bar
-                progress_callback = create_progress_callback(multipart_encoder)
-                multipart_encoder_monitor = MultipartEncoderMonitor(multipart_encoder, progress_callback)
-
-                response = self.request("POST",
-                                        self.url,
-                                        data=multipart_encoder_monitor,
-                                        headers={"Content-Type": multipart_encoder.content_type},
-                                        timeout=3600)
-
-            floyd_logger.info("Done")
+        try:
+            floyd_logger.info("Making create request to server...")
+            post_body = data.to_dict()
+            post_body["resumable"] = True
+            response = self.request("POST", self.url, json=post_body)
             return response.json().get("id")
+        except FloydException as e:
+            floyd_logger.info("Data create: ERROR! %s", e.message)
+            return None
+
+    def new_tus_credentials(self, data_id):
+        try:
+            response = self.request(
+                "POST",
+                "%s%s/upload_credentials" % (self.url, data_id))
+            data_dict = response.json()
+            return (data_dict["data_upload_id"], data_dict["token"])
+        except FloydException as e:
+            floyd_logger.error(
+                "Error while fetching data upload metadata for %s:\n\t%s",
+                data_id, e.message)
+            return ()
 
     def get(self, id):
         try:
-            response = self.request("GET",
-                                    "{}{}".format(self.url, id))
+            response = self.request("GET", self.url + id)
             data_dict = response.json()
             return Data.from_dict(data_dict)
         except FloydException as e:
-            floyd_logger.info("Data {}: ERROR! {}".format(id, e.message))
+            floyd_logger.info("Data %s: ERROR! %s", id, e.message)
             return None
 
     def get_all(self):
@@ -92,15 +68,14 @@ class DataClient(FloydHttpClient):
             data_dict = response.json()
             return [Data.from_dict(data) for data in data_dict]
         except FloydException as e:
-            floyd_logger.info("Error while retrieving data: {}".format(e.message))
+            floyd_logger.error("Error while retrieving data: %s", e.message)
             return []
 
-    def delete(self, id):
+    def delete(self, data_id):
         try:
-            self.request("DELETE",
-                         "{}{}".format(self.url, id, timeout=10))
-            floyd_logger.info("Data {}: Deleted".format(id))
+            self.request("DELETE", self.url + data_id, timeout=10)
+            floyd_logger.info("Data %s: Deleted", data_id)
             return True
         except FloydException as e:
-            floyd_logger.info("Data {}: ERROR! {}".format(id, e.message))
+            floyd_logger.error("Data %s: ERROR! %s", data_id, e.message)
             return False

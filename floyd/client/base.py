@@ -26,6 +26,7 @@ class FloydHttpClient(object):
                 params=None,
                 data=None,
                 files=None,
+                json=None,
                 timeout=5,
                 headers=None):
         """
@@ -47,6 +48,7 @@ class FloydHttpClient(object):
                                         request_url,
                                         params=params,
                                         data=data,
+                                        json=json,
                                         headers=request_headers,
                                         files=files,
                                         timeout=timeout)
