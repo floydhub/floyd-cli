@@ -55,6 +55,11 @@ class DataClient(FloydHttpClient):
         try:
             response = self.request("GET", self.url + id)
             data_dict = response.json()
+            if data_dict['module_type'] != 'DataModule':
+                floyd_logger.error(
+                    "Data %s: ERROR! Resource given is not a data.", id)
+                return None
+
             return Data.from_dict(data_dict)
         except FloydException as e:
             floyd_logger.info("Data %s: ERROR! %s", id, e.message)
