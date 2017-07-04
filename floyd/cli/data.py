@@ -81,11 +81,11 @@ def print_data(data_sources):
     if not data_sources:
         return
 
-    headers = ["DATA ID", "CREATED", "DISK USAGE", "NAME", "VERSION"]
+    headers = ["DATA ID", "CREATED", "STATUS", "DISK USAGE", "NAME", "VERSION"]
     data_list = []
     for data_source in data_sources:
         data_list.append([data_source.id, data_source.created_pretty,
-                          data_source.size, data_source.name,
+                          data_source.state, data_source.size, data_source.name,
                           data_source.version])
     floyd_logger.info(tabulate(data_list, headers=headers))
 
