@@ -45,6 +45,10 @@ def upload_is_resumable(data_config):
 
 def initialize_new_upload(data_config, access_token):
     data_config.increment_version()
+    data_config.set_tarball_path(None)
+    data_config.set_data_endpoint(None)
+    data_config.set_resource_id(None)
+
     version = data_config.version
     data_name = "{}/{}:{}".format(access_token.username,
                                   data_config.name,
