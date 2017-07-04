@@ -75,9 +75,8 @@ class FloydHttpClient(object):
                 message = None
             floyd_logger.debug("Error received : status_code: {}, message: {}".format(response.status_code,
                                                                                       message or response.content))
-
             if response.status_code == 400:
-                raise BadRequestException()
+                raise BadRequestException(response)
             elif response.status_code == 401:
                 raise AuthenticationException()
             elif response.status_code == 403:
