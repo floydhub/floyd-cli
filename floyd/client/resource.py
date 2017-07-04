@@ -11,7 +11,7 @@ class ResourceClient(FloydHttpClient):
     """
     URL_PREFIX = '/resources/'
     WAIT_INTERVAL = 10  # in seconds
-    MAX_WAIT_RETRY = 60
+    MAX_WAIT_RETRY = 180  # wait up to 30min
 
     def __init__(self):
         super(ResourceClient, self).__init__()
