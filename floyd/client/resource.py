@@ -1,7 +1,7 @@
 from time import sleep
 from floyd.model.resource import Resource
 from floyd.log import logger as floyd_logger
-from floyd.exceptions import FloydException
+from floyd.exceptions import FloydException, WaitTimeoutException
 from floyd.client.base import FloydHttpClient
 
 
@@ -38,4 +38,6 @@ class ResourceClient(FloydHttpClient):
             retry_count += 1
             yield retry_count
             sleep(self.WAIT_INTERVAL)
+        if retry_count >= self.MAX_WAIT_RETRY:
+            raise WaitTimeoutException()
         yield retry_count

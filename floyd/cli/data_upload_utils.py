@@ -4,8 +4,9 @@ import sys
 from tabulate import tabulate
 import tempfile
 from shutil import rmtree
-from clint.textui.progress import dots
+from clint.textui.progress import dots, STREAM as clint_STREAM
 
+from floyd.exceptions import WaitTimeoutException
 from floyd.client.data import DataClient
 from floyd.client.resource import ResourceClient
 from floyd.client.files import create_tarfile, sizeof_fmt
@@ -143,11 +144,18 @@ def complete_upload(data_config):
 
     # data tarball uploaded, check for server untar
     if data_config.resource_id:
-        for i in dots(ResourceWaitIter(data_config.resource_id),
-                      label='Waiting for server to unpack uploaded data...'):
-            pass
-        data_config.set_resource_id(None)
-        DataConfigManager.set_config(data_config)
+        try:
+            for i in dots(ResourceWaitIter(data_config.resource_id),
+                        label='Waiting for server to unpack uploaded data...'):
+                pass
+        except WaitTimeoutException:
+            clint_STREAM.write('\n')
+            clint_STREAM.flush()
+            floyd_logger.error("Data unpack wait timeout!")
+            sys.exit(1)
+        else:
+            data_config.set_resource_id(None)
+            DataConfigManager.set_config(data_config)
 
     # Print output
     table_output = [["DATA ID", "NAME", "VERSION"],
