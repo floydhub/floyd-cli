@@ -5,7 +5,7 @@ import pkg_resources
 import floyd
 from floyd.cli.auth import login, logout
 from floyd.cli.data import data
-from floyd.cli.experiment import delete, info, init, logs, output, status, stop
+from floyd.cli.experiment import clone, delete, info, init, logs, output, status, stop
 from floyd.cli.run import run
 from floyd.cli.version import upgrade, version
 from floyd.client.version import VersionClient
@@ -46,6 +46,7 @@ New version of CLI ({}) is now available. To upgrade run:
 
 
 def add_commands(cli):
+    cli.add_command(clone)
     cli.add_command(data)
     cli.add_command(delete)
     cli.add_command(info)

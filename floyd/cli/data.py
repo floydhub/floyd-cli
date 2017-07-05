@@ -109,6 +109,24 @@ def print_data(data_sources):
 
 
 @click.command()
+@click.argument('id', nargs=1)
+def clone(id):
+    """
+    Download the code for the experiment to the current path
+    """
+    data_source = DataClient().get(id)
+
+    if not data_source:
+        sys.exit()
+
+    data_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
+                                                                          data_source.resource_id)
+    DataClient().download_tar(url=data_url,
+                              untar=True,
+                              delete_after_untar=True)
+
+
+@click.command()
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for viewing data')
 @click.argument('id', nargs=1)
 def output(id, url):
@@ -158,6 +176,7 @@ def delete(ids, yes):
     if failures:
         sys.exit(1)
 
+data.add_command(clone)
 data.add_command(delete)
 data.add_command(init)
 data.add_command(upload)

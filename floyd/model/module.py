@@ -16,6 +16,7 @@ class ModuleSchema(Schema):
     version = fields.Float(allow_none=True)
     outputs = fields.List(fields.Dict)
     inputs = fields.List(fields.Dict)
+    resource_id = fields.Str()
 
     @post_load
     def make_module(self, data):
@@ -38,7 +39,8 @@ class Module(BaseModel):
                  family_id=None,
                  version=None,
                  outputs=default_outputs,
-                 inputs=default_inputs):
+                 inputs=default_inputs,
+                 resource_id=None,):
         self.name = name
         self.description = description
         self.command = command
@@ -50,3 +52,4 @@ class Module(BaseModel):
         self.version = version
         self.outputs = outputs
         self.inputs = inputs
+        self.resource_id = resource_id

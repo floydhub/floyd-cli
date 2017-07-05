@@ -8,6 +8,7 @@ import floyd
 from floyd.cli.utils import get_module_task_instance_id
 from floyd.client.common import get_url_contents
 from floyd.client.experiment import ExperimentClient
+from floyd.client.module import ModuleClient
 from floyd.client.project import ProjectClient
 from floyd.client.task_instance import TaskInstanceClient
 from floyd.manager.experiment_config import ExperimentConfigManager
@@ -64,6 +65,25 @@ def print_experiments(experiments):
                           experiment.duration_rounded, experiment.name,
                           experiment.instance_type_trimmed, experiment.description])
     floyd_logger.info(tabulate(expt_list, headers=headers))
+
+
+@click.command()
+@click.argument('id', nargs=1)
+def clone(id):
+    """
+    Download the code for the experiment to the current path
+    """
+    experiment = ExperimentClient().get(id)
+    task_instance_id = get_module_task_instance_id(experiment.task_instances)
+    task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
+    if not task_instance:
+        sys.exit("Cannot clone this version of the experiment. Try a different version.")
+    module = ModuleClient().get(task_instance.module_id) if task_instance else None
+    code_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
+                                                                          module.resource_id)
+    ExperimentClient().download_tar(url=code_url,
+                                    untar=True,
+                                    delete_after_untar=True)
 
 
 @click.command()
@@ -126,8 +146,10 @@ def logs(id, url, tail, sleep_duration=1):
 
 @click.command()
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
+@click.option('-d', '--download', is_flag=True, default=False,
+              help='Download the contents of the output to current directory')
 @click.argument('id', nargs=1)
-def output(id, url):
+def output(id, url, download):
     """
     Shows the output url of the run.
     By default opens the output page in your default browser.
@@ -140,8 +162,14 @@ def output(id, url):
         if url:
             floyd_logger.info(output_dir_url)
         else:
-            floyd_logger.info("Opening output directory in your browser ...")
-            webbrowser.open(output_dir_url)
+            if download:
+                output_dir_url = "{}&download=true".format(output_dir_url)
+                ExperimentClient().download_tar(url=output_dir_url,
+                                                untar=True,
+                                                delete_after_untar=True)
+            else:
+                floyd_logger.info("Opening output directory in your browser ...")
+                webbrowser.open(output_dir_url)
     else:
         floyd_logger.error("Output directory not available")
 
