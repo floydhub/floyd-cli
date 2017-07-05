@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from floyd.constants import DEFAULT_DOCKER_IMAGE
+from floyd.constants import DEFAULT_DOCKER_IMAGE, DEFAULT_ENV, DEFAULT_ARCH
 from floyd.model.base import BaseModel
 
 
@@ -11,11 +11,14 @@ class ModuleSchema(Schema):
     mode = fields.Str(allow_none=True)
     enable_tensorboard = fields.Boolean()
     module_type = fields.Str()
-    default_container = fields.Str()
+    # TODO: remove default_container once we fully migrated to env mapping
+    default_container = fields.Str(allow_none=True)
     family_id = fields.Str(allow_none=True)
     version = fields.Float(allow_none=True)
     outputs = fields.List(fields.Dict)
     inputs = fields.List(fields.Dict)
+    env = fields.Str()
+    arch = fields.Str()
 
     @post_load
     def make_module(self, data):
@@ -38,7 +41,9 @@ class Module(BaseModel):
                  family_id=None,
                  version=None,
                  outputs=default_outputs,
-                 inputs=default_inputs):
+                 inputs=default_inputs,
+                 env=DEFAULT_ENV,
+                 arch=DEFAULT_ARCH):
         self.name = name
         self.description = description
         self.command = command
@@ -50,3 +55,5 @@ class Module(BaseModel):
         self.version = version
         self.outputs = outputs
         self.inputs = inputs
+        self.env = env
+        self.arch = arch

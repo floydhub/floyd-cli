@@ -26,6 +26,7 @@ class FloydHttpClient(object):
                 params=None,
                 data=None,
                 files=None,
+                json=None,
                 timeout=5,
                 headers=None):
         """
@@ -47,6 +48,7 @@ class FloydHttpClient(object):
                                         request_url,
                                         params=params,
                                         data=data,
+                                        json=json,
                                         headers=request_headers,
                                         files=files,
                                         timeout=timeout)
@@ -73,9 +75,8 @@ class FloydHttpClient(object):
                 message = None
             floyd_logger.debug("Error received : status_code: {}, message: {}".format(response.status_code,
                                                                                       message or response.content))
-
             if response.status_code == 400:
-                raise BadRequestException()
+                raise BadRequestException(response)
             elif response.status_code == 401:
                 raise AuthenticationException()
             elif response.status_code == 403:

@@ -13,6 +13,7 @@ def cli(verbose):
     More help is available under each command listed below.
     """
     floyd.floyd_host = floyd.floyd_web_host = "https://dev.floydhub.com"
+    floyd.tus_server_endpoint = "https://dev.floydhub.com/api/v1/upload/"
     configure_logger(verbose)
     check_cli_version()
 
