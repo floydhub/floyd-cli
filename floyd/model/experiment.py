@@ -13,7 +13,6 @@ class ExperimentSchema(Schema):
     created = fields.DateTime()
     state = fields.Str(allow_none=True)
     duration = fields.Number(allow_none=True)
-    version = fields.Integer()
     log_id = fields.Str(load_from="logId")
     canvas = fields.Dict(load_only=True)
     task_instances = fields.List(fields.Str(), dump_only=True)
@@ -90,7 +89,6 @@ class ExperimentRequestSchema(Schema):
     module_id = fields.Str()
     data_ids = fields.List(fields.Str)
     family_id = fields.Str(allow_none=True)
-    version = fields.Integer(allow_none=True)
     predecessor = fields.Str(allow_none=True)
     instance_type = fields.Str(allow_none=True)
 
@@ -109,12 +107,10 @@ class ExperimentRequest(BaseModel):
                  data_ids=[],
                  predecessor=None,
                  family_id=None,
-                 version=None,
                  instance_type=None):
         self.name = name
         self.description = description
         self.module_id = module_id
         self.data_ids = data_ids
         self.family_id = family_id
-        self.version = version
         self.instance_type = instance_type

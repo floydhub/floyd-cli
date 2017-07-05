@@ -96,7 +96,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
         return
 
     module = Module(name=experiment_name,
-                    description=message if message else version,
+                    description=message or '',
                     command=command_str,
                     mode=get_mode_parameter(mode),
                     enable_tensorboard=tensorboard,
@@ -110,24 +110,23 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
 
     # Create experiment request
     experiment_request = ExperimentRequest(name=experiment_name,
-                                           description=message if message else version,
+                                           description=message,
                                            module_id=module_id,
                                            data_ids=data_ids,
                                            predecessor=experiment_config.experiment_predecessor,
                                            family_id=experiment_config.family_id,
-                                           version=version,
                                            instance_type=instance_type)
-    experiment_id = ExperimentClient().create(experiment_request)
-    floyd_logger.debug("Created experiment : {}".format(experiment_id))
+    expt_info = ExperimentClient().create(experiment_request)
+    floyd_logger.debug("Created experiment : {}".format(expt_info['id']))
 
     # Update expt config including predecessor
     experiment_config.increment_version()
     experiment_config.set_module_predecessor(module_id)
-    experiment_config.set_experiment_predecessor(experiment_id)
+    experiment_config.set_experiment_predecessor(expt_info['id'])
     ExperimentConfigManager.set_config(experiment_config)
 
-    table_output = [["RUN ID", "NAME", "VERSION"],
-                    [experiment_id, experiment_name, version]]
+    table_output = [["RUN ID", "NAME"],
+                    [expt_info['id'], expt_info['name']]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
     floyd_logger.info("")
 
@@ -135,14 +134,14 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
         while True:
             # Wait for the experiment / task instances to become available
             try:
-                experiment = ExperimentClient().get(experiment_id)
+                experiment = ExperimentClient().get(expt_info['id'])
                 if experiment.task_instances:
                     break
             except Exception:
-                floyd_logger.debug("Experiment not available yet: {}".format(experiment_id))
+                floyd_logger.debug("Experiment not available yet: {}".format(expt_info['id']))
 
-            floyd_logger.debug("Experiment not available yet: {}".format(experiment_id))
-            sleep(1)
+            floyd_logger.debug("Experiment not available yet: {}".format(expt_info['id']))
+            sleep(3)
             continue
 
         # Print the path to jupyter notebook
@@ -165,4 +164,4 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
     floyd_logger.info("""
 To view logs enter:
     floyd logs {}
-        """.format(experiment_id))
+        """.format(expt_info['id']))

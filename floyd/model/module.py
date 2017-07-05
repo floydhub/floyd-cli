@@ -14,7 +14,6 @@ class ModuleSchema(Schema):
     # TODO: remove default_container once we fully migrated to env mapping
     default_container = fields.Str(allow_none=True)
     family_id = fields.Str(allow_none=True)
-    version = fields.Float(allow_none=True)
     outputs = fields.List(fields.Dict)
     inputs = fields.List(fields.Dict)
     env = fields.Str()
@@ -39,7 +38,6 @@ class Module(BaseModel):
                  module_type="code",
                  default_container=DEFAULT_DOCKER_IMAGE,
                  family_id=None,
-                 version=None,
                  outputs=default_outputs,
                  inputs=default_inputs,
                  env=DEFAULT_ENV,
@@ -52,7 +50,6 @@ class Module(BaseModel):
         self.module_type = module_type
         self.default_container = default_container
         self.family_id = family_id
-        self.version = version
         self.outputs = outputs
         self.inputs = inputs
         self.env = env
