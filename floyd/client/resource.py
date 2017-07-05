@@ -30,9 +30,10 @@ class ResourceClient(FloydHttpClient):
         ready = False
         retry_count = 0
         while retry_count < self.MAX_WAIT_RETRY:
-            response = self.request('GET', self.URL_PREFIX + resource_id)
-            resource_dict = response.json()
-            ready = resource_dict['state'] == 'valid'
+            response = self.request(
+                'GET', '%s%s/state' % (self.URL_PREFIX, resource_id))
+            new_state = response.json()
+            ready = new_state == 'valid'
             if ready:
                 break
             retry_count += 1

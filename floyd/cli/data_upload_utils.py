@@ -155,7 +155,10 @@ def complete_upload(data_config):
         except WaitTimeoutException:
             clint_STREAM.write('\n')
             clint_STREAM.flush()
-            floyd_logger.error("Data unpack wait timeout!")
+            floyd_logger.info(
+                "Looks like it is going to take some extra for Floydhub to unpack "
+                "your data. Please check back later with the following command:"
+                "\n\tfloyd data upload -r")
             sys.exit(1)
         else:
             data_config.set_resource_id(None)
