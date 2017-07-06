@@ -41,7 +41,8 @@ class Experiment(BaseModel):
                  instance_type=None,
                  service_url=None,
                  tensorboard_url=None,
-                 output_id=None):
+                 output_id=None,
+                 **kwargs):
         self.id = id
         self.name = name
         self.description = description

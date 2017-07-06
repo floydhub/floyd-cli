@@ -18,6 +18,7 @@ class ModuleSchema(Schema):
     inputs = fields.List(fields.Dict)
     env = fields.Str()
     arch = fields.Str()
+    resource_id = fields.Str()
 
     @post_load
     def make_module(self, data):
@@ -41,7 +42,8 @@ class Module(BaseModel):
                  outputs=default_outputs,
                  inputs=default_inputs,
                  env=DEFAULT_ENV,
-                 arch=DEFAULT_ARCH):
+                 arch=DEFAULT_ARCH,
+                 resource_id=None,):
         self.name = name
         self.description = description
         self.command = command
@@ -54,3 +56,4 @@ class Module(BaseModel):
         self.inputs = inputs
         self.env = env
         self.arch = arch
+        self.resource_id = resource_id

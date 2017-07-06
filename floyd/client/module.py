@@ -8,6 +8,7 @@ from floyd.client.base import FloydHttpClient
 from floyd.client.files import get_files_in_current_directory
 from floyd.exceptions import FloydException
 from floyd.log import logger as floyd_logger
+from floyd.model.module import Module
 
 
 def create_progress_callback(encoder):
@@ -69,3 +70,9 @@ class ModuleClient(FloydHttpClient):
         except FloydException as e:
             floyd_logger.info("Module {}: ERROR! {}".format(id, e.message))
             return False
+
+    def get(self, id):
+        response = self.request("GET",
+                                "{}{}".format(self.url, id))
+        module_dict = response.json()
+        return Module.from_dict(module_dict)
