@@ -58,7 +58,7 @@ def print_experiments(experiments):
     """
     Prints expt details in a table. Includes urls and mode parameters
     """
-    headers = ["RUN ID", "CREATED", "STATUS", "DURATION(s)", "NAME", "INSTANCE", "VERSION"]
+    headers = ["RUN ID", "CREATED", "STATUS", "DURATION(s)", "NAME", "INSTANCE", "DESCRIPTION"]
     expt_list = []
     for experiment in experiments:
         expt_list.append([experiment.id, experiment.created_pretty, experiment.state,

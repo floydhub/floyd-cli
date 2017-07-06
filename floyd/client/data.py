@@ -33,7 +33,7 @@ class DataClient(FloydHttpClient):
             post_body = data.to_dict()
             post_body["resumable"] = True
             response = self.request("POST", self.url, json=post_body)
-            return response.json().get("id")
+            return response.json()
         except FloydException as e:
             floyd_logger.info("Data create: ERROR! %s", e.message)
             return None

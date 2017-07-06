@@ -10,9 +10,8 @@ from floyd.log import logger as floyd_logger
 class DataConfigSchema(Schema):
 
     name = fields.Str()
-    version = fields.Integer()
     family_id = fields.Str()
-    data_predecessor = fields.Str(allow_none=True)
+    data_id = fields.Str(allow_none=True)
     tarball_path = fields.Str(allow_none=True)
     data_endpoint = fields.Str(allow_none=True)
     resource_id = fields.Str(allow_none=True)
@@ -28,25 +27,22 @@ class DataConfig(BaseModel):
 
     def __init__(self,
                  name,
-                 version=0,
                  family_id=None,
-                 data_predecessor=None,
+                 data_id=None,
                  tarball_path=None,
                  data_endpoint=None,
-                 resource_id=None):
+                 resource_id=None,
+                 data_name=None):
         self.name = name
-        self.version = version
         self.family_id = family_id
-        self.data_predecessor = data_predecessor
+        self.data_id = data_id
         self.tarball_path = tarball_path
         self.data_endpoint = data_endpoint
         self.resource_id = resource_id
+        self.data_name = data_name
 
-    def increment_version(self):
-        self.version = self.version + 1
-
-    def set_data_predecessor(self, data_predecessor):
-        self.data_predecessor = data_predecessor
+    def set_data_id(self, data_id):
+        self.data_id = data_id
 
     def set_tarball_path(self, tarball_path):
         self.tarball_path = tarball_path
@@ -56,6 +52,9 @@ class DataConfig(BaseModel):
 
     def set_resource_id(self, resource_id):
         self.resource_id = resource_id
+
+    def set_data_name(self, data_name):
+        self.data_name = data_name
 
 
 class DataConfigManager(object):
