@@ -52,6 +52,9 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
                                         experiment_config.name,
                                         version)
 
+    # Get the actual command entered in the command line
+    full_command = get_command_line(gpu, env, message, data, mode, open, tensorboard, command)
+
     # Create module
     if len(data) > 5:
         floyd_logger.error(
@@ -111,6 +114,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
     # Create experiment request
     experiment_request = ExperimentRequest(name=experiment_name,
                                            description=message,
+                                           full_command=full_command,
                                            module_id=module_id,
                                            data_ids=data_ids,
                                            predecessor=experiment_config.experiment_predecessor,
@@ -165,3 +169,25 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
 To view logs enter:
     floyd logs {}
         """.format(expt_info['id']))
+
+
+def get_command_line(gpu, env, message, data, mode, open, tensorboard, command):
+    """
+    Return a string representing the full floyd command entered in the command line
+    """
+    floyd_command = "floyd run"
+    if not env == "keras":
+        floyd_command = floyd_command + " --env {}".format(env)
+    if message:
+        floyd_command = floyd_command + " --message \"{}\"".format(message)
+    if data:
+        for data_item in data:
+            floyd_command = floyd_command + " --data {}".format(data_item)
+    if not mode == "job":
+        floyd_command = floyd_command + " --mode {}".format(mode)
+    if not open:
+        floyd_command = floyd_command + " --no-open"
+    if tensorboard:
+        floyd_command = floyd_command + " --tensorboard"
+    floyd_command = floyd_command + " {}".format(' '.join(command))
+    return floyd_command
