@@ -4,11 +4,13 @@ from tabulate import tabulate
 from time import sleep
 import webbrowser
 
-from floyd.constants import DOCKER_IMAGES
-from floyd.cli.utils import (get_docker_image, get_mode_parameter, wait_for_url, get_data_name)
+from floyd.constants import DEFAULT_ENV
 from floyd.client.data import DataClient
+from floyd.cli.utils import (get_module_task_instance_id,
+                             get_mode_parameter, wait_for_url, get_data_name)
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
+from floyd.client.env import EnvClient
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.constants import CPU_INSTANCE_TYPE, GPU_INSTANCE_TYPE
@@ -29,8 +31,7 @@ from floyd.log import logger as floyd_logger
               default=True)
 @click.option('--env',
               help='Environment type to use',
-              default='keras',
-              type=click.Choice(sorted(DOCKER_IMAGES["cpu"].keys())))
+              default=DEFAULT_ENV)
 @click.option('--message', '-m',
               help='Experiment commit message')
 @click.option('--tensorboard/--no-tensorboard',
@@ -53,7 +54,8 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
 
     # Create module
     if len(data) > 5:
-        floyd_logger.error("Cannot attach more than 5 datasets to an experiment")
+        floyd_logger.error(
+            "Cannot attach more than 5 datasets to an experiment")
         return
 
     # Get the data entity from the server to:
@@ -74,39 +76,57 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
     module_inputs = [{'name': get_data_name(data_str, default_name),
                       'type': 'dir'} for data_str in data_ids]
 
+    if gpu:
+        arch = 'gpu'
+        instance_type = GPU_INSTANCE_TYPE
+    else:
+        arch = 'cpu'
+        instance_type = CPU_INSTANCE_TYPE
+
+    env_map = EnvClient().get_all()
+    envs = env_map.get(arch)
+    if envs:
+        if env not in envs:
+            floyd_logger.error(
+                "{} is not in the list of supported environments: {}".format(
+                    env, ', '.join(envs.keys())))
+            return
+    else:
+        floyd_logger.error("{} is not a supported architecture".format(arch))
+        return
+
     module = Module(name=experiment_name,
-                    description=message if message else version,
+                    description=message or '',
                     command=command_str,
                     mode=get_mode_parameter(mode),
                     enable_tensorboard=tensorboard,
                     family_id=experiment_config.family_id,
-                    default_container=get_docker_image(env, gpu),
                     version=version,
-                    inputs=module_inputs)
+                    inputs=module_inputs,
+                    env=env,
+                    arch=arch)
     module_id = ModuleClient().create(module)
     floyd_logger.debug("Created module with id : {}".format(module_id))
 
     # Create experiment request
-    instance_type = GPU_INSTANCE_TYPE if gpu else CPU_INSTANCE_TYPE
     experiment_request = ExperimentRequest(name=experiment_name,
-                                           description=message if message else version,
+                                           description=message,
                                            module_id=module_id,
                                            data_ids=data_ids,
                                            predecessor=experiment_config.experiment_predecessor,
                                            family_id=experiment_config.family_id,
-                                           version=version,
                                            instance_type=instance_type)
-    experiment_id = ExperimentClient().create(experiment_request)
-    floyd_logger.debug("Created experiment : {}".format(experiment_id))
+    expt_info = ExperimentClient().create(experiment_request)
+    floyd_logger.debug("Created experiment : {}".format(expt_info['id']))
 
     # Update expt config including predecessor
     experiment_config.increment_version()
     experiment_config.set_module_predecessor(module_id)
-    experiment_config.set_experiment_predecessor(experiment_id)
+    experiment_config.set_experiment_predecessor(expt_info['id'])
     ExperimentConfigManager.set_config(experiment_config)
 
-    table_output = [["RUN ID", "NAME", "VERSION"],
-                    [experiment_id, experiment_name, version]]
+    table_output = [["RUN ID", "NAME"],
+                    [expt_info['id'], expt_info['name']]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
     floyd_logger.info("")
 
@@ -114,14 +134,14 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
         while True:
             # Wait for the experiment / task instances to become available
             try:
-                experiment = ExperimentClient().get(experiment_id)
+                experiment = ExperimentClient().get(expt_info['id'])
                 if experiment.task_instances:
                     break
             except Exception:
-                floyd_logger.debug("Experiment not available yet: {}".format(experiment_id))
+                floyd_logger.debug("Experiment not available yet: {}".format(expt_info['id']))
 
-            floyd_logger.debug("Experiment not available yet: {}".format(experiment_id))
-            sleep(1)
+            floyd_logger.debug("Experiment not available yet: {}".format(expt_info['id']))
+            sleep(3)
             continue
 
         # Print the path to jupyter notebook
@@ -144,4 +164,4 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
     floyd_logger.info("""
 To view logs enter:
     floyd logs {}
-        """.format(experiment_id))
+        """.format(expt_info['id']))

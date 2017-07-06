@@ -27,7 +27,8 @@ class NotFoundException(FloydException):
 
 class BadRequestException(FloydException):
 
-    def __init__(self, message="One or more request parameters is incorrect."):
+    def __init__(self, response):
+        message = "One or more request parameters is incorrect, %s" % response.content
         super(BadRequestException, self).__init__(message=message)
 
 
@@ -53,3 +54,9 @@ class GatewayTimeoutException(FloydException):
 
     def __init__(self, message="FloydHub server took too long to respond."):
         super(GatewayTimeoutException, self).__init__(message=message)
+
+
+class WaitTimeoutException(FloydException):
+
+    def __init__(self, message="Timeout waiting for server state update."):
+        super(WaitTimeoutException, self).__init__(message=message)

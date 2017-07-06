@@ -17,7 +17,8 @@ def create_progress_callback(encoder):
 
     def callback(monitor):
         bar.show(monitor.bytes_read)
-    return callback
+
+    return callback, bar
 
 
 class ModuleClient(FloydHttpClient):
@@ -35,8 +36,10 @@ class ModuleClient(FloydHttpClient):
             sys.exit("Directory contains too many files to upload. Add unused files and directories to .floydignore file."
                      "Or upload data separately using floyd data command")
 
-        floyd_logger.info("Creating project run. Total upload size: {}".format(total_file_size))
-        floyd_logger.debug("Creating module. Uploading: {} files".format(len(upload_files)))
+        floyd_logger.info("Creating project run. Total upload size: %s",
+                          total_file_size)
+        floyd_logger.debug("Creating module. Uploading: %s files",
+                           len(upload_files))
         floyd_logger.info("Syncing code ...")
 
         # Add request data
@@ -46,7 +49,7 @@ class ModuleClient(FloydHttpClient):
         )
 
         # Attach progress bar
-        progress_callback = create_progress_callback(multipart_encoder)
+        progress_callback, bar = create_progress_callback(multipart_encoder)
         multipart_encoder_monitor = MultipartEncoderMonitor(multipart_encoder, progress_callback)
 
         response = self.request("POST",
@@ -55,6 +58,7 @@ class ModuleClient(FloydHttpClient):
                                 headers={"Content-Type": multipart_encoder.content_type},
                                 timeout=3600)
 
+        bar.done()
         floyd_logger.info("Done")
         return response.json().get("id")
 
