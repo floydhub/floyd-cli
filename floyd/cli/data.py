@@ -87,12 +87,11 @@ def print_data(data_sources):
     if not data_sources:
         return
 
-    headers = ["DATA ID", "CREATED", "STATUS", "DISK USAGE", "NAME", "VERSION"]
+    headers = ["DATA ID", "CREATED", "STATUS", "DISK USAGE", "NAME"]
     data_list = []
     for data_source in data_sources:
         data_list.append([data_source.id, data_source.created_pretty,
-                          data_source.state, data_source.size, data_source.name,
-                          data_source.version])
+                          data_source.state, data_source.size, data_source.name])
     floyd_logger.info(tabulate(data_list, headers=headers))
 
 
@@ -114,6 +113,7 @@ def clone(id):
                               delete_after_untar=True)
 
 
+@click.command()
 @click.option('-u', '--url', is_flag=True, default=False,
               help='Only print url for viewing data')
 @click.argument('id', nargs=1)

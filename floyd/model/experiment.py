@@ -91,7 +91,6 @@ class ExperimentRequestSchema(Schema):
     full_command = fields.Str()
     data_ids = fields.List(fields.Str)
     family_id = fields.Str(allow_none=True)
-    predecessor = fields.Str(allow_none=True)
     instance_type = fields.Str(allow_none=True)
 
     @post_load
@@ -108,7 +107,6 @@ class ExperimentRequest(BaseModel):
                  module_id,
                  full_command,
                  data_ids=[],
-                 predecessor=None,
                  family_id=None,
                  instance_type=None):
         self.name = name

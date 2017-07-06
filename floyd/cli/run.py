@@ -6,8 +6,7 @@ import webbrowser
 
 from floyd.constants import DEFAULT_ENV
 from floyd.client.data import DataClient
-from floyd.cli.utils import (get_module_task_instance_id,
-                             get_mode_parameter, wait_for_url, get_data_name)
+from floyd.cli.utils import get_mode_parameter, wait_for_url, get_data_name
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.client.env import EnvClient
@@ -47,10 +46,8 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
     command_str = ' '.join(command)
     experiment_config = ExperimentConfigManager.get_config()
     access_token = AuthConfigManager.get_access_token()
-    version = experiment_config.version
-    experiment_name = "{}/{}/{}".format(access_token.username,
-                                        experiment_config.name,
-                                        version)
+    experiment_name = "{}/{}".format(access_token.username,
+                                     experiment_config.name)
 
     # Get the actual command entered in the command line
     full_command = get_command_line(gpu, env, message, data, mode, open, tensorboard, command)
@@ -104,7 +101,6 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
                     mode=get_mode_parameter(mode),
                     enable_tensorboard=tensorboard,
                     family_id=experiment_config.family_id,
-                    version=version,
                     inputs=module_inputs,
                     env=env,
                     arch=arch)
@@ -117,17 +113,10 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
                                            full_command=full_command,
                                            module_id=module_id,
                                            data_ids=data_ids,
-                                           predecessor=experiment_config.experiment_predecessor,
                                            family_id=experiment_config.family_id,
                                            instance_type=instance_type)
     expt_info = ExperimentClient().create(experiment_request)
     floyd_logger.debug("Created experiment : {}".format(expt_info['id']))
-
-    # Update expt config including predecessor
-    experiment_config.increment_version()
-    experiment_config.set_module_predecessor(module_id)
-    experiment_config.set_experiment_predecessor(expt_info['id'])
-    ExperimentConfigManager.set_config(experiment_config)
 
     table_output = [["RUN ID", "NAME"],
                     [expt_info['id'], expt_info['name']]]
