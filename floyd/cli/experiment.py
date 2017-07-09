@@ -120,8 +120,14 @@ def logs(id, url, tail, sleep_duration=1):
         floyd_logger.info("Experiment is currently in a queue")
         return
 
-    task_instance = TaskInstanceClient().get(get_module_task_instance_id(experiment.task_instances))
-    log_url = "{}/api/v1/resources/{}?content=true".format(floyd.floyd_host, task_instance.log_id)
+    task_id = get_module_task_instance_id(experiment.task_instances)
+    task_instance = TaskInstanceClient().get(task_id)
+    if not task_instance:
+        floyd_logger.info("Experiment not started yet, no log to show.")
+        sys.exit(1)
+
+    log_url = "{}/api/v1/resources/{}?content=true".format(
+        floyd.floyd_host, task_instance.log_id)
     if url:
         floyd_logger.info(log_url)
         return
