@@ -4,13 +4,28 @@ import sys
 from tabulate import tabulate
 import tempfile
 from shutil import rmtree
+from clint.textui.progress import dots, STREAM as clint_STREAM
 
+from floyd.exceptions import WaitTimeoutException
 from floyd.client.data import DataClient
+from floyd.client.resource import ResourceClient
 from floyd.client.files import create_tarfile, sizeof_fmt
 from floyd.client.tus_data import TusDataClient
 from floyd.log import logger as floyd_logger
 from floyd.manager.data_config import DataConfigManager
 from floyd.model.data import DataRequest
+
+
+class ResourceWaitIter(object):
+    def __init__(self, resource_id):
+        self.resource_id = resource_id
+
+    def __iter__(self):
+        for c in ResourceClient().wait_for_ready(self.resource_id):
+            yield c
+
+    def __len__(self):
+        return ResourceClient.MAX_WAIT_RETRY
 
 
 def opt_to_resume(resume_flag):
@@ -23,11 +38,18 @@ def opt_to_resume(resume_flag):
 
 def upload_is_resumable(data_config):
     # TODO: Check to make sure server says the upload is resumable
-    return os.path.isfile(data_config.tarball_path or "") and data_config.data_endpoint
+    return ((data_config.resource_id or "")
+            or (os.path.isfile(data_config.tarball_path or "")
+                and data_config.data_endpoint))
 
 
 def initialize_new_upload(data_config, access_token):
+    # TODO: hit upload server to check for liveness before moving on
     data_config.increment_version()
+    data_config.set_tarball_path(None)
+    data_config.set_data_endpoint(None)
+    data_config.set_resource_id(None)
+
     version = data_config.version
     data_name = "{}/{}:{}".format(access_token.username,
                                   data_config.name,
@@ -87,35 +109,64 @@ def complete_upload(data_config):
     data_endpoint = data_config.data_endpoint
     data_id = data_config.data_predecessor
     tarball_path = data_config.tarball_path
-    file_size = os.path.getsize(tarball_path)
 
-    floyd_logger.debug("Getting fresh upload credentials")
-    creds = DataClient().new_tus_credentials(data_id)
-    if not creds:
+    if not data_id:
+        floyd_logger.error("Corrupted upload state, please start a new one.")
         sys.exit(1)
 
-    floyd_logger.info("Uploading compressed data. Total upload size: %s",
-                      sizeof_fmt(file_size))
-    tus_client = TusDataClient()
-    if not tus_client.resume_upload(tarball_path, data_endpoint, auth=creds):
-        floyd_logger.error("Failed to finish upload!")
-        return
+    # check for tarball upload
+    if not data_config.resource_id and (tarball_path and data_endpoint):
+        floyd_logger.debug("Getting fresh upload credentials")
+        creds = DataClient().new_tus_credentials(data_id)
+        if not creds:
+            sys.exit(1)
 
-    try:
-        floyd_logger.info("Removing compressed data...")
-        rmtree(os.path.dirname(tarball_path))
-    except (OSError, TypeError):
-        pass
+        file_size = os.path.getsize(tarball_path)
+        floyd_logger.info("Uploading compressed data. Total upload size: %s",
+                        sizeof_fmt(file_size))
+        tus_client = TusDataClient()
+        if not tus_client.resume_upload(tarball_path, data_endpoint, auth=creds):
+            floyd_logger.error("Failed to finish upload!")
+            return
 
-    data_id = data_config.data_predecessor
-    floyd_logger.debug("Created data with id : %s", data_id)
-    floyd_logger.info("Upload finished")
+        try:
+            floyd_logger.info("Removing compressed data...")
+            rmtree(os.path.dirname(tarball_path))
+        except (OSError, TypeError):
+            pass
 
-    # Update data config
-    data_config.set_data_predecessor(data_id)
-    data_config.set_tarball_path("")
-    data_config.set_data_endpoint("")
-    DataConfigManager.set_config(data_config)
+        data_id = data_config.data_predecessor
+        floyd_logger.debug("Created data with id : %s", data_id)
+        floyd_logger.info("Upload finished.")
+
+        # Update data config
+        data_config.set_data_predecessor(data_id)
+        data_config.set_tarball_path(None)
+        data_config.set_data_endpoint(None)
+        data_source = DataClient().get(data_id)
+        data_config.set_resource_id(data_source.resource_id)
+        DataConfigManager.set_config(data_config)
+
+    # data tarball uploaded, check for server untar
+    if data_config.resource_id:
+        try:
+            for i in dots(ResourceWaitIter(data_config.resource_id),
+                        label='Waiting for server to unpack uploaded data...'):
+                pass
+        except WaitTimeoutException:
+            clint_STREAM.write('\n')
+            clint_STREAM.flush()
+            floyd_logger.info(
+                "Looks like it is going to take some extra for Floydhub to unpack "
+                "your data. Please check back later with the following command:"
+                "\n\tfloyd data upload -r")
+            sys.exit(1)
+        else:
+            data_config.set_resource_id(None)
+            data_config.set_tarball_path(None)
+            data_config.set_data_endpoint(None)
+            data_config.set_resource_id(None)
+            DataConfigManager.set_config(data_config)
 
     # Print output
     table_output = [["DATA ID", "NAME", "VERSION"],

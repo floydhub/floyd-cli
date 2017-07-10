@@ -1,7 +1,6 @@
 import json
 import os
 from marshmallow import Schema, fields, post_load
-import tempfile
 
 from floyd.exceptions import FloydException
 from floyd.model.base import BaseModel
@@ -16,6 +15,7 @@ class DataConfigSchema(Schema):
     data_predecessor = fields.Str(allow_none=True)
     tarball_path = fields.Str(allow_none=True)
     data_endpoint = fields.Str(allow_none=True)
+    resource_id = fields.Str(allow_none=True)
 
     @post_load
     def make_access_token(self, data):
@@ -32,13 +32,15 @@ class DataConfig(BaseModel):
                  family_id=None,
                  data_predecessor=None,
                  tarball_path=None,
-                 data_endpoint=None):
+                 data_endpoint=None,
+                 resource_id=None):
         self.name = name
         self.version = version
         self.family_id = family_id
         self.data_predecessor = data_predecessor
         self.tarball_path = tarball_path
         self.data_endpoint = data_endpoint
+        self.resource_id = resource_id
 
     def increment_version(self):
         self.version = self.version + 1
@@ -51,6 +53,9 @@ class DataConfig(BaseModel):
 
     def set_data_endpoint(self, data_endpoint):
         self.data_endpoint = data_endpoint
+
+    def set_resource_id(self, resource_id):
+        self.resource_id = resource_id
 
 
 class DataConfigManager(object):
