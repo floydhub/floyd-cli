@@ -67,9 +67,9 @@ class DataClient(FloydHttpClient):
 
     def get_all(self):
         try:
-            response = self.request("GET",
-                                    self.url,
-                                    params="module_type=data")
+            response = self.request(
+                "GET", self.url, params={"module_typ": "data",
+                                         "restrict_to_owner": True})
             data_dict = response.json()
             return [Data.from_dict(data) for data in data_dict]
         except FloydException as e:
