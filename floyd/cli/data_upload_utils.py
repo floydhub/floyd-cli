@@ -44,6 +44,7 @@ def upload_is_resumable(data_config):
 
 
 def initialize_new_upload(data_config, access_token):
+    # TODO: hit upload server to check for liveness before moving on
     data_config.set_tarball_path(None)
     data_config.set_data_endpoint(None)
     data_config.set_resource_id(None)
@@ -158,6 +159,9 @@ def complete_upload(data_config):
                 "\n\tfloyd data upload -r")
             sys.exit(1)
         else:
+            data_config.set_resource_id(None)
+            data_config.set_tarball_path(None)
+            data_config.set_data_endpoint(None)
             data_config.set_resource_id(None)
             DataConfigManager.set_config(data_config)
 
