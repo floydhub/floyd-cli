@@ -165,7 +165,7 @@ def get_command_line(gpu, env, message, data, mode, open, tensorboard, command):
     Return a string representing the full floyd command entered in the command line
     """
     floyd_command = "floyd run"
-    if not env == "keras":
+    if not env == DEFAULT_ENV:
         floyd_command = floyd_command + " --env {}".format(env)
     if message:
         floyd_command = floyd_command + " --message \"{}\"".format(message)
