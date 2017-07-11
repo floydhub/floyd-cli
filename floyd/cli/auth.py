@@ -15,7 +15,7 @@ def login(token):
     Log into Floyd via Auth0.
     """
     if not token:
-        cli_info_url = "{}/welcome".format(floyd.floyd_web_host)
+        cli_info_url = "{}/settings/security".format(floyd.floyd_web_host)
         click.confirm('Authentication token page will now open in your browser. Continue?', abort=True, default=True)
 
         webbrowser.open(cli_info_url)
