@@ -5,7 +5,7 @@ import webbrowser
 
 import floyd
 from floyd.client.data import DataClient
-from floyd.config import generate_uuid
+from floyd.client.dataset import DatasetClient
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.data_config import DataConfig, DataConfigManager
 from floyd.log import logger as floyd_logger
@@ -24,18 +24,27 @@ def data():
 
 
 @click.command()
-@click.argument('name', nargs=1)
-def init(name):
+@click.argument('dataset-name', nargs=1)
+def init(dataset_name):
     """
-    Initialize a new data upload.
+    Initialize a new dataset at the current dir.
     After init ensure that your data files are in this directory.
     Then you can upload them to Floyd. Example:
 
         floyd data upload
     """
-    data_config = DataConfig(name=name, family_id=generate_uuid())
+    dataset_obj = DatasetClient().get_dataset_matching_name(dataset_name)
+    if not dataset_obj:
+        create_dataset_url = "{}/datasets/create".format(floyd.floyd_web_host)
+        floyd_logger.error(("Dataset name does not match your list of datasets. "
+                            "Create your new dataset in the web dashboard:\n\t%s"),
+                           create_dataset_url)
+        webbrowser.open(create_dataset_url)
+        return
+
+    data_config = DataConfig(name=dataset_name, family_id=dataset_obj.id)
     DataConfigManager.set_config(data_config)
-    floyd_logger.info("Data source \"{}\" initialized in current directory".format(name))
+    floyd_logger.info("Data source \"{}\" initialized in current directory".format(dataset_name))
     floyd_logger.info("""
     You can now upload your data to Floyd by:
         floyd data upload
@@ -63,7 +72,7 @@ def upload(resume):
 @click.argument('id', required=False, nargs=1)
 def status(id):
     """
-    Show the status of a run with id.
+    Show the status of a run with id. or a friendly name.
     It can also list status of all the runs in the project.
     """
     if id:
@@ -81,13 +90,30 @@ def print_data(data_sources):
     if not data_sources:
         return
 
-    headers = ["DATA ID", "CREATED", "STATUS", "DISK USAGE", "NAME", "VERSION"]
+    headers = ["DATA ID", "CREATED", "STATUS", "DISK USAGE", "NAME"]
     data_list = []
     for data_source in data_sources:
         data_list.append([data_source.id, data_source.created_pretty,
-                          data_source.state, data_source.size, data_source.name,
-                          data_source.version])
+                          data_source.state, data_source.size, data_source.name])
     floyd_logger.info(tabulate(data_list, headers=headers))
+
+
+@click.command()
+@click.argument('id', nargs=1)
+def clone(id):
+    """
+    Download the code for the experiment to the current path
+    """
+    data_source = DataClient().get(id)
+
+    if not data_source:
+        sys.exit()
+
+    data_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
+                                                                          data_source.resource_id)
+    DataClient().download_tar(url=data_url,
+                              untar=True,
+                              delete_after_untar=True)
 
 
 @click.command()
@@ -96,7 +122,7 @@ def print_data(data_sources):
 @click.argument('id', nargs=1)
 def output(id, url):
     """
-    Shows the output url of the run.
+    Shows the url of the dataset. You can use id or a friendly URI.
     By default opens the output page in your default browser.
     """
     data_source = DataClient().get(id)
@@ -141,6 +167,7 @@ def delete(ids, yes):
     if failures:
         sys.exit(1)
 
+data.add_command(clone)
 data.add_command(delete)
 data.add_command(init)
 data.add_command(upload)

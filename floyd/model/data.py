@@ -60,7 +60,7 @@ class Data(BaseModel):
         self.size = data.size
         self.state = data.state
         self.uri = data.uri
-        self.version = int(float(version))
+        self.version = int(float(version)) if version else None
         self.resource_id = resource_id
 
     def localize_date(self, date):
@@ -79,6 +79,7 @@ class DataRequestSchema(Schema):
     module_type = fields.Str()
     data_type = fields.Str()
     version = fields.Integer(allow_none=True)
+    family_id = fields.Str(allow_none=True)
 
     @post_load
     def make_data(self, data):
@@ -90,12 +91,14 @@ class DataRequest(BaseModel):
 
     def __init__(self,
                  name,
-                 description,
+                 description=None,
                  module_type="data",
                  data_type="dir",
+                 family_id=None,
                  version=None):
         self.name = name
         self.description = description
         self.module_type = module_type
         self.data_type = data_type
+        self.family_id = family_id
         self.version = version

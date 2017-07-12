@@ -21,7 +21,7 @@ class AuthorizationException(FloydException):
 
 class NotFoundException(FloydException):
 
-    def __init__(self, message="The resource you are looking for was not found. Check if the id is correct."):
+    def __init__(self, message="The resource you are looking for was not found. Check if the name or id is correct."):
         super(NotFoundException, self).__init__(message=message)
 
 

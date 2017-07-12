@@ -35,11 +35,10 @@ class ExperimentClient(FloydHttpClient):
         return True
 
     def create(self, experiment_request):
-        response = self.request("POST",
-                                "{}run_module/".format(self.url),
-                                data=json.dumps(experiment_request.to_dict()),
-                                timeout=3600)
-        return response.json().get("id")
+        return self.request("POST",
+                            "{}run_module/".format(self.url),
+                            data=json.dumps(experiment_request.to_dict()),
+                            timeout=3600).json()
 
     def delete(self, id):
         try:

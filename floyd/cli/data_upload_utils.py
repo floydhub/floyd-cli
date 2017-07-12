@@ -45,15 +45,11 @@ def upload_is_resumable(data_config):
 
 def initialize_new_upload(data_config, access_token):
     # TODO: hit upload server to check for liveness before moving on
-    data_config.increment_version()
     data_config.set_tarball_path(None)
     data_config.set_data_endpoint(None)
     data_config.set_resource_id(None)
 
-    version = data_config.version
-    data_name = "{}/{}:{}".format(access_token.username,
-                                  data_config.name,
-                                  version)
+    data_name = "{}/{}".format(access_token.username, data_config.name)
 
     # Create tarball of the data using the ID returned from the API
     temp_dir = tempfile.mkdtemp()
@@ -72,19 +68,21 @@ def initialize_new_upload(data_config, access_token):
 
     # Create data object using API
     data = DataRequest(name=data_name,
-                       description=version,
-                       data_type='gzip',
-                       version=version)
-    data_id = DataClient().create(data)
-    if not data_id:
+                       # TODO: support commit message
+                       description='',
+                       family_id=data_config.family_id,
+                       data_type='gzip')
+    data_info = DataClient().create(data)
+    if not data_info:
         rmtree(temp_dir)
         sys.exit(1)
 
-    data_config.set_data_predecessor(data_id)
+    data_config.set_data_id(data_info['id'])
+    data_config.set_data_name(data_info['name'])
     DataConfigManager.set_config(data_config)
 
     # fetch auth token for upload server
-    creds = DataClient().new_tus_credentials(data_id)
+    creds = DataClient().new_tus_credentials(data_info['id'])
     if not creds:
         # TODO: delete module from server?
         rmtree(temp_dir)
@@ -107,7 +105,7 @@ def initialize_new_upload(data_config, access_token):
 
 def complete_upload(data_config):
     data_endpoint = data_config.data_endpoint
-    data_id = data_config.data_predecessor
+    data_id = data_config.data_id
     tarball_path = data_config.tarball_path
 
     if not data_id:
@@ -123,7 +121,7 @@ def complete_upload(data_config):
 
         file_size = os.path.getsize(tarball_path)
         floyd_logger.info("Uploading compressed data. Total upload size: %s",
-                        sizeof_fmt(file_size))
+                          sizeof_fmt(file_size))
         tus_client = TusDataClient()
         if not tus_client.resume_upload(tarball_path, data_endpoint, auth=creds):
             floyd_logger.error("Failed to finish upload!")
@@ -135,12 +133,11 @@ def complete_upload(data_config):
         except (OSError, TypeError):
             pass
 
-        data_id = data_config.data_predecessor
         floyd_logger.debug("Created data with id : %s", data_id)
         floyd_logger.info("Upload finished.")
 
         # Update data config
-        data_config.set_data_predecessor(data_id)
+        data_config.set_data_id(None)
         data_config.set_tarball_path(None)
         data_config.set_data_endpoint(None)
         data_source = DataClient().get(data_id)
@@ -169,8 +166,8 @@ def complete_upload(data_config):
             DataConfigManager.set_config(data_config)
 
     # Print output
-    table_output = [["DATA ID", "NAME", "VERSION"],
-                    [data_id, data_config.name, data_config.version]]
+    table_output = [["DATA ID", "NAME"],
+                    [data_id, data_config.data_name]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
 
 

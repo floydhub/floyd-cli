@@ -1,16 +1,16 @@
 import click
-import webbrowser
 from tabulate import tabulate
 from time import sleep
+import webbrowser
 import sys
 
 import floyd
-from floyd.cli.utils import get_task_url, get_module_task_instance_id
+from floyd.cli.utils import get_module_task_instance_id
 from floyd.client.common import get_url_contents
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
+from floyd.client.project import ProjectClient
 from floyd.client.task_instance import TaskInstanceClient
-from floyd.config import generate_uuid
 from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.model.experiment_config import ExperimentConfig
@@ -26,8 +26,17 @@ def init(project):
 
         floyd run python tensorflow.py > /output/model.1
     """
+    project_obj = ProjectClient().get_project_matching_name(project)
+    if not project_obj:
+        create_project_url = "{}/projects/create".format(floyd.floyd_web_host)
+        floyd_logger.error(("Project name does not match your list of projects. "
+                            "Create your new project in the web dashboard:\n\t%s/projects"),
+                           create_project_url)
+        webbrowser.open(create_project_url)
+        return
+
     experiment_config = ExperimentConfig(name=project,
-                                         family_id=generate_uuid())
+                                         family_id=project_obj.id)
     ExperimentConfigManager.set_config(experiment_config)
     FloydIgnoreManager.init()
     floyd_logger.info("Project \"{}\" initialized in current directory".format(project))
@@ -52,13 +61,32 @@ def print_experiments(experiments):
     """
     Prints expt details in a table. Includes urls and mode parameters
     """
-    headers = ["RUN ID", "CREATED", "STATUS", "DURATION(s)", "NAME", "INSTANCE", "VERSION"]
+    headers = ["RUN ID", "CREATED", "STATUS", "DURATION(s)", "NAME", "INSTANCE", "DESCRIPTION"]
     expt_list = []
     for experiment in experiments:
         expt_list.append([experiment.id, experiment.created_pretty, experiment.state,
                           experiment.duration_rounded, experiment.name,
                           experiment.instance_type_trimmed, experiment.description])
     floyd_logger.info(tabulate(expt_list, headers=headers))
+
+
+@click.command()
+@click.argument('id', nargs=1)
+def clone(id):
+    """
+    Download the code for the experiment to the current path
+    """
+    experiment = ExperimentClient().get(id)
+    task_instance_id = get_module_task_instance_id(experiment.task_instances)
+    task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
+    if not task_instance:
+        sys.exit("Cannot clone this version of the experiment. Try a different version.")
+    module = ModuleClient().get(task_instance.module_id) if task_instance else None
+    code_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
+                                                                          module.resource_id)
+    ExperimentClient().download_tar(url=code_url,
+                                    untar=True,
+                                    delete_after_untar=True)
 
 
 @click.command()
@@ -70,19 +98,15 @@ def info(id):
     experiment = ExperimentClient().get(id)
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
-    mode = url = None
-    if experiment.state == "running":
-        if task_instance and task_instance.mode in ['jupyter', 'serving']:
-            mode = task_instance.mode
-            url = get_task_url(task_instance.id)
     table = [["Run ID", experiment.id], ["Name", experiment.name], ["Created", experiment.created_pretty],
              ["Status", experiment.state], ["Duration(s)", experiment.duration_rounded],
              ["Output ID", task_instance.id if task_instance else None], ["Instance", experiment.instance_type_trimmed],
              ["Version", experiment.description]]
-    if mode:
-        table.append(["Mode", mode])
-    if url:
-        table.append(["Url", url])
+    if task_instance and task_instance.mode in ['jupyter', 'serving']:
+        table.append(["Mode", task_instance.mode])
+        table.append(["Url", experiment.service_url])
+    if experiment.tensorboard_url:
+        table.append(["Tensorboard", experiment.tensorboard_url])
     floyd_logger.info(tabulate(table))
 
 
@@ -95,6 +119,10 @@ def logs(id, url, tail, sleep_duration=1):
     Print the logs of the run.
     """
     experiment = ExperimentClient().get(id)
+    if experiment.state == 'queued':
+        floyd_logger.info("Experiment is currently in a queue")
+        return
+
     task_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_id)
     if not task_instance:
@@ -127,8 +155,10 @@ def logs(id, url, tail, sleep_duration=1):
 
 @click.command()
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
+@click.option('-d', '--download', is_flag=True, default=False,
+              help='Download the contents of the output to current directory')
 @click.argument('id', nargs=1)
-def output(id, url):
+def output(id, url, download):
     """
     Shows the output url of the run.
     By default opens the output page in your default browser.
@@ -141,8 +171,14 @@ def output(id, url):
         if url:
             floyd_logger.info(output_dir_url)
         else:
-            floyd_logger.info("Opening output directory in your browser ...")
-            webbrowser.open(output_dir_url)
+            if download:
+                output_dir_url = "{}&download=true".format(output_dir_url)
+                ExperimentClient().download_tar(url=output_dir_url,
+                                                untar=True,
+                                                delete_after_untar=True)
+            else:
+                floyd_logger.info("Opening output directory in your browser ...")
+                webbrowser.open(output_dir_url)
     else:
         floyd_logger.error("Output directory not available")
 
@@ -158,7 +194,7 @@ def stop(id):
         floyd_logger.info("Experiment in {} state cannot be stopped".format(experiment.state))
         return
 
-    if ExperimentClient().stop(id):
+    if ExperimentClient().stop(experiment.id):
         floyd_logger.info("Experiment shutdown request submitted. Check status to confirm shutdown")
     else:
         floyd_logger.error("Failed to stop experiment")
@@ -184,16 +220,8 @@ def delete(ids, yes):
             floyd_logger.info("Experiment {}: Skipped.".format(experiment.name))
             continue
 
-        task_instance_id = get_module_task_instance_id(experiment.task_instances)
-        task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
-
-        if not ExperimentClient().delete(id):
+        if not ExperimentClient().delete(experiment.id):
             failures = True
-            continue
-
-        if task_instance and task_instance.module_id:
-            if not ModuleClient().delete(task_instance.module_id):
-                failures = True
 
     if failures:
         sys.exit(1)

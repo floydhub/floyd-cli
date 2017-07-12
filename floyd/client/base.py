@@ -1,5 +1,7 @@
 import requests
+import os
 import sys
+import tarfile
 
 import floyd
 from floyd.manager.auth_config import AuthConfigManager
@@ -57,12 +59,63 @@ class FloydHttpClient(object):
             sys.exit("Cannot connect to the Floyd server. Check your internet connection.")
 
         try:
-            floyd_logger.debug("Response Content: {}, Headers: {}".format(response.json(), response.headers))
+            floyd_logger.debug("Response Content: {}, Headers: {}".format(
+                response.json(), response.headers))
         except Exception:
             floyd_logger.debug("Request failed. Response: {}".format(response.content))
 
         self.check_response_status(response)
         return response
+
+    def download(self, url, filename, relative=False, headers=None, timeout=5):
+        """
+        Download the file from the given url at the current path
+        """
+        request_url = self.base_url + url if relative else url
+        floyd_logger.debug("Downloading file from url: {}".format(request_url))
+
+        # Auth headers if access_token is present
+        request_headers = {"Authorization": "Bearer {}".format(
+            self.access_token.token if self.access_token else None),
+        }
+        # Add any additional headers
+        if headers:
+            request_headers.update(headers)
+
+        try:
+            response = requests.get(request_url,
+                                    headers=request_headers,
+                                    timeout=timeout,
+                                    stream=True)
+            self.check_response_status(response)
+            with open(filename, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=1024):
+                    if chunk:
+                        f.write(chunk)
+            return filename
+        except requests.exceptions.ConnectionError as exception:
+            floyd_logger.debug("Exception: {}".format(exception))
+            sys.exit("Cannot connect to the Floyd server. Check your internet connection.")
+
+    def download_tar(self, url, untar=True, delete_after_untar=False):
+        """
+        Download and optionally untar the tar file from the given url
+        """
+        try:
+            floyd_logger.info("Downloading the tar file to the current directory ...")
+            filename = self.download(url=url, filename='output.tar')
+            if filename and untar:
+                floyd_logger.info("Untarring the contents of the file ...")
+                tar = tarfile.open(filename)
+                tar.extractall()
+                tar.close()
+            if delete_after_untar:
+                floyd_logger.info("Cleaning up the tar file ...")
+                os.remove(filename)
+            return filename
+        except FloydException as e:
+            floyd_logger.info("Download URL ERROR! {}".format(e.message))
+            return False
 
     def check_response_status(self, response):
         """
@@ -90,7 +143,10 @@ class FloydHttpClient(object):
             elif response.status_code == 504:
                 raise GatewayTimeoutException()
             elif 500 <= response.status_code < 600:
-                raise ServerException()
+                if 'Server under maintenance' in response.content.decode():
+                    raise ServerException('Server under maintenance, please try again later.')
+                else:
+                    raise ServerException()
             else:
                 msg = "An error occurred. Server response: {}".format(response.status_code)
                 raise FloydException(message=msg)
