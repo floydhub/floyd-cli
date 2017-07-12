@@ -1,7 +1,7 @@
 from clint.textui.progress import Bar as ProgressBar
 
 from floyd.manager.auth_config import AuthConfigManager
-from floyd.exceptions import FloydException
+from floyd.exceptions import FloydException, BadRequestException
 from floyd.client.base import FloydHttpClient
 from floyd.model.data import Data
 from floyd.log import logger as floyd_logger
@@ -35,8 +35,15 @@ class DataClient(FloydHttpClient):
             post_body["resumable"] = True
             response = self.request("POST", self.url, json=post_body)
             return response.json()
+        except BadRequestException as e:
+            if 'Dataset not found, ID' in e.message:
+                floyd_logger.error(
+                    'Data create: ERROR! Please run "floyd data init DATASET_NAME" before upload.')
+            else:
+                floyd_logger.error('Data create: ERROR! %s', e.message)
+            return None
         except FloydException as e:
-            floyd_logger.info("Data create: ERROR! %s", e.message)
+            floyd_logger.error("Data create: ERROR! %s", e.message)
             return None
 
     def new_tus_credentials(self, data_id):
