@@ -13,6 +13,7 @@ class TestExperimentRun(unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
 
+    @patch('floyd.cli.run.EnvClient.get_all', return_value={'cpu': {'foo': 'bar'}})
     @patch('floyd.cli.run.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.run.ExperimentConfigManager.get_config', side_effect=mock_experiment_config)
     @patch('floyd.cli.run.ExperimentConfigManager.set_config')
@@ -23,7 +24,8 @@ class TestExperimentRun(unittest.TestCase):
                           create_module,
                           set_config,
                           get_config,
-                          get_access_token):
+                          get_access_token,
+                          get_all_env):
         """
         Simple experiment with no data attached
         """

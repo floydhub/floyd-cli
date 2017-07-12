@@ -59,7 +59,8 @@ class FloydHttpClient(object):
             sys.exit("Cannot connect to the Floyd server. Check your internet connection.")
 
         try:
-            floyd_logger.debug("Response Content: {}, Headers: {}".format(response.json(), response.headers))
+            floyd_logger.debug("Response Content: {}, Headers: {}".format(
+                response.json(), response.headers))
         except Exception:
             floyd_logger.debug("Request failed. Response: {}".format(response.content))
 
@@ -142,7 +143,10 @@ class FloydHttpClient(object):
             elif response.status_code == 504:
                 raise GatewayTimeoutException()
             elif 500 <= response.status_code < 600:
-                raise ServerException()
+                if 'Server under maintenance' in response.content:
+                    raise ServerException('Server under maintenance, please try again later.')
+                else:
+                    raise ServerException()
             else:
                 msg = "An error occurred. Server response: {}".format(response.status_code)
                 raise FloydException(message=msg)

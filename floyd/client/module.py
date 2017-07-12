@@ -52,13 +52,16 @@ class ModuleClient(FloydHttpClient):
         progress_callback, bar = create_progress_callback(multipart_encoder)
         multipart_encoder_monitor = MultipartEncoderMonitor(multipart_encoder, progress_callback)
 
-        response = self.request("POST",
-                                self.url,
-                                data=multipart_encoder_monitor,
-                                headers={"Content-Type": multipart_encoder.content_type},
-                                timeout=3600)
-
-        bar.done()
+        try:
+            response = self.request("POST",
+                                    self.url,
+                                    data=multipart_encoder_monitor,
+                                    headers={"Content-Type": multipart_encoder.content_type},
+                                    timeout=3600)
+        except Exception as e:
+            # always make sure we clear the console
+            bar.done()
+            raise(e)
         floyd_logger.info("Done")
         return response.json().get("id")
 

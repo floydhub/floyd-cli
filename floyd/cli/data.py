@@ -35,9 +35,10 @@ def init(dataset_name):
     """
     dataset_obj = DatasetClient().get_dataset_matching_name(dataset_name)
     if not dataset_obj:
-        floyd_logger.error("Dataset name does not match your list of datasets. "
-                           "Create your new dataset in the web dashboard")
         create_dataset_url = "{}/datasets/create".format(floyd.floyd_web_host)
+        floyd_logger.error(("Dataset name does not match your list of datasets. "
+                            "Create your new dataset in the web dashboard:\n\t%s"),
+                           create_dataset_url)
         webbrowser.open(create_dataset_url)
         return
 

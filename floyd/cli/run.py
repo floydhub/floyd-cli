@@ -3,6 +3,7 @@ import click
 from tabulate import tabulate
 from time import sleep
 import webbrowser
+import sys
 
 from floyd.constants import DEFAULT_ENV
 from floyd.client.data import DataClient
@@ -104,7 +105,17 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
                     inputs=module_inputs,
                     env=env,
                     arch=arch)
-    module_id = ModuleClient().create(module)
+
+    from floyd.exceptions import BadRequestException
+    try:
+        module_id = ModuleClient().create(module)
+    except BadRequestException as e:
+        if 'Project not found, ID' in e.message:
+            floyd_logger.error(
+                'ERROR: Please run "floyd init PROJECT_NAME" before scheduling a job.')
+        else:
+            floyd_logger.error('ERROR: %s', e.message)
+        sys.exit(1)
     floyd_logger.debug("Created module with id : {}".format(module_id))
 
     # Create experiment request
