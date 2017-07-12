@@ -28,9 +28,11 @@ def init(project):
     """
     project_obj = ProjectClient().get_project_matching_name(project)
     if not project_obj:
+        create_project_url = "{}/projects/create".format(floyd.floyd_web_host)
         floyd_logger.error(("Project name does not match your list of projects. "
                             "Create your new project in the web dashboard:\n\t%s/projects"),
-                           floyd.floyd_host)
+                           create_project_url)
+        webbrowser.open(create_project_url)
         return
 
     experiment_config = ExperimentConfig(name=project,
