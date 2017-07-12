@@ -143,7 +143,7 @@ class FloydHttpClient(object):
             elif response.status_code == 504:
                 raise GatewayTimeoutException()
             elif 500 <= response.status_code < 600:
-                if 'Server under maintenance' in response.content:
+                if 'Server under maintenance' in response.content.decode():
                     raise ServerException('Server under maintenance, please try again later.')
                 else:
                     raise ServerException()
