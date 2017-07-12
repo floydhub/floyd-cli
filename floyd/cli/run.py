@@ -168,7 +168,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
     floyd_logger.info("""
 To view logs enter:
     floyd logs {}
-        """.format(expt_info['id']))
+        """.format(expt_info['name']))
 
 
 def get_command_line(gpu, env, message, data, mode, open, tensorboard, command):
