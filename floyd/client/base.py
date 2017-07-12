@@ -59,7 +59,8 @@ class FloydHttpClient(object):
             sys.exit("Cannot connect to the Floyd server. Check your internet connection.")
 
         try:
-            floyd_logger.debug("Response Content: {}, Headers: {}".format(response.json(), response.headers))
+            floyd_logger.debug("Response Content: {}, Headers: {}".format(
+                response.json(), response.headers))
         except Exception:
             floyd_logger.debug("Request failed. Response: {}".format(response.content))
 
