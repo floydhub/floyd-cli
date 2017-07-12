@@ -185,9 +185,11 @@ def get_command_line(gpu, env, message, data, mode, open, tensorboard, command):
             floyd_command = floyd_command + " --data {}".format(data_item)
     if not mode == "job":
         floyd_command = floyd_command + " --mode {}".format(mode)
+    if gpu:
+        floyd_command = floyd_command + " --gpu"
     if not open:
         floyd_command = floyd_command + " --no-open"
     if tensorboard:
         floyd_command = floyd_command + " --tensorboard"
-    floyd_command = floyd_command + " {}".format(' '.join(command))
+    floyd_command = floyd_command + " \"{}\"".format(' '.join(command))
     return floyd_command
