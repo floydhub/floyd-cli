@@ -20,12 +20,12 @@ def login(token):
 
         webbrowser.open(cli_info_url)
 
-    floyd_logger.info("Please copy and paste the token from the welcome page.")
+    floyd_logger.info("Please copy and paste the authentication token.")
     access_code = click.prompt('This is an invisible field. Paste token and press ENTER', type=str, hide_input=True)
 
     if not access_code:
         floyd_logger.info("Empty token received. Make sure your shell is handling the token appropriately.")
-        floyd_logger.info("See FAQ for help: http://docs.floydhub.com/faq/")
+        floyd_logger.info("See docs for help: http://127.0.0.1:8000/guides/basics/login")
         return
 
     access_code = access_code.strip(" ")

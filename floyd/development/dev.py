@@ -9,7 +9,7 @@ from floyd.main import check_cli_version, add_commands
 @click.option('-v', '--verbose', count=True, help='Turn on debug logging')
 def cli(verbose):
     """
-    Floyd CLI interacts with Floyd server and executes your commands.
+    Floyd CLI interacts with FloydHub server and executes your commands.
     More help is available under each command listed below.
     """
     floyd.floyd_host = floyd.floyd_web_host = "https://dev.floydhub.com"
