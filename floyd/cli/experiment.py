@@ -30,6 +30,8 @@ def init(project):
     if not project_obj:
         floyd_logger.error("Project name does not match your list of projects. "
                            "Create your new project in the web dashboard")
+        create_project_url = "{}/projects/create".format(floyd.floyd_web_host)
+        webbrowser.open(create_project_url)
         return
 
     experiment_config = ExperimentConfig(name=project,
