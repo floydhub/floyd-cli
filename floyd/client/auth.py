@@ -19,6 +19,6 @@ class AuthClient(FloydHttpClient):
         try:
             user_dict = response.json()
         except Exception:
-            raise AuthenticationException("Invalid Token")
+            raise AuthenticationException("Invalid Token.\nSee http://docs.floydhub.com/faqs/authentication/ for help")
 
         return User.from_dict(user_dict)

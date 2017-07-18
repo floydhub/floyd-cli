@@ -25,7 +25,7 @@ def login(token):
 
     if not access_code:
         floyd_logger.info("Empty token received. Make sure your shell is handling the token appropriately.")
-        floyd_logger.info("See docs for help: http://127.0.0.1:8000/guides/basics/login")
+        floyd_logger.info("See docs for help: http://docs.floydhub.com/faqs/authentication/")
         return
 
     access_code = access_code.strip(" ")
