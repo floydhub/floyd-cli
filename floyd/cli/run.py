@@ -155,20 +155,24 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
             if wait_for_url(jupyter_url, sleep_duration_seconds=2, iterations=900):
                 floyd_logger.info("\nPath to jupyter notebook: {}".format(jupyter_url))
                 if open:
-                    print("Opening the jupyter notebook in your browser now ...", end='')
                     webbrowser.open(jupyter_url)
             else:
                 floyd_logger.info("\nPath to jupyter notebook: {}".format(jupyter_url))
                 floyd_logger.info("Notebook is still loading. View logs to track progress")
+                floyd_logger.info("   floyd logs {}".format(expt_info['name']))
 
         # Print the path to serving endpoint
         if mode == 'serve':
             floyd_logger.info("Path to service endpoint: {}".format(experiment.service_url))
 
-    floyd_logger.info("""
-To view logs enter:
-    floyd logs {}
-        """.format(expt_info['name']))
+        if experiment.timeout_seconds < 4 * 60 * 60:
+            floyd_logger.info("\nYour job timeout is currently set to {} seconds".format(experiment.timeout_seconds))
+            floyd_logger.info("This is because you are in a trial account. Paid users will have longer timeouts. "
+                              "See https://www.floydhub.com/pricing for details")
+
+    else:
+        floyd_logger.info("To view logs enter:")
+        floyd_logger.info("   floyd logs {}".format(expt_info['name']))
 
 
 def get_command_line(gpu, env, message, data, mode, open, tensorboard, command):
@@ -191,5 +195,6 @@ def get_command_line(gpu, env, message, data, mode, open, tensorboard, command):
         floyd_command = floyd_command + " --no-open"
     if tensorboard:
         floyd_command = floyd_command + " --tensorboard"
-    floyd_command = floyd_command + " \"{}\"".format(' '.join(command))
+    if command:
+        floyd_command = floyd_command + " \"{}\"".format(' '.join(command))
     return floyd_command
