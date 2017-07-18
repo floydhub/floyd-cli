@@ -20,6 +20,7 @@ class ExperimentSchema(Schema):
     service_url = fields.Str(load_from="serviceUrl", allow_none=True)
     tensorboard_url = fields.Str(load_from="tensorboardUrl", allow_none=True)
     output_id = fields.Str(load_from="instanceOutputId", allow_none=True)
+    timeout_seconds = fields.Integer(allow_none=True)
 
     @post_load
     def make_experiment(self, data):
@@ -42,6 +43,7 @@ class Experiment(BaseModel):
                  service_url=None,
                  tensorboard_url=None,
                  output_id=None,
+                 timeout_seconds=None,
                  **kwargs):
         self.id = id
         self.name = name
@@ -59,6 +61,7 @@ class Experiment(BaseModel):
         self.service_url = service_url
         self.tensorboard_url = tensorboard_url
         self.output_id = output_id
+        self.timeout_seconds = timeout_seconds
 
     def localize_date(self, date):
         if not date.tzinfo:
