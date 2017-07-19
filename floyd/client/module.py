@@ -60,10 +60,9 @@ class ModuleClient(FloydHttpClient):
                                     data=multipart_encoder_monitor,
                                     headers={"Content-Type": multipart_encoder.content_type},
                                     timeout=3600)
-        except Exception as e:
+        finally:
             # always make sure we clear the console
             bar.done()
-            raise(e)
         floyd_logger.info("Done")
         return response.json().get("id")
 
