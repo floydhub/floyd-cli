@@ -1,5 +1,6 @@
+import sys
 from floyd.client.base import FloydHttpClient
-from floyd.exceptions import FloydException
+from floyd.exceptions import FloydException, AuthenticationException
 from floyd.model.dataset import Dataset
 from floyd.log import logger as floyd_logger
 
@@ -18,6 +19,9 @@ class DatasetClient(FloydHttpClient):
             datasets_dict = response.json()
             return [Dataset.from_dict(dataset) for dataset in datasets_dict.get("datasets", [])]
         except FloydException as e:
+            if isinstance(e, AuthenticationException):
+                # exit now since there is nothing we can do without login
+                sys.exit(1)
             floyd_logger.info("Error while retrieving datasets: {}".format(e.message))
             return []
 

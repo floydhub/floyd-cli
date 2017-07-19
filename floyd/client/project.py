@@ -1,5 +1,6 @@
+import sys
+from floyd.exceptions import FloydException, AuthenticationException
 from floyd.client.base import FloydHttpClient
-from floyd.exceptions import FloydException
 from floyd.model.project import Project
 from floyd.log import logger as floyd_logger
 
@@ -19,6 +20,9 @@ class ProjectClient(FloydHttpClient):
             return [Project.from_dict(project) for project in projects_dict.get("projects", [])]
         except FloydException as e:
             floyd_logger.info("Error while retrieving projects: {}".format(e.message))
+            if isinstance(e, AuthenticationException):
+                # exit now since there is nothing we can do without login
+                sys.exit(1)
             return []
 
     def get_project_matching_name(self, name):
