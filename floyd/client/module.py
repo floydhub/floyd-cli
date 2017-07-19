@@ -33,8 +33,10 @@ class ModuleClient(FloydHttpClient):
         try:
             upload_files, total_file_size = get_files_in_current_directory(file_type='code')
         except OSError:
-            sys.exit("Directory contains too many files to upload. Add unused files and directories to .floydignore file."
-                     "Or upload data separately using floyd data command")
+            sys.exit("Directory contains too many files to upload. If you have data files in the current directory, "
+                     "please upload them separately using \"floyd data\" command and remove them from here.\n"
+                     "See http://docs.floydhub.com/faqs/job/#i-get-too-many-open-files-error-when-i-run-my-project "
+                     "for more details on how to fix this.")
 
         floyd_logger.info("Creating project run. Total upload size: %s",
                           total_file_size)
@@ -58,10 +60,9 @@ class ModuleClient(FloydHttpClient):
                                     data=multipart_encoder_monitor,
                                     headers={"Content-Type": multipart_encoder.content_type},
                                     timeout=3600)
-        except Exception as e:
+        finally:
             # always make sure we clear the console
             bar.done()
-            raise(e)
         floyd_logger.info("Done")
         return response.json().get("id")
 

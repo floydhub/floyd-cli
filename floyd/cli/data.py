@@ -54,7 +54,9 @@ def init(dataset_name):
 @click.command()
 @click.option('-r', '--resume',
               is_flag=True, default=False, help='Resume previous upload')
-def upload(resume):
+@click.option('--message', '-m', default='',
+              help='Experiment commit message')
+def upload(resume, message):
     """
     Upload data in the current dir to Floyd.
     """
@@ -63,7 +65,7 @@ def upload(resume):
     if not upload_is_resumable(data_config) or not opt_to_resume(resume):
         abort_previous_upload(data_config)
         access_token = AuthConfigManager.get_access_token()
-        initialize_new_upload(data_config, access_token)
+        initialize_new_upload(data_config, access_token, message)
 
     complete_upload(data_config)
 
