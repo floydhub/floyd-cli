@@ -33,9 +33,9 @@ from floyd.log import logger as floyd_logger
               help='Environment type to use',
               default=DEFAULT_ENV)
 @click.option('--message', '-m',
-              help='Experiment commit message')
+              help='Job commit message')
 @click.option('--tensorboard/--no-tensorboard',
-              help='Run tensorboard in the experiment environment')
+              help='Run tensorboard in the job environment')
 @click.argument('command', nargs=-1)
 @click.pass_context
 def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
@@ -56,7 +56,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
     # Create module
     if len(data) > 5:
         floyd_logger.error(
-            "Cannot attach more than 5 datasets to an experiment")
+            "Cannot attach more than 5 datasets to an job")
         return
 
     # Get the data entity from the server to:
@@ -127,7 +127,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
                                            family_id=experiment_config.family_id,
                                            instance_type=instance_type)
     expt_info = ExperimentClient().create(experiment_request)
-    floyd_logger.debug("Created experiment : {}".format(expt_info['id']))
+    floyd_logger.debug("Created job : {}".format(expt_info['id']))
 
     table_output = [["RUN ID", "NAME"],
                     [expt_info['id'], expt_info['name']]]
@@ -142,9 +142,9 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
                 if experiment.task_instances:
                     break
             except Exception:
-                floyd_logger.debug("Experiment not available yet: {}".format(expt_info['id']))
+                floyd_logger.debug("Job not available yet: {}".format(expt_info['id']))
 
-            floyd_logger.debug("Experiment not available yet: {}".format(expt_info['id']))
+            floyd_logger.debug("Job not available yet: {}".format(expt_info['id']))
             sleep(3)
             continue
 

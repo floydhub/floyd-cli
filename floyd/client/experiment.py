@@ -44,16 +44,16 @@ class ExperimentClient(FloydHttpClient):
         try:
             self.request("DELETE",
                          "{}{}".format(self.url, id))
-            floyd_logger.info("Experiment {}: Deleted".format(id))
+            floyd_logger.info("Job {}: Deleted".format(id))
             return True
         except NotFoundException as e:
             floyd_logger.info(
-                    ("Experiment {}: ERROR! A deletable experiment with this "
+                    ("Job {}: ERROR! A deletable job with this "
                      "id was not found. Make sure you have the correct id and "
                      "that the experiment is not "
                      "queued or running.".format(id))
             )
             return False
         except FloydException as e:
-            floyd_logger.info("Experiment {}: ERROR! {}".format(id, e.message))
+            floyd_logger.info("Job {}: ERROR! {}".format(id, e.message))
             return False

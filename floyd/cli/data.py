@@ -56,7 +56,7 @@ def init(dataset_name):
 @click.option('-r', '--resume',
               is_flag=True, default=False, help='Resume previous upload')
 @click.option('--message', '-m', default='',
-              help='Experiment commit message')
+              help='Job commit message')
 def upload(resume, message):
     """
     Upload data in the current dir to Floyd.
@@ -105,7 +105,7 @@ def print_data(data_sources):
 @click.argument('id', nargs=1)
 def clone(id):
     """
-    Download the code for the experiment to the current path
+    Download the code for the job to the current path
     """
     data_source = DataClient().get(id)
 
