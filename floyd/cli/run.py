@@ -7,6 +7,7 @@ import sys
 
 from floyd.constants import DEFAULT_ENV
 from floyd.client.data import DataClient
+from floyd.client.project import ProjectClient
 from floyd.cli.utils import get_mode_parameter, wait_for_url, get_data_name
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
@@ -44,14 +45,15 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
     current directory and run your command remotely.
     This command will generate a run id for reference.
     """
-    command_str = ' '.join(command)
     experiment_config = ExperimentConfigManager.get_config()
+    if not ProjectClient().exists(experiment_config.family_id):
+        floyd_logger.error('Invalid project id, please run '
+                           '"floyd init PROJECT_NAME" before scheduling a job.')
+        return
+
     access_token = AuthConfigManager.get_access_token()
     experiment_name = "{}/{}".format(access_token.username,
                                      experiment_config.name)
-
-    # Get the actual command entered in the command line
-    full_command = get_command_line(gpu, env, message, data, mode, open, tensorboard, command)
 
     # Create module
     if len(data) > 5:
@@ -96,6 +98,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
         floyd_logger.error("{} is not a supported architecture".format(arch))
         return
 
+    command_str = ' '.join(command)
     module = Module(name=experiment_name,
                     description=message or '',
                     command=command_str,
@@ -119,6 +122,8 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
     floyd_logger.debug("Created module with id : {}".format(module_id))
 
     # Create experiment request
+    # Get the actual command entered in the command line
+    full_command = get_command_line(gpu, env, message, data, mode, open, tensorboard, command)
     experiment_request = ExperimentRequest(name=experiment_name,
                                            description=message,
                                            full_command=full_command,
@@ -126,7 +131,8 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
                                            data_ids=data_ids,
                                            family_id=experiment_config.family_id,
                                            instance_type=instance_type)
-    expt_info = ExperimentClient().create(experiment_request)
+    expt_cli = ExperimentClient()
+    expt_info = expt_cli.create(experiment_request)
     floyd_logger.debug("Created job : {}".format(expt_info['id']))
 
     table_output = [["RUN ID", "NAME"],
@@ -138,7 +144,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
         while True:
             # Wait for the experiment / task instances to become available
             try:
-                experiment = ExperimentClient().get(expt_info['id'])
+                experiment = expt_cli.get(expt_info['id'])
                 if experiment.task_instances:
                     break
             except Exception:
