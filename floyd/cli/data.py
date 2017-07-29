@@ -33,7 +33,7 @@ def init(dataset_name):
 
         floyd data upload
     """
-    dataset_obj = DatasetClient().get_dataset_matching_name(dataset_name)
+    dataset_obj = DatasetClient().get_by_name(dataset_name)
     if not dataset_obj:
         create_dataset_base_url = "{}/datasets/create".format(floyd.floyd_web_host)
         create_dataset_url = "{}?name={}".format(create_dataset_base_url, dataset_name)

@@ -1,5 +1,8 @@
 import sys
-from floyd.exceptions import FloydException, AuthenticationException
+from floyd.manager.auth_config import AuthConfigManager
+from floyd.exceptions import (
+    FloydException, AuthenticationException, NotFoundException
+)
 from floyd.client.base import FloydHttpClient
 from floyd.model.project import Project
 from floyd.log import logger as floyd_logger
@@ -25,12 +28,13 @@ class ProjectClient(FloydHttpClient):
                 sys.exit(1)
             return []
 
-    def get_project_matching_name(self, name):
-        projects = self.get_projects()
-        for project in projects:
-            if name == project.name:
-                return project
-        return None
+    def get_by_name(self, name):
+        access_token = AuthConfigManager.get_access_token()
+        try:
+            response = self.request('GET', '%s/%s/%s' % (self.url, access_token.username, name))
+            return Project.from_dict(response.json())
+        except NotFoundException:
+            return None
 
     def exists(self, project_id):
         try:
