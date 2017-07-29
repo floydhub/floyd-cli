@@ -26,7 +26,7 @@ def init(project):
 
         floyd run python tensorflow.py > /output/model.1
     """
-    project_obj = ProjectClient().get_project_matching_name(project)
+    project_obj = ProjectClient().get_by_name(project)
     if not project_obj:
         create_project_base_url = "{}/projects/create".format(floyd.floyd_web_host)
         create_project_url = "{}?name={}".format(create_project_base_url, project)
