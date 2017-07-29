@@ -31,3 +31,13 @@ class ProjectClient(FloydHttpClient):
             if name == project.name:
                 return project
         return None
+
+    def exists(self, project_id):
+        try:
+            response = self.request("GET", '%s/id/%s' % (self.url, project_id))
+            if response.status_code == 200:
+                return True
+            else:
+                return False
+        except FloydException:
+            return False
