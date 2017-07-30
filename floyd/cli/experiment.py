@@ -99,10 +99,12 @@ def info(id):
     experiment = ExperimentClient().get(id)
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
-    table = [["Run ID", experiment.id], ["Name", experiment.name], ["Created", experiment.created_pretty],
+    table = [["Job name", experiment.name],
+             ["Output name", '%s/output' % experiment.name if task_instance else None],
+             ["Created", experiment.created_pretty],
              ["Status", experiment.state], ["Duration(s)", experiment.duration_rounded],
-             ["Output ID", task_instance.id if task_instance else None], ["Instance", experiment.instance_type_trimmed],
-             ["Version", experiment.description]]
+             ["Instance", experiment.instance_type_trimmed],
+             ["Description", experiment.description]]
     if task_instance and task_instance.mode in ['jupyter', 'serving']:
         table.append(["Mode", task_instance.mode])
         table.append(["Url", experiment.service_url])
