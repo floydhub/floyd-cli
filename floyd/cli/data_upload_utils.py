@@ -145,17 +145,20 @@ def complete_upload(data_config):
 
     # data tarball uploaded, check for server untar
     if data_config.resource_id:
+        floyd_logger.info(
+            "Waiting for server to unpack data.\n"
+            "You can exit at any time and come back to check the status with:\n"
+            "\tfloyd data upload -r")
         try:
             for i in dots(ResourceWaitIter(data_config.resource_id),
-                        label='Waiting for server to unpack uploaded data...'):
+                          label='Waiting for unpack...'):
                 pass
         except WaitTimeoutException:
             clint_STREAM.write('\n')
             clint_STREAM.flush()
             floyd_logger.info(
-                "Looks like it is going to take some extra for Floydhub to unpack "
-                "your data. Please check back later with the following command:"
-                "\n\tfloyd data upload -r")
+                "Looks like it is going to take longer for Floydhub to unpack "
+                "your data. Please check back later.")
             sys.exit(1)
         else:
             data_config.set_resource_id(None)

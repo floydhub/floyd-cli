@@ -26,12 +26,13 @@ def init(project):
 
         floyd run python tensorflow.py > /output/model.1
     """
-    project_obj = ProjectClient().get_project_matching_name(project)
+    project_obj = ProjectClient().get_by_name(project)
     if not project_obj:
-        create_project_url = "{}/projects/create".format(floyd.floyd_web_host)
+        create_project_base_url = "{}/projects/create".format(floyd.floyd_web_host)
+        create_project_url = "{}?name={}".format(create_project_base_url, project)
         floyd_logger.error(("Project name does not match your list of projects. "
-                            "Create your new project in the web dashboard:\n\t%s/projects"),
-                           create_project_url)
+                            "Create your new project in the web dashboard:\n\t%s"),
+                           create_project_base_url)
         webbrowser.open(create_project_url)
         return
 
@@ -80,7 +81,7 @@ def clone(id):
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
     if not task_instance:
-        sys.exit("Cannot clone this version of the experiment. Try a different version.")
+        sys.exit("Cannot clone this version of the job. Try a different version.")
     module = ModuleClient().get(task_instance.module_id) if task_instance else None
     code_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
                                                                           module.resource_id)
@@ -98,10 +99,12 @@ def info(id):
     experiment = ExperimentClient().get(id)
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
-    table = [["Run ID", experiment.id], ["Name", experiment.name], ["Created", experiment.created_pretty],
+    table = [["Job name", experiment.name],
+             ["Output name", '%s/output' % experiment.name if task_instance else None],
+             ["Created", experiment.created_pretty],
              ["Status", experiment.state], ["Duration(s)", experiment.duration_rounded],
-             ["Output ID", task_instance.id if task_instance else None], ["Instance", experiment.instance_type_trimmed],
-             ["Version", experiment.description]]
+             ["Instance", experiment.instance_type_trimmed],
+             ["Description", experiment.description]]
     if task_instance and task_instance.mode in ['jupyter', 'serving']:
         table.append(["Mode", task_instance.mode])
         table.append(["Url", experiment.service_url])
@@ -120,13 +123,13 @@ def logs(id, url, tail, sleep_duration=1):
     """
     experiment = ExperimentClient().get(id)
     if experiment.state == 'queued':
-        floyd_logger.info("Experiment is currently in a queue")
+        floyd_logger.info("Job is currently in a queue")
         return
 
     task_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_id)
     if not task_instance:
-        floyd_logger.info("Experiment not started yet, no log to show.")
+        floyd_logger.info("Job not started yet, no log to show.")
         sys.exit(1)
 
     log_url = "{}/api/v1/resources/{}?content=true".format(
@@ -191,13 +194,13 @@ def stop(id):
     """
     experiment = ExperimentClient().get(id)
     if experiment.state not in ["queued", "running"]:
-        floyd_logger.info("Experiment in {} state cannot be stopped".format(experiment.state))
+        floyd_logger.info("Job in {} state cannot be stopped".format(experiment.state))
         return
 
     if ExperimentClient().stop(experiment.id):
         floyd_logger.info("Experiment shutdown request submitted. Check status to confirm shutdown")
     else:
-        floyd_logger.error("Failed to stop experiment")
+        floyd_logger.error("Failed to stop job")
 
 
 @click.command()
@@ -217,7 +220,7 @@ def delete(ids, yes):
         if not yes and not click.confirm("Delete Run: {}?".format(experiment.name),
                                          abort=False,
                                          default=False):
-            floyd_logger.info("Experiment {}: Skipped.".format(experiment.name))
+            floyd_logger.info("Job {}: Skipped.".format(experiment.name))
             continue
 
         if not ExperimentClient().delete(experiment.id):
