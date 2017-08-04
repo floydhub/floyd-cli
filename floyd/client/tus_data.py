@@ -59,7 +59,7 @@ class TusDataClient(FloydHttpClient):
             location = ""
         except requests.exceptions.ConnectionError as e:
             floyd_logger.error(
-                "Cannot connect to the Floyd data upload server. "
+                "Cannot connect to the Floyd data upload server for upload url. "
                 "Check your internet connection.")
             location = ""
 
@@ -83,7 +83,7 @@ class TusDataClient(FloydHttpClient):
             return False
         except requests.exceptions.ConnectionError as e:
             floyd_logger.error(
-                "Cannot connect to the Floyd data upload server. "
+                "Cannot connect to the Floyd data upload server for offset. "
                 "Check your internet connection.")
             return False
 
@@ -107,7 +107,9 @@ class TusDataClient(FloydHttpClient):
                         e.message)
                     return False
                 except requests.exceptions.ConnectionError as e:
-                    floyd_logger.error("Cannot connect to the Floyd data upload server. Check your internet connection.")
+                    floyd_logger.error(
+                        "Cannot connect to the Floyd data upload server. "
+                        "Check your internet connection.")
                     return False
 
             # Complete the progress bar with one more call to show()
@@ -127,7 +129,7 @@ class TusDataClient(FloydHttpClient):
         self.check_response_status(response)
 
         offset = int(response.headers["Upload-Offset"])
-        floyd_logger.debug("offset:{}".format(offset))
+        floyd_logger.debug("offset: %s", offset)
         return offset
 
     def _upload_chunk(self, data, offset, file_endpoint, headers=None, auth=None):
