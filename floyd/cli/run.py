@@ -135,8 +135,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
     expt_info = expt_cli.create(experiment_request)
     floyd_logger.debug("Created job : {}".format(expt_info['id']))
 
-    table_output = [["RUN ID", "NAME"],
-                    [expt_info['id'], expt_info['name']]]
+    table_output = [["JOB NAME"], [expt_info['name']]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
     floyd_logger.info("")
 
