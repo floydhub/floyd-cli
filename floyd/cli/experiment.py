@@ -6,10 +6,10 @@ import sys
 
 import floyd
 from floyd.cli.utils import get_module_task_instance_id
-from floyd.client.common import get_url_contents
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.client.project import ProjectClient
+from floyd.client.resource import ResourceClient
 from floyd.client.task_instance import TaskInstanceClient
 from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.manager.floyd_ignore import FloydIgnoreManager
@@ -142,14 +142,14 @@ def logs(id, url, tail, sleep_duration=1):
         current_shell_output = ""
         while True:
             # Get the logs in a loop and log the new lines
-            log_file_contents = get_url_contents(log_url)
+            log_file_contents = ResourceClient().get_content(task_instance.log_id)
             print_output = log_file_contents[len(current_shell_output):]
             if len(print_output.strip()):
                 floyd_logger.info(print_output)
             current_shell_output = log_file_contents
             sleep(sleep_duration)
     else:
-        log_file_contents = get_url_contents(log_url)
+        log_file_contents = ResourceClient().get_content(task_instance.log_id)
         if len(log_file_contents.strip()):
             floyd_logger.info(log_file_contents)
         else:
