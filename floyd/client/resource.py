@@ -25,6 +25,14 @@ class ResourceClient(FloydHttpClient):
             floyd_logger.info("Resource %s: ERROR! %s", resource_id, e.message)
             return None
 
+    def get_content(self, resource_id):
+        try:
+            response = self.request('GET', self.URL_PREFIX + resource_id + "?content=true")
+            return response.content.decode(response.encoding)
+        except FloydException as e:
+            floyd_logger.debug("Resource %s: ERROR! %s", resource_id, e.message)
+            return None
+
     def wait_for_ready(self, resource_id):
         sleep(2)  # initial wait of 2 seconds
         ready = False
