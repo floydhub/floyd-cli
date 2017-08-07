@@ -45,16 +45,23 @@ def init(project):
 
 @click.command()
 @click.argument('id', required=False, nargs=1)
-def status(id):
+@click.option('-f', '--format', default='default', help='Returns an experiment as json or default format')
+def status(id, format):
     """
     View status of all or specific run.
     It can also list status of all the runs in the project.
     """
     if id:
         experiment = ExperimentClient().get(id)
+        if format == 'json':
+            floyd_logger.info(experiment.to_dict())
+            return
         print_experiments([experiment])
     else:
         experiments = ExperimentClient().get_all()
+        if format == 'json':
+            floyd_logger.info([e.to_dict() for e in experiments])
+            return
         print_experiments(experiments)
 
 
@@ -92,11 +99,15 @@ def clone(id):
 
 @click.command()
 @click.argument('id', nargs=1)
-def info(id):
+@click.option('-f', '--format', default='default', help='json will return json formatted experiment, default will print ')
+def info(id, format):
     """
     Prints detailed info for the run
     """
     experiment = ExperimentClient().get(id)
+    if format == 'json':
+        floyd_logger.info(experiment.to_dict())
+        return
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
     table = [["Job name", experiment.name],
@@ -116,12 +127,16 @@ def info(id):
 @click.command()
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
 @click.option('-t', '--tail', is_flag=True, default=False, help='Stream the logs')
+@click.option('-f', '--format', default='default', help='Returns an experiment as json or default format')
 @click.argument('id', nargs=1)
-def logs(id, url, tail, sleep_duration=1):
+def logs(id, url, tail, format, sleep_duration=1):
     """
     Print the logs of the run.
     """
     experiment = ExperimentClient().get(id)
+    if format == 'json':
+        floyd_logger.info(experiment.to_dict())
+        return
     if experiment.state == 'queued':
         floyd_logger.info("Job is currently in a queue")
         return
@@ -160,8 +175,9 @@ def logs(id, url, tail, sleep_duration=1):
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
 @click.option('-d', '--download', is_flag=True, default=False,
               help='Download the contents of the output to current directory')
+@click.option('-f', '--format', default='default', help='Returns an experiment as json or default format')
 @click.argument('id', nargs=1)
-def output(id, url, download):
+def output(id, url, download, format):
     """
     Shows the output url of the run.
     By default opens the output page in your default browser.
@@ -171,6 +187,12 @@ def output(id, url, download):
     if "output" in task_instance.output_ids:
         resource = ResourceClient().get(task_instance.output_ids["output"])
         output_dir_url = "{}/viewer/{}".format(floyd.floyd_host, resource.uri)
+        if format == 'json':
+            experiment_dict = json.loads(experiment.to_dict())
+            experiment_dict['output_dir_url'] = output_dir_url
+            floyd_logger.info(json.dumps(experiment_dict))
+            return
+
         if url:
             floyd_logger.info(output_dir_url)
         else:
