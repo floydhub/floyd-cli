@@ -3,6 +3,7 @@ from tabulate import tabulate
 from time import sleep
 import webbrowser
 import sys
+import json
 
 import floyd
 from floyd.cli.utils import get_module_task_instance_id
