@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, post_load
 from floyd.model.base import BaseModel
 
 
@@ -11,19 +11,23 @@ class ResourceSchema(Schema):
     date_finalized = fields.DateTime()
     date_last_updated = fields.DateTime()
 
+    @post_load
+    def make_resource(self, data):
+        return Resource(**data)
+
 
 class Resource(BaseModel):
     schema = ResourceSchema(strict=True)
 
     def __init__(self,
-                 resource_id,
+                 id,
                  uri,
                  state,
                  resource_type,
                  size,
                  date_finalized,
                  date_last_updated):
-        self.id = resource_id
+        self.id = id
         self.uri = uri
         self.state = state
         self.resource_type = resource_type

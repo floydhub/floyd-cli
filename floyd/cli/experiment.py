@@ -169,8 +169,8 @@ def output(id, url, download):
     experiment = ExperimentClient().get(id)
     task_instance = TaskInstanceClient().get(get_module_task_instance_id(experiment.task_instances))
     if "output" in task_instance.output_ids:
-        output_dir_url = "{}/api/v1/resources/{}?content=true".format(floyd.floyd_host,
-                                                                      task_instance.output_ids["output"])
+        resource = ResourceClient().get(task_instance.output_ids["output"])
+        output_dir_url = "{}/viewer/{}".format(floyd.floyd_host, resource.uri)
         if url:
             floyd_logger.info(output_dir_url)
         else:

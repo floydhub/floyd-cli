@@ -63,7 +63,6 @@ class ModuleClient(FloydHttpClient):
         finally:
             # always make sure we clear the console
             bar.done()
-        floyd_logger.info("Done")
         return response.json().get("id")
 
     def delete(self, id):

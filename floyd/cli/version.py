@@ -8,6 +8,10 @@ from floyd.log import logger as floyd_logger
 PROJECT_NAME = "floyd-cli"
 
 
+def pip_upgrade():
+    pip.main(["install", "--upgrade", PROJECT_NAME])
+
+
 @click.command()
 def version():
     """
@@ -23,6 +27,6 @@ def upgrade():
     Upgrade floyd command line
     """
     try:
-        pip.main(["install", "--upgrade", PROJECT_NAME])
+        pip_upgrade()
     except Exception as e:
         floyd_logger.error(e)

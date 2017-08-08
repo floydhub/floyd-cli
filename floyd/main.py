@@ -1,4 +1,5 @@
 import click
+import sys
 from distutils.version import LooseVersion
 import pkg_resources
 
@@ -33,16 +34,22 @@ def check_cli_version():
     server_version = VersionClient().get_cli_version()
     current_version = pkg_resources.require("floyd-cli")[0].version
     if LooseVersion(current_version) < LooseVersion(server_version.min_version):
-        raise FloydException("""
-Your version of CLI ({}) is no longer compatible with server. Run:
-    pip install -U floyd-cli
-to upgrade to the latest version ({})
-            """.format(current_version, server_version.latest_version))
-    if LooseVersion(current_version) < LooseVersion(server_version.latest_version):
         print("""
-New version of CLI ({}) is now available. To upgrade run:
+Your version of CLI (%s) is no longer compatible with server.""" % current_version)
+        if click.confirm('Do you want to upgrade to version %s now?' % server_version.latest_version):
+            from floyd.cli.version import pip_upgrade
+            pip_upgrade()
+            sys.exit(0)
+        else:
+            print("""Your can manually run:
     pip install -U floyd-cli
-            """.format(server_version.latest_version))
+to upgrade to the latest version (%s))""" % server_version.latest_version)
+            sys.exit(0)
+    elif LooseVersion(current_version) < LooseVersion(server_version.latest_version):
+        print("""
+New version of CLI (%s) is now available. To upgrade run:
+    pip install -U floyd-cli
+            """ % server_version.latest_version)
 
 
 def add_commands(cli):
