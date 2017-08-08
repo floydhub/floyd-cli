@@ -69,7 +69,7 @@ class Experiment(BaseModel):
         return date.astimezone(PST_TIMEZONE)
 
     def to_dict(self):
-        return json.dumps(self.__dict__, indent=4, sort_keys=True, default=str)
+        return self.__dict__
 
     @property
     def created_pretty(self):

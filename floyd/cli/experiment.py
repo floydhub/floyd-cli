@@ -54,13 +54,13 @@ def status(id, format):
     if id:
         experiment = ExperimentClient().get(id)
         if format == 'json':
-            floyd_logger.info(experiment.to_dict())
+            floyd_logger.info(json.dumps(experiment.to_dict(), default=str))
             return
         print_experiments([experiment])
     else:
         experiments = ExperimentClient().get_all()
         if format == 'json':
-            floyd_logger.info([e.to_dict() for e in experiments])
+            floyd_logger.info(json.dumps([e.to_dict() for e in experiments], default=str))
             return
         print_experiments(experiments)
 
@@ -106,7 +106,7 @@ def info(id, format):
     """
     experiment = ExperimentClient().get(id)
     if format == 'json':
-        floyd_logger.info(experiment.to_dict())
+        floyd_logger.info(json.dumps(experiment.to_dict(), default=str))
         return
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
@@ -135,7 +135,7 @@ def logs(id, url, tail, format, sleep_duration=1):
     """
     experiment = ExperimentClient().get(id)
     if format == 'json':
-        floyd_logger.info(experiment.to_dict())
+        floyd_logger.info(json.dumps(experiment.to_dict(), default=str))
         return
     if experiment.state == 'queued':
         floyd_logger.info("Job is currently in a queue")
@@ -188,9 +188,9 @@ def output(id, url, download, format):
         resource = ResourceClient().get(task_instance.output_ids["output"])
         output_dir_url = "{}/viewer/{}".format(floyd.floyd_host, resource.uri)
         if format == 'json':
-            experiment_dict = json.loads(experiment.to_dict())
+            experiment_dict = experiment.to_dict()
             experiment_dict['output_dir_url'] = output_dir_url
-            floyd_logger.info(json.dumps(experiment_dict))
+            floyd_logger.info(json.dumps(experiment_dict, default=str))
             return
 
         if url:
