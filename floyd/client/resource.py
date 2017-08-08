@@ -20,7 +20,8 @@ class ResourceClient(FloydHttpClient):
         try:
             response = self.request('GET', self.URL_PREFIX + resource_id)
             resource_dict = response.json()
-            return Resource.from_dict(resource_dict)
+            resource = Resource.from_dict(resource_dict)
+            return resource
         except FloydException as e:
             floyd_logger.info("Resource %s: ERROR! %s", resource_id, e.message)
             return None
