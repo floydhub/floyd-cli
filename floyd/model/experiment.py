@@ -68,6 +68,9 @@ class Experiment(BaseModel):
             date = utc.localize(date)
         return date.astimezone(PST_TIMEZONE)
 
+    def to_dict(self):
+        return self.__dict__
+
     @property
     def created_pretty(self):
         return pretty_date(self.created)
