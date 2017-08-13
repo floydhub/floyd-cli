@@ -19,13 +19,15 @@ class TestExperimentRun(unittest.TestCase):
     @patch('floyd.cli.run.ExperimentConfigManager.set_config')
     @patch('floyd.cli.run.ModuleClient.create', return_value='module_id')
     @patch('floyd.cli.run.ExperimentClient.create', return_value='expt_id')
+    @patch('floyd.cli.run.ProjectClient.exists', return_value=True)
     def test_with_no_data(self,
                           create_experiment,
                           create_module,
                           set_config,
                           get_config,
                           get_access_token,
-                          get_all_env):
+                          get_all_env,
+                          exists):
         """
         Simple experiment with no data attached
         """
@@ -37,12 +39,14 @@ class TestExperimentRun(unittest.TestCase):
     @patch('floyd.cli.run.ExperimentConfigManager.set_config')
     @patch('floyd.cli.run.ModuleClient.create', return_value='module_id')
     @patch('floyd.cli.run.ExperimentClient.create', return_value='expt_id')
+    @patch('floyd.cli.run.ProjectClient.exists', return_value=True)
     def test_with_multiple_data_ids(self,
                                     create_experiment,
                                     create_module,
                                     set_config,
                                     get_config,
-                                    get_access_token):
+                                    get_access_token,
+                                    exists):
         """
         Simple experiment with no data attached
         """
