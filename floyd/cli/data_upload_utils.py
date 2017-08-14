@@ -169,8 +169,9 @@ def complete_upload(data_config):
             DataConfigManager.set_config(data_config)
 
     # Print output
-    table_output = [["DATA ID", "NAME"],
-                    [data_id, normalize_data_name(data_config.data_name)]]
+    table_output = [["NAME"],
+                    [normalize_data_name(data_config.data_name)]]
+    floyd_logger.info('')
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
 
 
