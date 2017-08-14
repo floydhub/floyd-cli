@@ -163,7 +163,7 @@ def delete(ids, yes):
 
         data_name = normalize_data_name(data_source.name)
         suffix = data_name.split('/')[-1]
-        if not suffix.isnumeric():
+        if not suffix.isdigit():
             failures = True
             floyd_logger.error('%s is not a dataset, skipped.', id)
             if suffix == 'output':
@@ -183,6 +183,7 @@ def delete(ids, yes):
 
     if failures:
         sys.exit(1)
+
 
 data.add_command(clone)
 data.add_command(delete)
