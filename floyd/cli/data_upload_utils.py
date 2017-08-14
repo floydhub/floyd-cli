@@ -14,6 +14,7 @@ from floyd.client.tus_data import TusDataClient
 from floyd.log import logger as floyd_logger
 from floyd.manager.data_config import DataConfigManager
 from floyd.model.data import DataRequest
+from floyd.cli.utils import normalize_data_name
 
 
 class ResourceWaitIter(object):
@@ -169,7 +170,7 @@ def complete_upload(data_config):
 
     # Print output
     table_output = [["DATA ID", "NAME"],
-                    [data_id, data_config.data_name]]
+                    [data_id, normalize_data_name(data_config.data_name)]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
 
 

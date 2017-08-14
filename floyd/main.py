@@ -10,7 +10,6 @@ from floyd.cli.experiment import clone, delete, info, init, logs, output, status
 from floyd.cli.run import run
 from floyd.cli.version import upgrade, version
 from floyd.client.version import VersionClient
-from floyd.exceptions import FloydException
 from floyd.log import configure_logger
 
 

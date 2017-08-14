@@ -14,6 +14,7 @@ from floyd.cli.data_upload_utils import (
     opt_to_resume, upload_is_resumable, abort_previous_upload,
     initialize_new_upload, complete_upload
 )
+from floyd.cli.utils import normalize_data_name
 
 
 @click.group()
@@ -97,7 +98,8 @@ def print_data(data_sources):
     headers = ["DATA NAME", "CREATED", "STATUS", "DISK USAGE"]
     data_list = []
     for data_source in data_sources:
-        data_list.append([data_source.name, data_source.created_pretty,
+        data_list.append([normalize_data_name(data_source.name),
+                          data_source.created_pretty,
                           data_source.state, data_source.size])
     floyd_logger.info(tabulate(data_list, headers=headers))
 
@@ -159,10 +161,11 @@ def delete(ids, yes):
             failures = True
             continue
 
-        if not yes and not click.confirm("Delete Data: {}?".format(data_source.name),
+        data_name = normalize_data_name(data_source.name)
+        if not yes and not click.confirm("Delete Data: {}?".format(data_name),
                                          abort=False,
                                          default=False):
-            floyd_logger.info("Data {}: Skipped".format(data_source.name))
+            floyd_logger.info("Data %s: Skipped", data_name)
             continue
 
         if not DataClient().delete(id):

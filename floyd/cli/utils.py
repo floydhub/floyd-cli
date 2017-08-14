@@ -72,3 +72,26 @@ def get_data_id(data_str):
         return name_or_id
     else:
         return data_str
+
+
+def normalize_data_name(data_name):
+    if data_name.endswith('/output'):
+        name_parts = data_name.split('/')
+        if len(name_parts) <= 4:
+            name_parts.insert(1, 'projects')
+            data_name = '/'.join(name_parts)
+        return data_name
+    else:
+        name_parts = data_name.split('/')
+        if len(name_parts) <= 3:
+            name_parts.insert(1, 'datasets')
+            data_name = '/'.join(name_parts)
+        return data_name
+
+
+def normalize_job_name(job_name):
+    job_name_parts = job_name.split('/')
+    if len(job_name_parts) <= 3:
+        job_name_parts.insert(1, 'projects')
+        job_name = '/'.join(job_name_parts)
+    return job_name
