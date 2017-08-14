@@ -178,6 +178,8 @@ def delete(ids, yes):
 
         if not DataClient().delete(data_source.id):
             failures = True
+        else:
+            floyd_logger.info("Data %s: Deleted", data_name)
 
     if failures:
         sys.exit(1)
