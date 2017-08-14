@@ -162,13 +162,21 @@ def delete(ids, yes):
             continue
 
         data_name = normalize_data_name(data_source.name)
+        suffix = data_name.split('/')[-1]
+        if not suffix.isnumeric():
+            failures = True
+            floyd_logger.error('%s is not a dataset, skipped.', id)
+            if suffix == 'output':
+                floyd_logger.error('To delete job output, please delete the job itself.')
+            continue
+
         if not yes and not click.confirm("Delete Data: {}?".format(data_name),
                                          abort=False,
                                          default=False):
             floyd_logger.info("Data %s: Skipped", data_name)
             continue
 
-        if not DataClient().delete(id):
+        if not DataClient().delete(data_source.id):
             failures = True
 
     if failures:
