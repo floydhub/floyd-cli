@@ -67,4 +67,5 @@ def add_commands(cli):
     cli.add_command(upgrade)
     cli.add_command(version)
 
+
 add_commands(cli)
