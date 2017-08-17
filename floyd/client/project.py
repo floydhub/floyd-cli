@@ -43,5 +43,5 @@ class ProjectClient(FloydHttpClient):
                 return True
             else:
                 return False
-        except FloydException:
+        except NotFoundException:
             return False

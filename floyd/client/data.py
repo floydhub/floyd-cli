@@ -90,7 +90,6 @@ class DataClient(FloydHttpClient):
         try:
             # data delete is a synchronous process, it can take a long time
             self.request("DELETE", self.url + data_id, timeout=60)
-            floyd_logger.info("Data %s: Deleted", data_id)
             return True
         except FloydException as e:
             floyd_logger.error("Data %s: ERROR! %s", data_id, e.message)

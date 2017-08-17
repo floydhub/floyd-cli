@@ -10,7 +10,6 @@ from floyd.cli.experiment import clone, delete, info, init, logs, output, status
 from floyd.cli.run import run
 from floyd.cli.version import upgrade, version
 from floyd.client.version import VersionClient
-from floyd.exceptions import FloydException
 from floyd.log import configure_logger
 
 
@@ -67,5 +66,6 @@ def add_commands(cli):
     cli.add_command(run)
     cli.add_command(upgrade)
     cli.add_command(version)
+
 
 add_commands(cli)

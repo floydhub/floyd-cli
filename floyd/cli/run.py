@@ -8,7 +8,9 @@ import sys
 from floyd.constants import DEFAULT_ENV
 from floyd.client.data import DataClient
 from floyd.client.project import ProjectClient
-from floyd.cli.utils import get_mode_parameter, wait_for_url, get_data_name
+from floyd.cli.utils import (
+    get_mode_parameter, wait_for_url, get_data_name, normalize_job_name
+)
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.client.env import EnvClient
@@ -133,9 +135,11 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
                                            instance_type=instance_type)
     expt_cli = ExperimentClient()
     expt_info = expt_cli.create(experiment_request)
-    floyd_logger.debug("Created job : {}".format(expt_info['id']))
+    floyd_logger.debug("Created job : %s", expt_info['id'])
 
-    table_output = [["JOB NAME"], [expt_info['name']]]
+    job_name = normalize_job_name(expt_info['name'])
+    floyd_logger.info("")
+    table_output = [["JOB NAME"], [job_name]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
     floyd_logger.info("")
 
@@ -147,9 +151,9 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
                 if experiment.task_instances:
                     break
             except Exception:
-                floyd_logger.debug("Job not available yet: {}".format(expt_info['id']))
+                floyd_logger.debug("Job not available yet: %s", expt_info['id'])
 
-            floyd_logger.debug("Job not available yet: {}".format(expt_info['id']))
+            floyd_logger.debug("Job not available yet: %s", expt_info['id'])
             sleep(3)
             continue
 
@@ -162,9 +166,9 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
                 if open:
                     webbrowser.open(jupyter_url)
             else:
-                floyd_logger.info("\nPath to jupyter notebook: {}".format(jupyter_url))
+                floyd_logger.info("\nPath to jupyter notebook: %s", jupyter_url)
                 floyd_logger.info("Notebook is still loading. View logs to track progress")
-                floyd_logger.info("   floyd logs {}".format(expt_info['name']))
+                floyd_logger.info("   floyd logs %s", job_name)
 
         # Print the path to serving endpoint
         if mode == 'serve':
@@ -177,7 +181,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
 
     else:
         floyd_logger.info("To view logs enter:")
-        floyd_logger.info("   floyd logs {}".format(expt_info['name']))
+        floyd_logger.info("   floyd logs %s", job_name)
 
 
 def get_command_line(gpu, env, message, data, mode, open, tensorboard, command):
