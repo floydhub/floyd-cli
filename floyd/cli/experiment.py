@@ -5,7 +5,9 @@ import webbrowser
 import sys
 
 import floyd
-from floyd.cli.utils import get_module_task_instance_id
+from floyd.cli.utils import (
+    get_module_task_instance_id, normalize_job_name, normalize_data_name
+)
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.client.project import ProjectClient
@@ -65,7 +67,8 @@ def print_experiments(experiments):
     headers = ["JOB NAME", "CREATED", "STATUS", "DURATION(s)", "INSTANCE", "DESCRIPTION"]
     expt_list = []
     for experiment in experiments:
-        expt_list.append([experiment.name, experiment.created_pretty, experiment.state,
+        expt_list.append([normalize_job_name(experiment.name),
+                          experiment.created_pretty, experiment.state,
                           experiment.duration_rounded,
                           experiment.instance_type_trimmed, experiment.description])
     floyd_logger.info(tabulate(expt_list, headers=headers))
@@ -99,8 +102,8 @@ def info(id):
     experiment = ExperimentClient().get(id)
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
-    table = [["Job name", experiment.name],
-             ["Output name", '%s/output' % experiment.name if task_instance else None],
+    table = [["Job name", normalize_job_name(experiment.name)],
+             ["Output name", normalize_data_name(experiment.name + '/output') if task_instance else None],
              ["Created", experiment.created_pretty],
              ["Status", experiment.state], ["Duration(s)", experiment.duration_rounded],
              ["Instance", experiment.instance_type_trimmed],
