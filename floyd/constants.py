@@ -73,8 +73,17 @@ var
 .DS_Store
 """
 
-CPU_INSTANCE_TYPE = "cpu_high"
-GPU_INSTANCE_TYPE = "gpu_high"
+C1_INSTANCE_TYPE = 'c1'
+G1_INSTANCE_TYPE = 'g1'
+C1P_INSTANCE_TYPE = 'c1p'
+G1P_INSTANCE_TYPE = 'g1p'
+
+INSTANCE_ARCH_MAP = {
+    C1_INSTANCE_TYPE: 'cpu',
+    G1_INSTANCE_TYPE: 'gpu',
+    C1P_INSTANCE_TYPE: 'cpu',
+    G1P_INSTANCE_TYPE: 'gpu',
+}
 
 FIRST_STEPS_DOC = """
 Start by cloning the sample project
