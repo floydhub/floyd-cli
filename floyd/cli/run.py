@@ -16,7 +16,7 @@ from floyd.client.module import ModuleClient
 from floyd.client.env import EnvClient
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.experiment_config import ExperimentConfigManager
-from floyd.constants import CPU_INSTANCE_TYPE, GPU_INSTANCE_TYPE
+from floyd.constants import C1_INSTANCE_TYPE, G1_INSTANCE_TYPE, INSTANCE_ARCH_MAP
 from floyd.model.module import Module
 from floyd.model.experiment import ExperimentRequest
 from floyd.log import logger as floyd_logger
@@ -39,9 +39,12 @@ from floyd.log import logger as floyd_logger
               help='Job commit message')
 @click.option('--tensorboard/--no-tensorboard',
               help='Run tensorboard in the job environment')
+@click.option('--instance-type',
+              type=click.Choice(INSTANCE_ARCH_MAP.keys()),
+              help='Instance type to run the job')
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
+def run(ctx, gpu, env, message, data, mode, open, tensorboard, instance_type, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -81,12 +84,13 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, command):
     module_inputs = [{'name': get_data_name(data_str, default_name),
                       'type': 'dir'} for data_str in data_ids]
 
-    if gpu:
-        arch = 'gpu'
-        instance_type = GPU_INSTANCE_TYPE
-    else:
-        arch = 'cpu'
-        instance_type = CPU_INSTANCE_TYPE
+    if not instance_type:
+        if gpu:
+            instance_type = G1_INSTANCE_TYPE
+        else:
+            instance_type = C1_INSTANCE_TYPE
+
+    arch = INSTANCE_ARCH_MAP[instance_type]
 
     env_map = EnvClient().get_all()
     envs = env_map.get(arch)

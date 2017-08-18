@@ -45,6 +45,7 @@ def get_unignored_file_paths(ignore_list=None, whitelist=None):
 
     return unignored_files
 
+
 def ignore_path(path, ignore_list=None, whitelist=None):
     """
     Returns a boolean indicating if a path should be ignored given an
@@ -55,6 +56,7 @@ def ignore_path(path, ignore_list=None, whitelist=None):
     if whitelist is None:
         whitelist = []
     return matches_glob_list(path, ignore_list) and not matches_glob_list(path, whitelist)
+
 
 def matches_glob_list(path, glob_list):
     """
@@ -68,6 +70,7 @@ def matches_glob_list(path, glob_list):
         except TypeError:
             pass
     return False
+
 
 def get_files_in_current_directory(file_type):
     """
