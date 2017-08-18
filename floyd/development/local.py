@@ -18,4 +18,5 @@ def cli(verbose):
     configure_logger(verbose)
     check_cli_version()
 
+
 add_commands(cli)
