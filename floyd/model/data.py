@@ -31,8 +31,8 @@ class DataDetails(BaseModel):
 class DataSchema(Schema):
     id = fields.Str()
     name = fields.Str()
-    description = fields.Str()
     created = fields.DateTime(load_from="date_created")
+    description = fields.Str(allow_none=True)
     data = fields.Nested(DataDetailsSchema)
     version = fields.Str(allow_none=True)
     resource_id = fields.Str(allow_none=True)
