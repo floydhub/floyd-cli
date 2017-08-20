@@ -9,8 +9,8 @@ from floyd.model.base import BaseModel
 class ExperimentSchema(Schema):
     id = fields.Str()
     name = fields.Str()
-    description = fields.Str()
     created = fields.DateTime()
+    description = fields.Str(allow_none=True)
     state = fields.Str(allow_none=True)
     duration = fields.Number(allow_none=True)
     log_id = fields.Str(load_from="logId")
