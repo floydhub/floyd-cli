@@ -1,3 +1,4 @@
+from clint.textui import progress
 import requests
 import os
 import sys
@@ -89,7 +90,9 @@ class FloydHttpClient(object):
                                     stream=True)
             self.check_response_status(response)
             with open(filename, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=1024):
+                total_length = int(response.headers.get('content-length'))
+                for chunk in progress.bar(response.iter_content(chunk_size=1024),
+                                          expected_size=(total_length / 1024) + 1):
                     if chunk:
                         f.write(chunk)
             return filename

@@ -171,6 +171,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
             jupyter_url = experiment.service_url
             print("Setting up your instance and waiting for Jupyter notebook to become available ...", end='')
             if wait_for_url(jupyter_url, sleep_duration_seconds=2, iterations=900):
+                sleep(3)  # HACK: sleep extra 3 seconds for traffic route sync
                 floyd_logger.info("\nPath to jupyter notebook: {}".format(jupyter_url))
                 if open:
                     webbrowser.open(jupyter_url)
