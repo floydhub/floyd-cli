@@ -26,7 +26,7 @@ def init(project):
     Initialize new project at the current dir.
     After init run your command. Example:
 
-        floyd run python tensorflow.py > /output/model.1
+        floyd run 'python tensorflow.py > /output/model.1'
     """
     project_obj = ProjectClient().get_by_name(project)
     if not project_obj:
@@ -228,6 +228,8 @@ def delete(ids, yes):
 
         if not ExperimentClient().delete(experiment.id):
             failures = True
+        else:
+            floyd_logger.info("Job %s Deleted", experiment.name)
 
     if failures:
         sys.exit(1)
