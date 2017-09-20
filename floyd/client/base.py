@@ -85,6 +85,8 @@ class FloydHttpClient(object):
                                     stream=True)
             self.check_response_status(response)
             with open(filename, 'wb') as f:
+                # chunk mode response doesn't have content-length so we are
+                # using a custom header here
                 content_length = response.headers.get('x-floydhub-content-length')
                 if not content_length:
                     content_length = response.headers.get('content-length')

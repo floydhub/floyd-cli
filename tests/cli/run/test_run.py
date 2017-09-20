@@ -76,7 +76,7 @@ class TestExperimentRun(unittest.TestCase):
             tensorboard=False,
             command_str='echo \'hello'
         )
-        assert re == 'floyd run --cpu --env tensorflow --data foo:input --data bar --mode jupyter --open'
+        assert re == 'floyd run --cpu --env tensorflow --data foo:input --data bar --mode jupyter'
 
         re = get_command_line(
             instance_type='g1',

@@ -216,9 +216,7 @@ def get_command_line(instance_type, env, message, data, mode, open, tensorboard,
     if not mode == "job":
         floyd_command += ["--mode", mode]
         if mode == 'jupyter':
-            if open:
-                floyd_command.append("--open")
-            else:
+            if not open:
                 floyd_command.append("--no-open")
     else:
         if command_str:
