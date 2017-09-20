@@ -30,8 +30,7 @@ class ExperimentClient(FloydHttpClient):
         return Experiment.from_dict(experiment_dict)
 
     def stop(self, id):
-        self.request("GET",
-                     "{}cancel/{}".format(self.url, id))
+        self.request("GET", "{}cancel/{}".format(self.url, id))
         return True
 
     def create(self, experiment_request):

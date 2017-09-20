@@ -56,15 +56,10 @@ class FloydHttpClient(object):
                                         files=files,
                                         timeout=timeout)
         except requests.exceptions.ConnectionError as exception:
-            floyd_logger.debug("Exception: {}".format(exception))
+            floyd_logger.debug("Exception: %s", exception, exc_info=True)
             sys.exit("Cannot connect to the Floyd server. Check your internet connection.")
 
-        try:
-            floyd_logger.debug("Response Content: {}, Headers: {}".format(
-                response.json(), response.headers))
-        except Exception:
-            floyd_logger.debug("Request failed. Response: {}".format(response.content))
-
+        floyd_logger.debug("Response Content: %s, Headers: %s" % (response.content, response.headers))
         self.check_response_status(response)
         return response
 
@@ -90,11 +85,18 @@ class FloydHttpClient(object):
                                     stream=True)
             self.check_response_status(response)
             with open(filename, 'wb') as f:
-                total_length = int(response.headers.get('content-length'))
-                for chunk in progress.bar(response.iter_content(chunk_size=1024),
-                                          expected_size=(total_length / 1024) + 1):
-                    if chunk:
-                        f.write(chunk)
+                content_length = response.headers.get('x-floydhub-content-length')
+                if not content_length:
+                    content_length = response.headers.get('content-length')
+                if content_length:
+                    for chunk in progress.bar(response.iter_content(chunk_size=1024),
+                                              expected_size=(int(content_length) / 1024) + 1):
+                        if chunk:
+                            f.write(chunk)
+                else:
+                    for chunk in response.iter_content(chunk_size=1024):
+                        if chunk:
+                            f.write(chunk)
             return filename
         except requests.exceptions.ConnectionError as exception:
             floyd_logger.debug("Exception: {}".format(exception))
