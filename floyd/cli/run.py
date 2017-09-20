@@ -4,8 +4,12 @@ from tabulate import tabulate
 from time import sleep
 import webbrowser
 import sys
+try:
+    from pipes import quote as shell_quote
+except:
+    from shlex import quote as shell_quote
 
-from floyd.constants import DEFAULT_ENV
+from floyd.constants import DEFAULT_ENV, INSTANCE_NAME_MAP
 from floyd.client.data import DataClient
 from floyd.client.project import ProjectClient
 from floyd.cli.utils import (
@@ -134,7 +138,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
 
     # Create experiment request
     # Get the actual command entered in the command line
-    full_command = get_command_line(gpu, env, message, data, mode, open, tensorboard, command)
+    full_command = get_command_line(instance_type, env, message, data, mode, open, tensorboard, command_str)
     experiment_request = ExperimentRequest(name=experiment_name,
                                            description=message,
                                            full_command=full_command,
@@ -194,26 +198,29 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
         floyd_logger.info("   floyd logs %s", job_name)
 
 
-def get_command_line(gpu, env, message, data, mode, open, tensorboard, command):
+def get_command_line(instance_type, env, message, data, mode, open, tensorboard, command_str):
     """
     Return a string representing the full floyd command entered in the command line
     """
-    floyd_command = "floyd run"
+    floyd_command = ["floyd", "run"]
+    floyd_command.append('--' + INSTANCE_NAME_MAP[instance_type])
     if not env == DEFAULT_ENV:
-        floyd_command = floyd_command + " --env {}".format(env)
+        floyd_command += ["--env", env]
     if message:
-        floyd_command = floyd_command + " --message \"{}\"".format(message)
+        floyd_command += ["--message", shell_quote(message)]
     if data:
         for data_item in data:
-            floyd_command = floyd_command + " --data {}".format(data_item)
-    if not mode == "job":
-        floyd_command = floyd_command + " --mode {}".format(mode)
-    if gpu:
-        floyd_command = floyd_command + " --gpu"
-    if not open:
-        floyd_command = floyd_command + " --no-open"
+            floyd_command += ["--data", data_item]
     if tensorboard:
-        floyd_command = floyd_command + " --tensorboard"
-    if command:
-        floyd_command = floyd_command + " \"{}\"".format(' '.join(command))
-    return floyd_command
+        floyd_command.append("--tensorboard")
+    if not mode == "job":
+        floyd_command += ["--mode", mode]
+        if mode == 'jupyter':
+            if open:
+                floyd_command.append("--open")
+            else:
+                floyd_command.append("--no-open")
+    else:
+        if command_str:
+            floyd_command.append(shell_quote(command_str))
+    return ' '.join(floyd_command)
