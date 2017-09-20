@@ -94,12 +94,12 @@ def clone(id):
 
 
 @click.command()
-@click.argument('id', nargs=1)
-def info(id):
+@click.argument('job_name', nargs=1)
+def info(job_name):
     """
     Prints detailed info for the run
     """
-    experiment = ExperimentClient().get(id)
+    experiment = ExperimentClient().get(job_name)
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
     table = [["Job name", normalize_job_name(experiment.name)],
@@ -220,7 +220,7 @@ def delete(ids, yes):
             failures = True
             continue
 
-        if not yes and not click.confirm("Delete Run: {}?".format(experiment.name),
+        if not yes and not click.confirm("Delete Job: {}?".format(experiment.name),
                                          abort=False,
                                          default=False):
             floyd_logger.info("Job {}: Skipped.".format(experiment.name))
