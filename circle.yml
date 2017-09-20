@@ -10,11 +10,12 @@ general:
 
 dependencies:
   override:
-    - pip install tox tox-pyenv
+    - pip install tox tox-pyenv flake8
     - pyenv local 2.7.11 3.5.2  # Should correspond to pre-installed Python versions on CircleCI
 
 test:
   override:
+     - flake8 floyd
      - tox
 
 deployment:

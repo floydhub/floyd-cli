@@ -26,7 +26,7 @@ def init(project):
     Initialize new project at the current dir.
     After init run your command. Example:
 
-        floyd run python tensorflow.py > /output/model.1
+        floyd run 'python tensorflow.py > /output/model.1'
     """
     project_obj = ProjectClient().get_by_name(project)
     if not project_obj:
@@ -94,12 +94,12 @@ def clone(id):
 
 
 @click.command()
-@click.argument('id', nargs=1)
-def info(id):
+@click.argument('job_name', nargs=1)
+def info(job_name):
     """
     Prints detailed info for the run
     """
-    experiment = ExperimentClient().get(id)
+    experiment = ExperimentClient().get(job_name)
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
     table = [["Job name", normalize_job_name(experiment.name)],
@@ -220,7 +220,7 @@ def delete(ids, yes):
             failures = True
             continue
 
-        if not yes and not click.confirm("Delete Run: {}?".format(experiment.name),
+        if not yes and not click.confirm("Delete Job: {}?".format(experiment.name),
                                          abort=False,
                                          default=False):
             floyd_logger.info("Job {}: Skipped.".format(experiment.name))
@@ -228,6 +228,8 @@ def delete(ids, yes):
 
         if not ExperimentClient().delete(experiment.id):
             failures = True
+        else:
+            floyd_logger.info("Job %s Deleted", experiment.name)
 
     if failures:
         sys.exit(1)

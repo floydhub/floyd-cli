@@ -30,8 +30,7 @@ class ExperimentClient(FloydHttpClient):
         return Experiment.from_dict(experiment_dict)
 
     def stop(self, id):
-        self.request("GET",
-                     "{}cancel/{}".format(self.url, id))
+        self.request("GET", "{}cancel/{}".format(self.url, id))
         return True
 
     def create(self, experiment_request):
@@ -44,7 +43,6 @@ class ExperimentClient(FloydHttpClient):
         try:
             self.request("DELETE",
                          "{}{}".format(self.url, id))
-            floyd_logger.info("Job {}: Deleted".format(id))
             return True
         except NotFoundException as e:
             floyd_logger.info(

@@ -2,7 +2,7 @@ from click.testing import CliRunner
 import unittest
 from mock import patch
 
-from floyd.cli.run import run
+from floyd.cli.run import run, get_command_line
 from tests.cli.mocks import mock_access_token, mock_experiment_config
 
 
@@ -52,3 +52,40 @@ class TestExperimentRun(unittest.TestCase):
         """
         result = self.runner.invoke(run, ['command', '--data', 'data-id1', '--data', 'data-id2'])
         assert(result.exit_code == 0)
+
+    def test_get_command_line(self):
+        re = get_command_line(
+            instance_type='g1p',
+            env='pytorch-2.0:py2',
+            message='test\' message',
+            data=['foo:input'],
+            mode='job',
+            open=False,
+            tensorboard=True,
+            command_str='echo hello'
+        )
+        assert re == 'floyd run --gpu+ --env pytorch-2.0:py2 --message \'test\'"\'"\' message\' --data foo:input --tensorboard \'echo hello\''
+
+        re = get_command_line(
+            instance_type='c1',
+            env='tensorflow',
+            message=None,
+            data=['foo:input', 'bar'],
+            mode='jupyter',
+            open=True,
+            tensorboard=False,
+            command_str='echo \'hello'
+        )
+        assert re == 'floyd run --cpu --env tensorflow --data foo:input --data bar --mode jupyter'
+
+        re = get_command_line(
+            instance_type='g1',
+            env='tensorflow',
+            message=None,
+            data=['foo:input'],
+            mode='job',
+            open=False,
+            tensorboard=True,
+            command_str='echo hello > /output'
+        )
+        assert re == 'floyd run --gpu --env tensorflow --data foo:input --tensorboard \'echo hello > /output\''
