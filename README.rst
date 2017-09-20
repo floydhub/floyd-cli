@@ -9,8 +9,8 @@ Command line tool for Floyd. Use this to interact with Floyd (`www.floydhub.com 
 .. image:: https://badge.fury.io/py/floyd-cli.svg
    :target: https://badge.fury.io/py/floyd-cli
 
-* `Installation <http://docs.floydhub.com/home/install/>`_
-* `Getting Started <http://docs.floydhub.com/home/getting_started/>`_
+* `Installation <http://docs.floydhub.com/guides/basics/install/>`_
+* `Quick Start <http://docs.floydhub.com/getstarted/quick_start/>`_
 * `Documentation <http://docs.floydhub.com/>`_
 * `Issue Tracking <https://github.com/floydhub/floyd-cli/issues>`_
 * `Forum <https://forum.floydhub.com/>`_
@@ -38,7 +38,7 @@ the prompt and press ``ENTER``. You are now logged in and ready to rock.
 -----------------------------------
 Ready to run your first experiment?
 -----------------------------------
-Visit the `getting started guide <http://docs.floydhub.com/home/getting_started/>`_.
+Visit the `quick start guide <http://docs.floydhub.com/getstarted/quick_start/>`_.
 
 --------------------------------
 Want to learn more?

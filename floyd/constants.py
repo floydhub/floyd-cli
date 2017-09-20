@@ -85,6 +85,13 @@ INSTANCE_ARCH_MAP = {
     G1P_INSTANCE_TYPE: 'gpu',
 }
 
+INSTANCE_NAME_MAP = {
+    C1_INSTANCE_TYPE: 'cpu',
+    G1_INSTANCE_TYPE: 'gpu',
+    C1P_INSTANCE_TYPE: 'cpu+',
+    G1P_INSTANCE_TYPE: 'gpu+',
+}
+
 FIRST_STEPS_DOC = """
 Start by cloning the sample project
     git clone https://github.com/floydhub/tensorflow-examples.git
