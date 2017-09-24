@@ -33,6 +33,12 @@ class ExperimentClient(FloydHttpClient):
         self.request("GET", "{}cancel/{}".format(self.url, id))
         return True
 
+    def restart(self, expt_id, parameters=None):
+        if parameters is None:
+            parameters = {}
+        re = self.request("POST", "{}restart/{}".format(self.url, expt_id), json=parameters)
+        return re.json()
+
     def create(self, experiment_request):
         return self.request("POST",
                             "{}run_module/".format(self.url),
