@@ -171,6 +171,10 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
         sys.exit(3)
 
     command_str = ' '.join(command)
+    if command_str and mode in ('jupyter', 'serve'):
+        floyd_logger.error('Command argument "%s" cannot be used with mode: %s', command_str, mode)
+        sys.exit(3)
+
     module = Module(name=experiment_name,
                     description=message or '',
                     command=command_str,
