@@ -12,6 +12,8 @@ class ExperimentSchema(Schema):
     created = fields.DateTime()
     description = fields.Str(allow_none=True)
     state = fields.Str(allow_none=True)
+    # TODO: change to not allow none
+    mode = fields.Str(allow_none=True)
     duration = fields.Number(allow_none=True)
     log_id = fields.Str(load_from="logId")
     canvas = fields.Dict(load_only=True)
@@ -44,7 +46,7 @@ class Experiment(BaseModel):
                  tensorboard_url=None,
                  output_id=None,
                  timeout_seconds=None,
-                 **kwargs):
+                 mode=None):
         self.id = id
         self.name = name
         self.description = description
@@ -62,6 +64,7 @@ class Experiment(BaseModel):
         self.tensorboard_url = tensorboard_url
         self.output_id = output_id
         self.timeout_seconds = timeout_seconds
+        self.mode = mode
 
     def localize_date(self, date):
         if not date.tzinfo:
@@ -87,7 +90,7 @@ class Experiment(BaseModel):
 
     @property
     def is_finished(self):
-        return self.state in ["shutdown", "failed", "success"]
+        return self.state in ["shutdown", "failed", "success", "timeout"]
 
 
 class ExperimentRequestSchema(Schema):
