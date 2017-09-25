@@ -87,10 +87,14 @@ def show_new_job_info(expt_client, job_name, expt_info, mode):
         # Print the path to jupyter notebook
         if mode == 'jupyter':
             jupyter_url = experiment.service_url
+            if not jupyter_url:
+                floyd_logger.error("Jupyter URL not available, please check job state and log for error.")
+                sys.exit(1)
+
             print("Setting up your instance and waiting for Jupyter notebook to become available ...", end='')
             if wait_for_url(jupyter_url, sleep_duration_seconds=2, iterations=900):
                 sleep(3)  # HACK: sleep extra 3 seconds for traffic route sync
-                floyd_logger.info("\nPath to jupyter notebook: {}".format(jupyter_url))
+                floyd_logger.info("\nPath to jupyter notebook: %s", jupyter_url)
                 if open:
                     webbrowser.open(jupyter_url)
             else:
@@ -100,11 +104,12 @@ def show_new_job_info(expt_client, job_name, expt_info, mode):
 
         # Print the path to serving endpoint
         if mode == 'serve':
-            floyd_logger.info("Path to service endpoint: {}".format(experiment.service_url))
+            floyd_logger.info("Path to service endpoint: %s", experiment.service_url)
 
         if experiment.timeout_seconds < 4 * 60 * 60:
-            floyd_logger.info("\nYour job timeout is currently set to {} seconds".format(experiment.timeout_seconds))
-            floyd_logger.info("This is because you are in a trial account. Paid users will have longer timeouts. "
+            floyd_logger.info("\nYour job timeout is currently set to %s seconds",
+                              experiment.timeout_seconds)
+            floyd_logger.info("This is because you are in the free plan. Paid users will have longer timeouts. "
                               "See https://www.floydhub.com/pricing for details")
 
     else:
