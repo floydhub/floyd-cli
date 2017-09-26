@@ -13,43 +13,48 @@ class TestExperimentRun(unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
 
-    @patch('floyd.cli.run.EnvClient.get_all', return_value={'cpu': {'foo': 'bar'}})
+    @patch('floyd.cli.run.EnvClient.get_all', return_value={'cpu': {'default': 'bar'}})
     @patch('floyd.cli.run.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.run.ExperimentConfigManager.get_config', side_effect=mock_experiment_config)
     @patch('floyd.cli.run.ExperimentConfigManager.set_config')
     @patch('floyd.cli.run.ModuleClient.create', return_value='module_id')
-    @patch('floyd.cli.run.ExperimentClient.create', return_value='expt_id')
+    @patch('floyd.cli.run.ExperimentClient')
     @patch('floyd.cli.run.ProjectClient.exists', return_value=True)
     def test_with_no_data(self,
-                          create_experiment,
+                          exists,
+                          expt_client,
                           create_module,
                           set_config,
                           get_config,
                           get_access_token,
-                          get_all_env,
-                          exists):
+                          get_all_env):
         """
         Simple experiment with no data attached
         """
         result = self.runner.invoke(run, ['command'])
         assert(result.exit_code == 0)
 
+    @patch('floyd.cli.run.DataClient.get')
+    @patch('floyd.cli.run.EnvClient.get_all', return_value={'cpu': {'default': 'bar'}})
     @patch('floyd.cli.run.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.run.ExperimentConfigManager.get_config', side_effect=mock_experiment_config)
     @patch('floyd.cli.run.ExperimentConfigManager.set_config')
     @patch('floyd.cli.run.ModuleClient.create', return_value='module_id')
-    @patch('floyd.cli.run.ExperimentClient.create', return_value='expt_id')
+    @patch('floyd.cli.run.ExperimentClient')
     @patch('floyd.cli.run.ProjectClient.exists', return_value=True)
     def test_with_multiple_data_ids(self,
-                                    create_experiment,
+                                    exists,
+                                    expt_client,
                                     create_module,
                                     set_config,
                                     get_config,
                                     get_access_token,
-                                    exists):
+                                    env_get_all,
+                                    data_get):
         """
         Simple experiment with no data attached
         """
+        data_get.return_value.id = 'data_id'
         result = self.runner.invoke(run, ['command', '--data', 'data-id1', '--data', 'data-id2'])
         assert(result.exit_code == 0)
 

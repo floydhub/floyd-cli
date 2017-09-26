@@ -27,10 +27,98 @@ from floyd.constants import (
 from floyd.model.module import Module
 from floyd.model.experiment import ExperimentRequest
 from floyd.log import logger as floyd_logger
+from floyd.exceptions import BadRequestException
+
+
+def process_data_ids(data):
+    if len(data) > 5:
+        floyd_logger.error(
+            "Cannot attach more than 5 datasets to a job")
+        return False, None
+
+    # Get the data entity from the server to:
+    # 1. Confirm that the data id or uri exists and has the right permissions
+    # 2. If uri is used, get the id of the dataset
+    data_ids = []
+    for data_name_or_id in data:
+        path = None
+        if ':' in data_name_or_id:
+            data_name_or_id, path = data_name_or_id.split(':')
+        data_obj = DataClient().get(data_name_or_id)
+        if not data_obj:
+            floyd_logger.error("Data not found for name or id: {}".format(data_name_or_id))
+            return False, None
+        data_ids.append("%s:%s" % (data_obj.id, path if path else data_obj.id))
+    return True, data_ids
+
+
+def validate_env(env, instance_type):
+    arch = INSTANCE_ARCH_MAP[instance_type]
+    env_map = EnvClient().get_all()
+    envs = env_map.get(arch)
+    if envs:
+        if env not in envs:
+            floyd_logger.error(
+                "{} is not in the list of supported environments:\n{}".format(
+                    env, tabulate([[env_name] for env_name in envs.keys()])))
+            return False
+    else:
+        floyd_logger.error("invalid instance type")
+        return False
+
+    return True
+
+
+def show_new_job_info(expt_client, job_name, expt_info, mode):
+    if mode in ['jupyter', 'serve']:
+        while True:
+            # Wait for the experiment / task instances to become available
+            try:
+                experiment = expt_client.get(expt_info['id'])
+                if experiment.task_instances:
+                    break
+            except Exception:
+                floyd_logger.debug("Job not available yet: %s", expt_info['id'])
+
+            floyd_logger.debug("Job not available yet: %s", expt_info['id'])
+            sleep(3)
+            continue
+
+        # Print the path to jupyter notebook
+        if mode == 'jupyter':
+            jupyter_url = experiment.service_url
+            if not jupyter_url:
+                floyd_logger.error("Jupyter URL not available, please check job state and log for error.")
+                sys.exit(1)
+
+            print("Setting up your instance and waiting for Jupyter notebook to become available ...", end='')
+            if wait_for_url(jupyter_url, sleep_duration_seconds=2, iterations=900):
+                sleep(3)  # HACK: sleep extra 3 seconds for traffic route sync
+                floyd_logger.info("\nPath to jupyter notebook: %s", jupyter_url)
+                if open:
+                    webbrowser.open(jupyter_url)
+            else:
+                floyd_logger.info("\nPath to jupyter notebook: %s", jupyter_url)
+                floyd_logger.info("Notebook is still loading. View logs to track progress")
+                floyd_logger.info("   floyd logs %s", job_name)
+
+        # Print the path to serving endpoint
+        if mode == 'serve':
+            floyd_logger.info("Path to service endpoint: %s", experiment.service_url)
+
+        if experiment.timeout_seconds < 4 * 60 * 60:
+            floyd_logger.info("\nYour job timeout is currently set to %s seconds",
+                              experiment.timeout_seconds)
+            floyd_logger.info("This is because you are in the free plan. Paid users will have longer timeouts. "
+                              "See https://www.floydhub.com/pricing for details")
+
+    else:
+        floyd_logger.info("To view logs enter:")
+        floyd_logger.info("   floyd logs %s", job_name)
 
 
 @click.command()
-@click.option('--gpu/--cpu', default=False, help='Run on a gpu instance')
+@click.option('--gpu/--cpu', default=False, help='Run on a GPU instance')
 @click.option('--data', multiple=True, help='Data source id to use')
 @click.option('--mode',
               help='Different floyd modes',
@@ -60,32 +148,17 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
     if not ProjectClient().exists(experiment_config.family_id):
         floyd_logger.error('Invalid project id, please run '
                            '"floyd init PROJECT_NAME" before scheduling a job.')
-        return
+        sys.exit(1)
 
     access_token = AuthConfigManager.get_access_token()
     experiment_name = "{}/{}".format(access_token.username,
                                      experiment_config.name)
 
+    success, data_ids = process_data_ids(data)
+    if not success:
+        sys.exit(2)
+
     # Create module
-    if len(data) > 5:
-        floyd_logger.error(
-            "Cannot attach more than 5 datasets to an job")
-        return
-
-    # Get the data entity from the server to:
-    # 1. Confirm that the data id or uri exists and has the right permissions
-    # 2. If uri is used, get the id of the dataset
-    data_ids = []
-    for data_name_or_id in data:
-        path = None
-        if ':' in data_name_or_id:
-            data_name_or_id, path = data_name_or_id.split(':')
-        data_obj = DataClient().get(data_name_or_id)
-        if not data_obj:
-            floyd_logger.error("Data not found for name or id: {}".format(data_name_or_id))
-            return
-        data_ids.append("{}:{}".format(data_obj.id, path) if path else data_obj.id)
-
     default_name = 'input' if len(data_ids) <= 1 else None
     module_inputs = [{'name': get_data_name(data_str, default_name),
                       'type': 'dir'} for data_str in data_ids]
@@ -99,21 +172,14 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
     else:
         instance_type = C1_INSTANCE_TYPE
 
-    arch = INSTANCE_ARCH_MAP[instance_type]
-
-    env_map = EnvClient().get_all()
-    envs = env_map.get(arch)
-    if envs:
-        if env not in envs:
-            floyd_logger.error(
-                "{} is not in the list of supported environments: {}".format(
-                    env, ', '.join(envs.keys())))
-            return
-    else:
-        floyd_logger.error("{} is not a supported architecture".format(arch))
-        return
+    if not validate_env(env, instance_type):
+        sys.exit(3)
 
     command_str = ' '.join(command)
+    if command_str and mode in ('jupyter', 'serve'):
+        floyd_logger.error('Command argument "%s" cannot be used with mode: %s.\nSee http://docs.floydhub.com/guides/run_a_job/#mode for more information about run modes.', command_str, mode)
+        sys.exit(3)
+
     module = Module(name=experiment_name,
                     description=message or '',
                     command=command_str,
@@ -122,9 +188,8 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
                     family_id=experiment_config.family_id,
                     inputs=module_inputs,
                     env=env,
-                    arch=arch)
+                    arch=INSTANCE_ARCH_MAP[instance_type])
 
-    from floyd.exceptions import BadRequestException
     try:
         module_id = ModuleClient().create(module)
     except BadRequestException as e:
@@ -133,8 +198,8 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
                 'ERROR: Please run "floyd init PROJECT_NAME" before scheduling a job.')
         else:
             floyd_logger.error('ERROR: %s', e.message)
-        sys.exit(1)
-    floyd_logger.debug("Created module with id : {}".format(module_id))
+        sys.exit(4)
+    floyd_logger.debug("Created module with id : %s", module_id)
 
     # Create experiment request
     # Get the actual command entered in the command line
@@ -146,8 +211,8 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
                                            data_ids=data_ids,
                                            family_id=experiment_config.family_id,
                                            instance_type=instance_type)
-    expt_cli = ExperimentClient()
-    expt_info = expt_cli.create(experiment_request)
+    expt_client = ExperimentClient()
+    expt_info = expt_client.create(experiment_request)
     floyd_logger.debug("Created job : %s", expt_info['id'])
 
     job_name = normalize_job_name(expt_info['name'])
@@ -155,47 +220,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
     table_output = [["JOB NAME"], [job_name]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
     floyd_logger.info("")
-
-    if mode in ['jupyter', 'serve']:
-        while True:
-            # Wait for the experiment / task instances to become available
-            try:
-                experiment = expt_cli.get(expt_info['id'])
-                if experiment.task_instances:
-                    break
-            except Exception:
-                floyd_logger.debug("Job not available yet: %s", expt_info['id'])
-
-            floyd_logger.debug("Job not available yet: %s", expt_info['id'])
-            sleep(3)
-            continue
-
-        # Print the path to jupyter notebook
-        if mode == 'jupyter':
-            jupyter_url = experiment.service_url
-            print("Setting up your instance and waiting for Jupyter notebook to become available ...", end='')
-            if wait_for_url(jupyter_url, sleep_duration_seconds=2, iterations=900):
-                sleep(3)  # HACK: sleep extra 3 seconds for traffic route sync
-                floyd_logger.info("\nPath to jupyter notebook: {}".format(jupyter_url))
-                if open:
-                    webbrowser.open(jupyter_url)
-            else:
-                floyd_logger.info("\nPath to jupyter notebook: %s", jupyter_url)
-                floyd_logger.info("Notebook is still loading. View logs to track progress")
-                floyd_logger.info("   floyd logs %s", job_name)
-
-        # Print the path to serving endpoint
-        if mode == 'serve':
-            floyd_logger.info("Path to service endpoint: {}".format(experiment.service_url))
-
-        if experiment.timeout_seconds < 4 * 60 * 60:
-            floyd_logger.info("\nYour job timeout is currently set to {} seconds".format(experiment.timeout_seconds))
-            floyd_logger.info("This is because you are in a trial account. Paid users will have longer timeouts. "
-                              "See https://www.floydhub.com/pricing for details")
-
-    else:
-        floyd_logger.info("To view logs enter:")
-        floyd_logger.info("   floyd logs %s", job_name)
+    show_new_job_info(expt_client, job_name, expt_info, mode)
 
 
 def get_command_line(instance_type, env, message, data, mode, open, tensorboard, command_str):
@@ -222,3 +247,74 @@ def get_command_line(instance_type, env, message, data, mode, open, tensorboard,
         if command_str:
             floyd_command.append(shell_quote(command_str))
     return ' '.join(floyd_command)
+
+
+@click.command()
+@click.argument('job_name', nargs=1)
+@click.option('--data', multiple=True, help='Data mount to override')
+@click.option('--open/--no-open', 'open_notebook',
+              help='Automatically open the notebook url',
+              default=True)
+@click.option('--env',
+              help='Environment type to use',
+              default=None)
+@click.option('--message', '-m',
+              help='Job commit message')
+@click.option('--gpu', is_flag=True, help='Run on a GPU instance')
+@click.option('--cpu', is_flag=True, help='Run on a CPU instance')
+@click.option('--gpu+', 'gpup', is_flag=True, help='Run in a GPU+ instance')
+@click.option('--cpu+', 'cpup', is_flag=True, help='Run in a CPU+ instance')
+@click.argument('command', nargs=-1)
+@click.pass_context
+def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cpup, command):
+    """
+    Restart a given job as a new job.
+    """
+    parameters = {}
+
+    expt_client = ExperimentClient()
+    job = expt_client.get(job_name)
+
+    if gpup:
+        instance_type = G1P_INSTANCE_TYPE
+    elif cpup:
+        instance_type = C1P_INSTANCE_TYPE
+    elif gpu:
+        instance_type = G1_INSTANCE_TYPE
+    elif cpu:
+        instance_type = C1_INSTANCE_TYPE
+    else:
+        instance_type = job.instance_type
+
+    if instance_type is not None:
+        parameters['instance_type'] = instance_type
+    else:
+        instance_type = job.instance_type
+
+    if env is not None:
+        if not validate_env(env, instance_type):
+            sys.exit(1)
+        parameters['env'] = env
+
+    success, data_ids = process_data_ids(data)
+    if not success:
+        sys.exit(1)
+
+    if message:
+        parameters['message'] = message
+
+    if command:
+        parameters['command'] = ' '.join(command)
+
+    floyd_logger.info('Restarting job %s...', job_name)
+
+    new_job_info = expt_client.restart(job.id, parameters=parameters)
+    if not new_job_info:
+        floyd_logger.error("Failed to restart job")
+        sys.exit(1)
+
+    floyd_logger.info('New job created:')
+    table_output = [["JOB NAME"], [new_job_info['name']]]
+    floyd_logger.info('\n' + tabulate(table_output, headers="firstrow") + '\n')
+
+    show_new_job_info(expt_client, new_job_info['name'], new_job_info, job.mode)
