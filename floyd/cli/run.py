@@ -49,7 +49,7 @@ def process_data_ids(data):
             floyd_logger.error("Data not found for name or id: {}".format(data_name_or_id))
             return False, None
         if path:
-            data_ids.append("%s:%s" % (data_obj.id, path if path else data_obj.id))
+            data_ids.append("%s:%s" % (data_obj.id, path))
         else:
             data_ids.append(data_obj.id)
     return True, data_ids
