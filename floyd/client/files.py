@@ -91,7 +91,7 @@ def get_files_in_current_directory(file_type):
         local_files.append((file_type, (unix_style_path(file_path), open(file_path, 'rb'), 'text/plain')))
         total_file_size += os.path.getsize(file_path)
 
-    return (local_files, sizeof_fmt(total_file_size))
+    return (local_files, total_file_size)
 
 
 def unix_style_path(path):
