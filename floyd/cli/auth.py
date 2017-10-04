@@ -33,7 +33,7 @@ def login(token):
     access_token = AccessToken(username=user.username,
                                token=access_code)
     AuthConfigManager.set_access_token(access_token)
-    floyd_logger.info("Login Successful")
+    floyd_logger.info("Login Successful as %s.", user.username)
 
 
 @click.command()

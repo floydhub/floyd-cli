@@ -19,9 +19,12 @@ class FloydHttpClient(object):
     """
     Base client for all HTTP operations
     """
-    def __init__(self):
+    def __init__(self, skip_auth=False):
         self.base_url = "{}/api/v1".format(floyd.floyd_host)
-        self.access_token = AuthConfigManager.get_access_token()
+        if not skip_auth:
+            self.access_token = AuthConfigManager.get_access_token()
+        else:
+            self.access_token = None
 
     def request(self,
                 method,
@@ -31,17 +34,18 @@ class FloydHttpClient(object):
                 files=None,
                 json=None,
                 timeout=5,
-                headers=None):
+                headers=None,
+                skip_auth=False):
         """
         Execute the request using requests library
         """
         request_url = self.base_url + url
-        floyd_logger.debug("Starting request to url: {} with params: {}, data: {}".format(request_url, params, data))
+        floyd_logger.debug("Starting request to url: %s with params: %s, data: %s", request_url, params, data)
 
+        request_headers = {}
         # Auth headers if access_token is present
-        request_headers = {"Authorization": "Bearer {}".format(
-            self.access_token.token if self.access_token else None),
-        }
+        if self.access_token:
+            request_headers["Authorization"] = "Bearer " + self.access_token.token
         # Add any additional headers
         if headers:
             request_headers.update(headers)
@@ -71,9 +75,9 @@ class FloydHttpClient(object):
         floyd_logger.debug("Downloading file from url: {}".format(request_url))
 
         # Auth headers if access_token is present
-        request_headers = {"Authorization": "Bearer {}".format(
-            self.access_token.token if self.access_token else None),
-        }
+        request_headers = {}
+        if self.access_token:
+            request_headers["Authorization"] = "Bearer " + self.access_token.token
         # Add any additional headers
         if headers:
             request_headers.update(headers)
