@@ -5,11 +5,11 @@ from floyd.model.base import BaseModel
 class ResourceSchema(Schema):
     id = fields.Str()
     uri = fields.Str()
-    state = fields.Str()
+    state = fields.Str(allow_none=True)
     resource_type = fields.Str()
     size = fields.Str()
-    date_finalized = fields.DateTime()
-    date_last_updated = fields.DateTime()
+    date_finalized = fields.DateTime(allow_none=True)
+    date_last_updated = fields.DateTime(allow_none=True)
 
     @post_load
     def make_resource(self, data):
