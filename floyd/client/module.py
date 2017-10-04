@@ -5,7 +5,7 @@ from clint.textui.progress import Bar as ProgressBar
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
 from floyd.client.base import FloydHttpClient
-from floyd.client.files import get_files_in_current_directory
+from floyd.client.files import get_files_in_current_directory, sizeof_fmt
 from floyd.exceptions import FloydException
 from floyd.log import logger as floyd_logger
 from floyd.model.module import Module
@@ -25,6 +25,9 @@ class ModuleClient(FloydHttpClient):
     """
     Client to interact with modules api
     """
+
+    MAX_UPLOAD_SIZE = 1024 * 1024 * 150
+
     def __init__(self):
         self.url = "/modules/"
         super(ModuleClient, self).__init__()
@@ -38,8 +41,17 @@ class ModuleClient(FloydHttpClient):
                      "See http://docs.floydhub.com/faqs/job/#i-get-too-many-open-files-error-when-i-run-my-project "
                      "for more details on how to fix this.")
 
+        if total_file_size > self.MAX_UPLOAD_SIZE:
+            sys.exit(("Code size too large to sync, please keep it under %s.\n"
+                      "If you have data files in the current directory, please upload them "
+                      "separately using \"floyd data\" command and remove them from here.\n"
+                      "You may find the following documentation useful:\n\n"
+                      "\thttps://docs.floydhub.com/guides/create_and_upload_dataset/\n"
+                      "\thttps://docs.floydhub.com/guides/data/mounting_data/\n"
+                      "\thttps://docs.floydhub.com/guides/floyd_ignore/") % (sizeof_fmt(self.MAX_UPLOAD_SIZE)))
+
         floyd_logger.info("Creating project run. Total upload size: %s",
-                          total_file_size)
+                          sizeof_fmt(total_file_size))
         floyd_logger.debug("Creating module. Uploading: %s files",
                            len(upload_files))
         floyd_logger.info("Syncing code ...")
