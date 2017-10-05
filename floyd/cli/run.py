@@ -109,7 +109,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode):
         if mode == 'serve':
             floyd_logger.info("Path to service endpoint: %s", experiment.service_url)
 
-        if experiment.timeout_seconds < 4 * 60 * 60:
+        if experiment.timeout_seconds < 24 * 60 * 60:
             floyd_logger.info("\nYour job timeout is currently set to %s seconds",
                               experiment.timeout_seconds)
             floyd_logger.info("This is because you are in the free plan. Paid users will have longer timeouts. "
