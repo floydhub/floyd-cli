@@ -15,6 +15,7 @@ class DataConfigSchema(Schema):
     tarball_path = fields.Str(allow_none=True)
     data_endpoint = fields.Str(allow_none=True)
     resource_id = fields.Str(allow_none=True)
+    data_name = fields.Str(allow_none=True)
 
     @post_load
     def make_access_token(self, data):
@@ -66,8 +67,7 @@ class DataConfigManager(object):
 
     @classmethod
     def set_config(cls, data_config):
-        floyd_logger.debug("Setting {} in the file {}".format(data_config.to_dict(),
-                                                              cls.CONFIG_FILE_PATH))
+        floyd_logger.debug("Setting %s in the file %s", data_config.to_dict(), cls.CONFIG_FILE_PATH)
         with open(cls.CONFIG_FILE_PATH, "w") as config_file:
             config_file.write(json.dumps(data_config.to_dict()))
 

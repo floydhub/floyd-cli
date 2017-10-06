@@ -13,6 +13,7 @@ class TestExperimentRun(unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
 
+    @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.run.EnvClient.get_all', return_value={'cpu': {'default': 'bar'}})
     @patch('floyd.cli.run.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.run.ExperimentConfigManager.get_config', side_effect=mock_experiment_config)
@@ -27,13 +28,15 @@ class TestExperimentRun(unittest.TestCase):
                           set_config,
                           get_config,
                           get_access_token,
-                          get_all_env):
+                          get_all_env,
+                          assert_token_not_expired):
         """
         Simple experiment with no data attached
         """
         result = self.runner.invoke(run, ['command'])
         assert(result.exit_code == 0)
 
+    @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.run.DataClient.get')
     @patch('floyd.cli.run.EnvClient.get_all', return_value={'cpu': {'default': 'bar'}})
     @patch('floyd.cli.run.AuthConfigManager.get_access_token', side_effect=mock_access_token)
@@ -50,7 +53,8 @@ class TestExperimentRun(unittest.TestCase):
                                     get_config,
                                     get_access_token,
                                     env_get_all,
-                                    data_get):
+                                    data_get,
+                                    assert_token_not_expired):
         """
         Simple experiment with no data attached
         """

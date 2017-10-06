@@ -30,6 +30,7 @@ setup(
         "shortuuid>=0.4.3",
         "tabulate>=0.7.7",
         "pathlib2>=2.2.1",
+        "raven",
     ],
     setup_requires=[
         "nose>=1.0",
