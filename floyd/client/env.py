@@ -9,7 +9,7 @@ class EnvClient(FloydHttpClient):
     """
     def __init__(self):
         self.url = "/env"
-        super(EnvClient, self).__init__()
+        super(EnvClient, self).__init__(skip_auth=True)
 
     def get_all(self):
         try:

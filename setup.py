@@ -3,7 +3,7 @@ import os
 from setuptools import find_packages, setup
 
 project = "floyd-cli"
-version = "0.10.13"
+version = "0.10.14"
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
     long_description = readme.read()
@@ -30,6 +30,7 @@ setup(
         "shortuuid>=0.4.3",
         "tabulate>=0.7.7",
         "pathlib2>=2.2.1",
+        "raven",
     ],
     setup_requires=[
         "nose>=1.0",

@@ -9,10 +9,10 @@ class VersionClient(FloydHttpClient):
     """
     def __init__(self):
         self.url = "/cli_version"
-        super(VersionClient, self).__init__()
+        super(VersionClient, self).__init__(skip_auth=True)
 
     def get_cli_version(self):
         response = self.request("GET", self.url)
         data_dict = response.json()
-        floyd_logger.debug("CLI Version info :{}".format(data_dict))
+        floyd_logger.debug("CLI Version info: %s", data_dict)
         return CliVersion.from_dict(data_dict)

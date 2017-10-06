@@ -114,7 +114,7 @@ def complete_upload(data_config):
         floyd_logger.error("Corrupted upload state, please start a new one.")
         sys.exit(1)
 
-    # check for tarball upload
+    # check for tarball upload, upload to server if not done
     if not data_config.resource_id and (tarball_path and data_endpoint):
         floyd_logger.debug("Getting fresh upload credentials")
         creds = DataClient().new_tus_credentials(data_id)
@@ -139,7 +139,6 @@ def complete_upload(data_config):
         floyd_logger.info("Upload finished.")
 
         # Update data config
-        data_config.set_data_id(None)
         data_config.set_tarball_path(None)
         data_config.set_data_endpoint(None)
         data_source = DataClient().get(data_id)
@@ -168,6 +167,7 @@ def complete_upload(data_config):
             data_config.set_tarball_path(None)
             data_config.set_data_endpoint(None)
             data_config.set_resource_id(None)
+            data_config.set_data_id(None)
             DataConfigManager.set_config(data_config)
 
     # Print output

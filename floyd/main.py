@@ -12,6 +12,12 @@ from floyd.cli.version import upgrade, version
 from floyd.client.version import VersionClient
 from floyd.log import configure_logger
 
+from raven import Client
+floyd_raven = Client(
+    dsn='https://d8669005bd2b4b1ba6387ec57e1ce660:1d25ce33fcdb4864b9fd4f0c97689a98@sentry.io/226940',
+    release=pkg_resources.require("floyd-cli")[0].version,
+    environment='prod')
+
 
 @click.group()
 @click.option('-h', '--host', default='https://www.floydhub.com', help='Floyd server endpoint')

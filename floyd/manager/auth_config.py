@@ -26,6 +26,7 @@ class AuthConfigManager(object):
 
         with open(cls.CONFIG_FILE_PATH, "r") as config_file:
             access_token_str = config_file.read()
+
         return AccessToken.from_dict(json.loads(access_token_str))
 
     @classmethod
