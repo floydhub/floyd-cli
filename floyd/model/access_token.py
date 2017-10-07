@@ -9,7 +9,7 @@ from floyd.model.base import BaseModel
 
 def assert_token_not_expired(token):
     payload_base64 = token.split('.')[1] + '==='
-    payload = json.loads(base64.decodestring(payload_base64))
+    payload = json.loads(base64.decodestring(payload_base64.encode('ascii')).decode('ascii'))
     if payload['exp'] <= time.time():
         sys.exit('ERROR: Auth token expired, please use "floyd login" command to login with a new token.')
 
