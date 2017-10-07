@@ -1,9 +1,9 @@
 import click
 import sys
 from distutils.version import LooseVersion
-import pkg_resources
 
 import floyd
+from floyd.cli.utils import get_cli_version
 from floyd.cli.auth import login, logout
 from floyd.cli.data import data
 from floyd.cli.experiment import clone, delete, info, init, logs, output, status, stop
@@ -24,7 +24,7 @@ def cli(host, verbose):
     import raven
     raven.Client(
         dsn='https://d8669005bd2b4b1ba6387ec57e1ce660:1d25ce33fcdb4864b9fd4f0c97689a98@sentry.io/226940',
-        release=pkg_resources.require("floyd-cli")[0].version,
+        release=get_cli_version(),
         environment='prod')
 
     floyd.floyd_host = host
@@ -37,7 +37,7 @@ def check_cli_version():
     Check if the current cli version satisfies the server requirements
     """
     server_version = VersionClient().get_cli_version()
-    current_version = pkg_resources.require("floyd-cli")[0].version
+    current_version = get_cli_version()
     if LooseVersion(current_version) < LooseVersion(server_version.min_version):
         print("""
 Your version of CLI (%s) is no longer compatible with server.""" % current_version)

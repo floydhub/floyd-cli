@@ -2,6 +2,7 @@ from __future__ import print_function
 from time import sleep
 import requests
 import sys
+import pkg_resources
 
 from floyd.constants import DOCKER_IMAGES
 
@@ -95,3 +96,7 @@ def normalize_job_name(job_name):
         job_name_parts.insert(1, 'projects')
         job_name = '/'.join(job_name_parts)
     return job_name
+
+
+def get_cli_version():
+    return pkg_resources.require("floyd-cli")[0].version

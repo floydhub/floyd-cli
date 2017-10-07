@@ -5,6 +5,7 @@ import sys
 import tarfile
 
 import floyd
+from floyd.cli.utils import get_cli_version
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.exceptions import (AuthenticationException, AuthorizationException,
                               BadGatewayException, BadRequestException,
@@ -42,7 +43,7 @@ class FloydHttpClient(object):
         request_url = self.base_url + url
         floyd_logger.debug("Starting request to url: %s with params: %s, data: %s", request_url, params, data)
 
-        request_headers = {}
+        request_headers = {'x-floydhub-cli-version': get_cli_version()}
         # Auth headers if access_token is present
         if self.access_token:
             request_headers["Authorization"] = "Bearer " + self.access_token.token
