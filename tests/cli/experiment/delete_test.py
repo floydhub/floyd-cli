@@ -18,13 +18,14 @@ class TestExperimentDelete(unittest.TestCase):
     @patch('floyd.cli.experiment.ExperimentClient')
     def test_with_no_arguments(self, *api_clients):
         result = self.runner.invoke(delete)
+        self.assertEqual(result.exit_code, 0)
 
         # No calls to API clients, exit 0
         for client in api_clients:
             client.assert_not_called()
 
-        assert(result.exit_code == 0)
 
+    @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.experiment.TaskInstanceClient')
     @patch('floyd.cli.experiment.ModuleClient')
     @patch('floyd.cli.experiment.ExperimentClient.get', side_effect=mock_exp)
@@ -33,7 +34,8 @@ class TestExperimentDelete(unittest.TestCase):
                                               delete_experiment,
                                               get_experiment,
                                               module_client,
-                                              task_instance_client):
+                                              task_instance_client,
+                                              assert_token_not_expired):
         id_1, id_2, id_3 = '1', '2', '3'
         result = self.runner.invoke(delete, ['-y', id_1, id_2, id_3])
 
@@ -42,8 +44,10 @@ class TestExperimentDelete(unittest.TestCase):
         get_experiment.assert_has_calls(calls, any_order=True)
         delete_experiment.assert_has_calls(calls, any_order=True)
 
-        assert(result.exit_code == 0)
+        self.assertEqual(result.exit_code, 0)
 
+
+    @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.experiment.TaskInstanceClient')
     @patch('floyd.cli.experiment.ModuleClient')
     @patch('floyd.cli.experiment.ExperimentClient.get', side_effect=mock_exp)
@@ -52,7 +56,8 @@ class TestExperimentDelete(unittest.TestCase):
                                        delete_experiment,
                                        get_experiment,
                                        module_client,
-                                       task_instance_client):
+                                       task_instance_client,
+                                       assert_token_not_expired):
         id_1, id_2, id_3 = '1', '2', '3'
 
         # Tell prompt to skip id_1 and id_3
@@ -71,14 +76,17 @@ class TestExperimentDelete(unittest.TestCase):
         task_instance_client.assert_not_called()
         module_client.assert_not_called()
 
-        assert(result.exit_code == 0)
+        self.assertEqual(result.exit_code, 0)
 
+
+    @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.experiment.TaskInstanceClient')
     @patch('floyd.cli.experiment.ModuleClient')
     @patch('floyd.cli.experiment.ExperimentClient.get', side_effect=mock_exp)
     @patch('floyd.cli.experiment.ExperimentClient.delete', return_value=False)
     def test_failed_delete(self, delete_experiment, get_experiment,
-                           task_instance_client, module_client):
+                           task_instance_client, module_client,
+                           assert_token_not_expired):
         id_1, id_2, id_3 = '1', '2', '3'
         result = self.runner.invoke(delete, ['-y', id_1, id_2, id_3])
 
@@ -89,7 +97,7 @@ class TestExperimentDelete(unittest.TestCase):
         delete_experiment.assert_has_calls(calls, any_order=True)
 
         # Exit 1 for failed deletes
-        assert(result.exit_code == 1)
+        self.assertEqual(result.exit_code, 1)
 
     @patch('floyd.cli.experiment.ExperimentClient')
     def test_with_no_found_task_instance(self,
@@ -120,6 +128,7 @@ class TestExperimentDelete(unittest.TestCase):
         # Exit 0 for successful experiment delete
         assert(result.exit_code == 0)
 
+    @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.experiment.TaskInstanceClient.get', side_effect=mock_task_inst)
     @patch('floyd.cli.experiment.get_module_task_instance_id', return_value='123')
     @patch('floyd.cli.experiment.ModuleClient.delete')
@@ -130,7 +139,8 @@ class TestExperimentDelete(unittest.TestCase):
                                                   delete_experiment,
                                                   delete_module,
                                                   get_module_task_instance_id,
-                                                  get_task_instance):
+                                                  get_task_instance,
+                                                  assert_token_not_expired):
         id_1 = '1'
         result = self.runner.invoke(delete, ['-y', id_1])
 
