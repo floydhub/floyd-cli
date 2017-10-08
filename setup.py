@@ -27,7 +27,6 @@ setup(
         "requests-toolbelt>=0.7.1",
         "marshmallow>=2.11.1",
         "pytz>=2016.10",
-        "shortuuid>=0.4.3",
         "tabulate>=0.7.7",
         "pathlib2>=2.2.1",
         "raven",
