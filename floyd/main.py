@@ -25,7 +25,8 @@ def cli(host, verbose):
     raven.Client(
         dsn='https://d8669005bd2b4b1ba6387ec57e1ce660:1d25ce33fcdb4864b9fd4f0c97689a98@sentry.io/226940',
         release=get_cli_version(),
-        environment='prod')
+        environment='prod',
+        processors=('raven.processors.SanitizePasswordsProcessr',))
 
     floyd.floyd_host = host
     configure_logger(verbose)
