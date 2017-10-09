@@ -211,6 +211,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
                                            description=message,
                                            full_command=full_command,
                                            module_id=module_id,
+                                           env=env,
                                            data_ids=data_ids,
                                            family_id=experiment_config.family_id,
                                            instance_type=instance_type)

@@ -101,10 +101,11 @@ class ExperimentRequestSchema(Schema):
     data_ids = fields.List(fields.Str)
     family_id = fields.Str(allow_none=True)
     instance_type = fields.Str(allow_none=True)
+    env = fields.Str(allow_none=True)
 
     @post_load
-    def make_experiment_request(self, data):
-        return ExperimentRequest(**data)
+    def make_experiment_request(self, kwargs):
+        return ExperimentRequest(**kwargs)
 
 
 class ExperimentRequest(BaseModel):
@@ -115,13 +116,15 @@ class ExperimentRequest(BaseModel):
                  description,
                  module_id,
                  full_command,
-                 data_ids=[],
+                 env=None,
+                 data_ids=None,
                  family_id=None,
                  instance_type=None):
         self.name = name
         self.description = description
         self.full_command = full_command
         self.module_id = module_id
-        self.data_ids = data_ids
+        self.data_ids = data_ids if data_ids is not None else []
         self.family_id = family_id
         self.instance_type = instance_type
+        self.env = env
