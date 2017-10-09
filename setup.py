@@ -13,7 +13,7 @@ setup(
     version=version,
     description="Command line tool for Floyd",
     long_description=long_description,
-    author="Floyd",
+    author="Floyd Labs Inc.",
     author_email="support@floydhub.com",
     url="https://github.com/floydhub/floyd-cli",
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
