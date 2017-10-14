@@ -69,7 +69,7 @@ class TestExperimentRun(unittest.TestCase):
             message='test\' message',
             data=['foo:input'],
             mode='job',
-            open=False,
+            open_notebook=False,
             tensorboard=True,
             command_str='echo hello'
         )
@@ -81,7 +81,7 @@ class TestExperimentRun(unittest.TestCase):
             message=None,
             data=['foo:input', 'bar'],
             mode='jupyter',
-            open=True,
+            open_notebook=True,
             tensorboard=False,
             command_str='echo \'hello'
         )
@@ -93,7 +93,7 @@ class TestExperimentRun(unittest.TestCase):
             message=None,
             data=['foo:input'],
             mode='job',
-            open=False,
+            open_notebook=False,
             tensorboard=True,
             command_str='echo hello > /output'
         )

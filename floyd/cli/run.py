@@ -224,7 +224,7 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, tensorboard, gpup, cp
     table_output = [["JOB NAME"], [job_name]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
     floyd_logger.info("")
-    show_new_job_info(expt_client, job_name, expt_info, mode)
+    show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook)
 
 
 def get_command_line(instance_type, env, message, data, mode, open_notebook, tensorboard, command_str):
@@ -321,4 +321,4 @@ def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cp
     table_output = [["JOB NAME"], [new_job_info['name']]]
     floyd_logger.info('\n' + tabulate(table_output, headers="firstrow") + '\n')
 
-    show_new_job_info(expt_client, new_job_info['name'], new_job_info, job.mode)
+    show_new_job_info(expt_client, new_job_info['name'], new_job_info, job.mode, open_notebook)
