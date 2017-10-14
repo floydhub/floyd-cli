@@ -72,7 +72,7 @@ def validate_env(env, instance_type):
     return True
 
 
-def show_new_job_info(expt_client, job_name, expt_info, mode):
+def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook):
     if mode in ['jupyter', 'serve']:
         while True:
             # Wait for the experiment / task instances to become available
@@ -98,7 +98,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode):
             if wait_for_url(jupyter_url, sleep_duration_seconds=2, iterations=900):
                 sleep(3)  # HACK: sleep extra 3 seconds for traffic route sync
                 floyd_logger.info("\nPath to jupyter notebook: %s", jupyter_url)
-                if open:
+                if open_notebook:
                     webbrowser.open(jupyter_url)
             else:
                 floyd_logger.info("\nPath to jupyter notebook: %s", jupyter_url)
@@ -127,7 +127,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode):
               help='Different floyd modes',
               default='job',
               type=click.Choice(['job', 'jupyter', 'serve']))
-@click.option('--open/--no-open',
+@click.option('--open/--no-open', 'open_notebook',
               help='Automatically open the notebook url',
               default=True)
 @click.option('--env',
@@ -141,7 +141,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode):
 @click.option('--cpu+', 'cpup', is_flag=True, help='Run in a CPU+ instance')
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, command):
+def run(ctx, gpu, env, message, data, mode, open_notebook, tensorboard, gpup, cpup, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -227,7 +227,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
     show_new_job_info(expt_client, job_name, expt_info, mode)
 
 
-def get_command_line(instance_type, env, message, data, mode, open, tensorboard, command_str):
+def get_command_line(instance_type, env, message, data, mode, open_notebook, tensorboard, command_str):
     """
     Return a string representing the full floyd command entered in the command line
     """
@@ -245,7 +245,7 @@ def get_command_line(instance_type, env, message, data, mode, open, tensorboard,
     if not mode == "job":
         floyd_command += ["--mode", mode]
         if mode == 'jupyter':
-            if not open:
+            if not open_notebook:
                 floyd_command.append("--no-open")
     else:
         if command_str:
