@@ -9,11 +9,12 @@ try:
 except:
     from shlex import quote as shell_quote
 
+import floyd
 from floyd.constants import DEFAULT_ENV, INSTANCE_NAME_MAP
 from floyd.client.data import DataClient
 from floyd.client.project import ProjectClient
 from floyd.cli.utils import (
-    get_mode_parameter, wait_for_url, get_data_name, normalize_job_name
+    get_mode_parameter, get_data_name, normalize_job_name
 )
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
@@ -72,7 +73,7 @@ def validate_env(env, instance_type):
     return True
 
 
-def show_new_job_info(expt_client, job_name, expt_info, mode):
+def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True):
     if mode in ['jupyter', 'serve']:
         while True:
             # Wait for the experiment / task instances to become available
@@ -89,21 +90,14 @@ def show_new_job_info(expt_client, job_name, expt_info, mode):
 
         # Print the path to jupyter notebook
         if mode == 'jupyter':
-            jupyter_url = experiment.service_url
-            if not jupyter_url:
-                floyd_logger.error("Jupyter URL not available, please check job state and log for error.")
+            if not experiment.service_url:
+                floyd_logger.error("Jupyter not available, please check job state and log for error.")
                 sys.exit(1)
 
-            print("Setting up your instance and waiting for Jupyter notebook to become available ...", end='')
-            if wait_for_url(jupyter_url, sleep_duration_seconds=2, iterations=900):
-                sleep(3)  # HACK: sleep extra 3 seconds for traffic route sync
-                floyd_logger.info("\nPath to jupyter notebook: %s", jupyter_url)
-                if open:
-                    webbrowser.open(jupyter_url)
-            else:
-                floyd_logger.info("\nPath to jupyter notebook: %s", jupyter_url)
-                floyd_logger.info("Notebook is still loading. View logs to track progress")
-                floyd_logger.info("   floyd logs %s", job_name)
+            jupyter_url = '%s/%s' % (floyd.floyd_web_host, job_name)
+            floyd_logger.info("\nPath to jupyter notebook: %s", jupyter_url)
+            if open_notebook:
+                webbrowser.open(jupyter_url)
 
         # Print the path to serving endpoint
         if mode == 'serve':
@@ -127,7 +121,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode):
               help='Different floyd modes',
               default='job',
               type=click.Choice(['job', 'jupyter', 'serve']))
-@click.option('--open/--no-open',
+@click.option('--open/--no-open', 'open_notebook',
               help='Automatically open the notebook url',
               default=True)
 @click.option('--env',
@@ -141,7 +135,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode):
 @click.option('--cpu+', 'cpup', is_flag=True, help='Run in a CPU+ instance')
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, command):
+def run(ctx, gpu, env, message, data, mode, open_notebook, tensorboard, gpup, cpup, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -206,7 +200,7 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
 
     # Create experiment request
     # Get the actual command entered in the command line
-    full_command = get_command_line(instance_type, env, message, data, mode, open, tensorboard, command_str)
+    full_command = get_command_line(instance_type, env, message, data, mode, open_notebook, tensorboard, command_str)
     experiment_request = ExperimentRequest(name=experiment_name,
                                            description=message,
                                            full_command=full_command,
@@ -224,10 +218,10 @@ def run(ctx, gpu, env, message, data, mode, open, tensorboard, gpup, cpup, comma
     table_output = [["JOB NAME"], [job_name]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
     floyd_logger.info("")
-    show_new_job_info(expt_client, job_name, expt_info, mode)
+    show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook)
 
 
-def get_command_line(instance_type, env, message, data, mode, open, tensorboard, command_str):
+def get_command_line(instance_type, env, message, data, mode, open_notebook, tensorboard, command_str):
     """
     Return a string representing the full floyd command entered in the command line
     """
@@ -245,7 +239,7 @@ def get_command_line(instance_type, env, message, data, mode, open, tensorboard,
     if not mode == "job":
         floyd_command += ["--mode", mode]
         if mode == 'jupyter':
-            if not open:
+            if not open_notebook:
                 floyd_command.append("--no-open")
     else:
         if command_str:
@@ -321,4 +315,4 @@ def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cp
     table_output = [["JOB NAME"], [new_job_info['name']]]
     floyd_logger.info('\n' + tabulate(table_output, headers="firstrow") + '\n')
 
-    show_new_job_info(expt_client, new_job_info['name'], new_job_info, job.mode)
+    show_new_job_info(expt_client, new_job_info['name'], new_job_info, job.mode, open_notebook)
