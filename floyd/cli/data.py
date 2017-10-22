@@ -113,6 +113,8 @@ def clone(id):
     data_source = DataClient().get(id)
 
     if not data_source:
+        if 'output' in id:
+            floyd_logger.info("Note: You cannot clone the output of a running job. You need to wait for it to finish.")
         sys.exit()
 
     data_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
