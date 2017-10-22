@@ -22,6 +22,7 @@ class ExperimentSchema(Schema):
     service_url = fields.Str(load_from="serviceUrl", allow_none=True)
     tensorboard_url = fields.Str(load_from="tensorboardUrl", allow_none=True)
     output_id = fields.Str(load_from="instanceOutputId", allow_none=True)
+    instance_log_id = fields.Str(load_from="instanceLogId", allow_none=True)
     timeout_seconds = fields.Integer(allow_none=True)
 
     @post_load
@@ -45,6 +46,7 @@ class Experiment(BaseModel):
                  service_url=None,
                  tensorboard_url=None,
                  output_id=None,
+                 instance_log_id=None,
                  timeout_seconds=None,
                  mode=None):
         self.id = id
@@ -63,6 +65,7 @@ class Experiment(BaseModel):
         self.service_url = service_url
         self.tensorboard_url = tensorboard_url
         self.output_id = output_id
+        self.instance_log_id = instance_log_id
         self.timeout_seconds = timeout_seconds
         self.mode = mode
 

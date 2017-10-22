@@ -129,14 +129,13 @@ def logs(id, url, tail, sleep_duration=1):
         floyd_logger.info("Job is currently in a queue")
         return
 
-    task_id = get_module_task_instance_id(experiment.task_instances)
-    task_instance = TaskInstanceClient().get(task_id)
-    if not task_instance:
+    instance_log_id = experiment.instance_log_id
+    if not instance_log_id:
         floyd_logger.info("Job not started yet, no log to show.")
         sys.exit(1)
 
     log_url = "{}/api/v1/resources/{}?content=true".format(
-        floyd.floyd_host, task_instance.log_id)
+        floyd.floyd_host, instance_log_id)
     if url:
         floyd_logger.info(log_url)
         return
@@ -145,14 +144,14 @@ def logs(id, url, tail, sleep_duration=1):
         current_shell_output = ""
         while True:
             # Get the logs in a loop and log the new lines
-            log_file_contents = ResourceClient().get_content(task_instance.log_id)
+            log_file_contents = ResourceClient().get_content(instance_log_id)
             print_output = log_file_contents[len(current_shell_output):]
             if len(print_output.strip()):
                 floyd_logger.info(print_output)
             current_shell_output = log_file_contents
             sleep(sleep_duration)
     else:
-        log_file_contents = ResourceClient().get_content(task_instance.log_id)
+        log_file_contents = ResourceClient().get_content(instance_log_id)
         if len(log_file_contents.strip()):
             floyd_logger.info(log_file_contents)
         else:
