@@ -6,7 +6,6 @@ import webbrowser
 import floyd
 from floyd.client.data import DataClient
 from floyd.client.dataset import DatasetClient
-from floyd.client.resource import ResourceClient
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.data_config import DataConfig, DataConfigManager
 from floyd.log import logger as floyd_logger
@@ -138,8 +137,7 @@ def output(id, url):
     if not data_source:
         sys.exit()
 
-    resource = ResourceClient().get(data_source.resource_id)
-    data_url = "{}/viewer/{}".format(floyd.floyd_host, resource.uri)
+    data_url = "%s/%s" % (floyd.floyd_web_host, data_source.name)
     if url:
         floyd_logger.info(data_url)
     else:
