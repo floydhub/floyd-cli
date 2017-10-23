@@ -9,7 +9,6 @@ from floyd.model.base import BaseModel
 class DataDetailsSchema(Schema):
     state = fields.Str()
     size = fields.Str()
-    uri = fields.Str()
 
     @post_load
     def make_data_details(self, data_details):
@@ -21,11 +20,9 @@ class DataDetails(BaseModel):
 
     def __init__(self,
                  state,
-                 size,
-                 uri):
+                 size):
         self.state = state
         self.size = size
-        self.uri = uri
 
 
 class DataSchema(Schema):
@@ -59,7 +56,6 @@ class Data(BaseModel):
         self.description = description
         self.size = data.size
         self.state = data.state
-        self.uri = data.uri
         self.version = int(float(version)) if version else None
         self.resource_id = resource_id
 
