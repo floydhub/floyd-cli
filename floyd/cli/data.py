@@ -187,9 +187,20 @@ def delete(ids, yes):
         sys.exit(1)
 
 
+@click.command()
+@click.argument('source')
+def add(source):
+    """
+    Create data for current dataset from a given source, for example: foo/projects/bar/1/output
+    """
+    new_data = DatasetClient().add_data(source)
+    print_data([DataClient().get(new_data['data_id'])])
+
+
 data.add_command(clone)
 data.add_command(delete)
 data.add_command(init)
 data.add_command(upload)
 data.add_command(status)
 data.add_command(output)
+data.add_command(add)
