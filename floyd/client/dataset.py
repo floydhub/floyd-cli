@@ -6,6 +6,7 @@ from floyd.exceptions import (
 )
 from floyd.model.dataset import Dataset
 from floyd.log import logger as floyd_logger
+from floyd.manager.data_config import DataConfigManager
 
 
 class DatasetClient(FloydHttpClient):
@@ -35,3 +36,11 @@ class DatasetClient(FloydHttpClient):
             return Dataset.from_dict(response.json())
         except NotFoundException:
             return None
+
+    def add_data(self, source):
+        data_config = DataConfigManager.get_config()
+        dataset_id = data_config.family_id
+        if not dataset_id:
+            sys.exit('Please initialize current directory with \'floyd data init DATASET_NAME\' first.')
+        re = self.request('POST', '%s/%s' % (self.url, dataset_id), json={'source': source})
+        return re.json()
