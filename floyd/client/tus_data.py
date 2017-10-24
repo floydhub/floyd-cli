@@ -14,7 +14,7 @@ class TusDataClient(FloydHttpClient):
     """
     Client to interact with Data api
     """
-    DEFAULT_CHUNK_SIZE = 4 * 1024 * 1024
+    DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024  # 5MB
     TUS_VERSION = '1.0.0'
 
     def __init__(self, chunk_size=None, base_url=None):
@@ -133,7 +133,7 @@ class TusDataClient(FloydHttpClient):
         return offset
 
     def _upload_chunk(self, data, offset, file_endpoint, headers=None, auth=None):
-        floyd_logger.debug("Uploading {} bytes chunk from offset: {}".format(len(data), offset))
+        floyd_logger.debug("Uploading %s bytes chunk from offset: %s", len(data), offset)
 
         h = {
             'Content-Type': 'application/offset+octet-stream',

@@ -22,10 +22,11 @@ class TestDataDelete(unittest.TestCase):
 
         assert(result.exit_code == 0)
 
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
     @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.data.DataClient.get', side_effect=mock_data)
     @patch('floyd.cli.data.DataClient.delete', return_value=True)
-    def test_with_multiple_ids_and_yes_option(self, delete_data, get_data, assert_token_not_expired):
+    def test_with_multiple_ids_and_yes_option(self, delete_data, get_data, assert_token_not_expired, get_access_token):
         id_1, id_2, id_3 = '1', '2', '3'
         result = self.runner.invoke(delete, ['-y', id_1, id_2, id_3])
 
@@ -36,10 +37,11 @@ class TestDataDelete(unittest.TestCase):
 
         assert(result.exit_code == 0)
 
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
     @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.data.DataClient.get', side_effect=mock_data)
     @patch('floyd.cli.data.DataClient.delete', return_value=True)
-    def test_delete_without_yes_option(self, delete_data, get_data, assert_token_not_expired):
+    def test_delete_without_yes_option(self, delete_data, get_data, assert_token_not_expired, get_access_token):
         id_1, id_2, id_3 = '1', '2', '3'
 
         # Tell prompt to skip id_1 and id_3
@@ -56,10 +58,11 @@ class TestDataDelete(unittest.TestCase):
 
         assert(result.exit_code == 0)
 
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
     @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.data.DataClient.get', side_effect=mock_data)
     @patch('floyd.cli.data.DataClient.delete', return_value=False)
-    def test_failed_delete(self, delete_data, get_data, assert_token_not_expired):
+    def test_failed_delete(self, delete_data, get_data, assert_token_not_expired, get_access_token):
         id_1, id_2, id_3 = '1', '2', '3'
         result = self.runner.invoke(delete, ['-y', id_1, id_2, id_3])
 
@@ -72,10 +75,11 @@ class TestDataDelete(unittest.TestCase):
         # Exit 1 for failed deletes
         assert(result.exit_code == 1)
 
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
     @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.data.DataClient.get', return_value=None)
     @patch('floyd.cli.data.DataClient.delete')
-    def test_failed_get(self, delete_data, get_data, assert_token_not_expired):
+    def test_failed_get(self, delete_data, get_data, assert_token_not_expired, get_access_token):
         id_1, id_2, id_3 = '1', '2', '3'
         result = self.runner.invoke(delete, ['-y', id_1, id_2, id_3])
 

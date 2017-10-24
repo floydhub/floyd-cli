@@ -129,14 +129,13 @@ def logs(id, url, tail, sleep_duration=1):
         floyd_logger.info("Job is currently in a queue")
         return
 
-    task_id = get_module_task_instance_id(experiment.task_instances)
-    task_instance = TaskInstanceClient().get(task_id)
-    if not task_instance:
+    instance_log_id = experiment.instance_log_id
+    if not instance_log_id:
         floyd_logger.info("Job not started yet, no log to show.")
         sys.exit(1)
 
     log_url = "{}/api/v1/resources/{}?content=true".format(
-        floyd.floyd_host, task_instance.log_id)
+        floyd.floyd_host, instance_log_id)
     if url:
         floyd_logger.info(log_url)
         return
@@ -145,14 +144,14 @@ def logs(id, url, tail, sleep_duration=1):
         current_shell_output = ""
         while True:
             # Get the logs in a loop and log the new lines
-            log_file_contents = ResourceClient().get_content(task_instance.log_id)
+            log_file_contents = ResourceClient().get_content(instance_log_id)
             print_output = log_file_contents[len(current_shell_output):]
             if len(print_output.strip()):
                 floyd_logger.info(print_output)
             current_shell_output = log_file_contents
             sleep(sleep_duration)
     else:
-        log_file_contents = ResourceClient().get_content(task_instance.log_id)
+        log_file_contents = ResourceClient().get_content(instance_log_id)
         if len(log_file_contents.strip()):
             floyd_logger.info(log_file_contents)
         else:
@@ -161,32 +160,19 @@ def logs(id, url, tail, sleep_duration=1):
 
 @click.command()
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
-@click.option('-d', '--download', is_flag=True, default=False,
-              help='Download the contents of the output to current directory')
 @click.argument('id', nargs=1)
-def output(id, url, download):
+def output(id, url):
     """
     Shows the output url of the run.
     By default opens the output page in your default browser.
     """
     experiment = ExperimentClient().get(id)
-    task_instance = TaskInstanceClient().get(get_module_task_instance_id(experiment.task_instances))
-    if "output" in task_instance.output_ids:
-        resource = ResourceClient().get(task_instance.output_ids["output"])
-        output_dir_url = "{}/viewer/{}".format(floyd.floyd_host, resource.uri)
-        if url:
-            floyd_logger.info(output_dir_url)
-        else:
-            if download:
-                output_dir_url = "{}&download=true".format(output_dir_url)
-                ExperimentClient().download_tar(url=output_dir_url,
-                                                untar=True,
-                                                delete_after_untar=True)
-            else:
-                floyd_logger.info("Opening output directory in your browser ...")
-                webbrowser.open(output_dir_url)
+    output_dir_url = "%s/%s/output" % (floyd.floyd_web_host, experiment.name)
+    if url:
+        floyd_logger.info(output_dir_url)
     else:
-        floyd_logger.error("Output directory not available")
+        floyd_logger.info("Opening output path in your browser ...")
+        webbrowser.open(output_dir_url)
 
 
 @click.command()

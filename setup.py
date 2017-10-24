@@ -3,7 +3,7 @@ import os
 from setuptools import find_packages, setup
 
 project = "floyd-cli"
-version = "0.10.15"
+version = "0.10.16"
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
     long_description = readme.read()
@@ -13,7 +13,7 @@ setup(
     version=version,
     description="Command line tool for Floyd",
     long_description=long_description,
-    author="Floyd",
+    author="Floyd Labs Inc.",
     author_email="support@floydhub.com",
     url="https://github.com/floydhub/floyd-cli",
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
@@ -27,7 +27,6 @@ setup(
         "requests-toolbelt>=0.7.1",
         "marshmallow>=2.11.1",
         "pytz>=2016.10",
-        "shortuuid>=0.4.3",
         "tabulate>=0.7.7",
         "pathlib2>=2.2.1",
         "raven",

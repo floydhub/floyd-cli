@@ -6,7 +6,6 @@ import webbrowser
 import floyd
 from floyd.client.data import DataClient
 from floyd.client.dataset import DatasetClient
-from floyd.client.resource import ResourceClient
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.data_config import DataConfig, DataConfigManager
 from floyd.log import logger as floyd_logger
@@ -113,6 +112,8 @@ def clone(id):
     data_source = DataClient().get(id)
 
     if not data_source:
+        if 'output' in id:
+            floyd_logger.info("Note: You cannot clone the output of a running job. You need to wait for it to finish.")
         sys.exit()
 
     data_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
@@ -136,8 +137,7 @@ def output(id, url):
     if not data_source:
         sys.exit()
 
-    resource = ResourceClient().get(data_source.resource_id)
-    data_url = "{}/viewer/{}".format(floyd.floyd_host, resource.uri)
+    data_url = "%s/%s" % (floyd.floyd_web_host, data_source.name)
     if url:
         floyd_logger.info(data_url)
     else:
@@ -185,9 +185,20 @@ def delete(ids, yes):
         sys.exit(1)
 
 
+@click.command()
+@click.argument('source')
+def add(source):
+    """
+    Create data for current dataset from a given source, for example: foo/projects/bar/1/output
+    """
+    new_data = DatasetClient().add_data(source)
+    print_data([DataClient().get(new_data['data_id'])])
+
+
 data.add_command(clone)
 data.add_command(delete)
 data.add_command(init)
 data.add_command(upload)
 data.add_command(status)
 data.add_command(output)
+data.add_command(add)
