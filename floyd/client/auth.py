@@ -36,7 +36,7 @@ class AuthClient(FloydHttpClient):
         try:
             token_dict = response.json()
             response.raise_for_status()
-        except Exception :
+        except Exception:
             if response.status_code == 401:
                 raise AuthenticationException("Invalid credentials")
             raise AuthenticationException("Login failed. Please try login without username and password.")
