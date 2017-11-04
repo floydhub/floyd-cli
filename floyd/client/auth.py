@@ -23,7 +23,22 @@ class AuthClient(FloydHttpClient):
             response.raise_for_status()
         except Exception:
             if response.status_code == 401:
-                raise AuthenticationException("Invalid Token.\nSee http://docs.floydhub.com/faqs/authentication/ for help")
+                raise AuthenticationException("Invalid Token.\nSee http://docs.floydhub.com/faqs/authentication/ for help")  # noqa
             raise AuthenticationException("Login failed.\nSee http://docs.floydhub.com/faqs/authentication/ for help")
 
         return User.from_dict(user_dict)
+
+    def login(self, credentials):
+        # This is another special case client, because auth_token is not set yet (this is how we get the token)
+        # So do not use the shared base client for this!
+        response = requests.post('%slogin' % self.base_url,
+                                 json=credentials.to_dict())
+        try:
+            token_dict = response.json()
+            response.raise_for_status()
+        except Exception :
+            if response.status_code == 401:
+                raise AuthenticationException("Invalid credentials")
+            raise AuthenticationException("Login failed")
+
+        return token_dict.get('access_token')
