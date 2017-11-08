@@ -42,6 +42,8 @@ def login(token, username, password):
         floyd_logger.info("Please copy and paste the authentication token.")
         access_code = click.prompt('This is an invisible field. Paste token and press ENTER', type=str, hide_input=True)
 
+        access_code = access_code.strip()
+
         if not access_code:
             floyd_logger.info("Empty token received. Make sure your shell is handling the token appropriately.")
             floyd_logger.info("See docs for help: http://docs.floydhub.com/faqs/authentication/")
