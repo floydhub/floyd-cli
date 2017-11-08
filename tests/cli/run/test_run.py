@@ -33,7 +33,7 @@ class TestExperimentRun(unittest.TestCase):
         """
         Simple experiment with no data attached
         """
-        result = self.runner.invoke(run, ['command'])
+        result = self.runner.invoke(run, ['command'], catch_exceptions=False)
         assert(result.exit_code == 0)
 
     @patch('floyd.model.access_token.assert_token_not_expired')
@@ -59,7 +59,7 @@ class TestExperimentRun(unittest.TestCase):
         Simple experiment with no data attached
         """
         data_get.return_value.id = 'data_id'
-        result = self.runner.invoke(run, ['command', '--data', 'data-id1', '--data', 'data-id2'])
+        result = self.runner.invoke(run, ['command', '--data', 'data-id1', '--data', 'data-id2'], catch_exceptions=False)
         assert(result.exit_code == 0)
 
     def test_get_command_line(self):

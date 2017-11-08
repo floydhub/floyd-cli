@@ -28,10 +28,13 @@ class ProjectClient(FloydHttpClient):
                 sys.exit(1)
             return []
 
-    def get_by_name(self, name):
-        access_token = AuthConfigManager.get_access_token()
+    def get_by_name(self, name, username=None):
+        if not username:
+            access_token = AuthConfigManager.get_access_token()
+            username = access_token.username
+
         try:
-            response = self.request('GET', '%s/%s/%s' % (self.url, access_token.username, name))
+            response = self.request('GET', '%s/%s/%s' % (self.url, username, name))
             return Project.from_dict(response.json())
         except NotFoundException:
             return None

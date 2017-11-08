@@ -11,6 +11,8 @@ class ProjectSchema(Schema):
     id = fields.Str()
     description = fields.Str(allow_none=True)
     public = fields.Boolean()
+    public = fields.Boolean()
+    latest_experiment_name = fields.Str(allow_none=True)
 
     @post_load
     def make_credentials(self, data):
@@ -28,8 +30,10 @@ class Project(BaseModel):
                  name,
                  id,
                  description,
-                 public):
+                 public,
+                 latest_experiment_name):
         self.name = name
         self.id = id
         self.description = description
         self.public = public
+        self.latest_experiment_name = latest_experiment_name
