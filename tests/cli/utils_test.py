@@ -6,7 +6,10 @@ class TestCliUtil(unittest.TestCase):
     """
     Tests cli utils helper functions
     """
-    def test_normalize_data_name(self):
+    @patch('floyd.cli.utils.current_username', return_value='pete')
+    @patch('floyd.cli.utils.current_experiment_name', return_value='test_proj')
+    @patch('floyd.cli.utils.get_dataset_number', return_value='TEST')
+    def test_normalize_data_name(self, _0, _1, _2):
         from floyd.cli.utils import normalize_data_name
         assert normalize_data_name('foo/bar/1') == 'foo/datasets/bar/1'
         assert normalize_data_name('foo/datasets/bar/1') == 'foo/datasets/bar/1'

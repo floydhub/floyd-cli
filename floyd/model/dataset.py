@@ -11,6 +11,7 @@ class DatasetSchema(Schema):
     id = fields.Str()
     description = fields.Str(allow_none=True)
     public = fields.Boolean()
+    totalVersionsCount = fields.Int(allow_none=True)
 
     @post_load
     def make_credentials(self, data):
@@ -28,8 +29,10 @@ class Dataset(BaseModel):
                  name,
                  id,
                  description,
-                 public):
+                 public,
+                 totalVersionsCount):
         self.name = name
         self.id = id
         self.description = description
         self.public = public
+        self.totalVersionsCount = totalVersionsCount

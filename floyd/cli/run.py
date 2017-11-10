@@ -14,7 +14,7 @@ from floyd.constants import DEFAULT_ENV, INSTANCE_NAME_MAP
 from floyd.client.data import DataClient
 from floyd.client.project import ProjectClient
 from floyd.cli.utils import (
-    get_mode_parameter, get_data_name, normalize_job_name
+    get_mode_parameter, get_data_name, normalize_job_name, normalize_data_name
 )
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
@@ -233,6 +233,11 @@ def get_command_line(instance_type, env, message, data, mode, open_notebook, ten
         floyd_command += ["--message", shell_quote(message)]
     if data:
         for data_item in data:
+            parts = data_item.split(':')
+
+            if len(parts) > 1:
+                data_item = normalize_data_name(parts[0]) + ':' + parts[1]
+
             floyd_command += ["--data", data_item]
     if tensorboard:
         floyd_command.append("--tensorboard")

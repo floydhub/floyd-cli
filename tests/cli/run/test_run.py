@@ -62,7 +62,8 @@ class TestExperimentRun(unittest.TestCase):
         result = self.runner.invoke(run, ['command', '--data', 'data-id1', '--data', 'data-id2'], catch_exceptions=False)
         assert(result.exit_code == 0)
 
-    def test_get_command_line(self):
+    @patch('floyd.cli.run.normalize_data_name', return_value='mckay/datasets/foo/1')
+    def test_get_command_line(self, _):
         re = get_command_line(
             instance_type='g1p',
             env='pytorch-2.0:py2',
@@ -73,7 +74,7 @@ class TestExperimentRun(unittest.TestCase):
             tensorboard=True,
             command_str='echo hello'
         )
-        assert re == 'floyd run --gpu+ --env pytorch-2.0:py2 --message \'test\'"\'"\' message\' --data foo:input --tensorboard \'echo hello\''
+        assert re == 'floyd run --gpu+ --env pytorch-2.0:py2 --message \'test\'"\'"\' message\' --data mckay/datasets/foo/1:input --tensorboard \'echo hello\''
 
         re = get_command_line(
             instance_type='c1',
@@ -85,7 +86,7 @@ class TestExperimentRun(unittest.TestCase):
             tensorboard=False,
             command_str='echo \'hello'
         )
-        assert re == 'floyd run --cpu --env tensorflow --data foo:input --data bar --mode jupyter'
+        assert re == 'floyd run --cpu --env tensorflow --data mckay/datasets/foo/1:input --data bar --mode jupyter'
 
         re = get_command_line(
             instance_type='g1',
@@ -97,4 +98,4 @@ class TestExperimentRun(unittest.TestCase):
             tensorboard=True,
             command_str='echo hello > /output'
         )
-        assert re == 'floyd run --gpu --env tensorflow --data foo:input --tensorboard \'echo hello > /output\''
+        assert re == 'floyd run --gpu --env tensorflow --data mckay/datasets/foo/1:input --tensorboard \'echo hello > /output\''
