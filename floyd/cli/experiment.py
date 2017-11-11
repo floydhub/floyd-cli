@@ -28,21 +28,24 @@ def init(project):
 
         floyd run 'python tensorflow.py > /output/model.1'
     """
+    FloydIgnoreManager.init()
+
+    experiment_config = ExperimentConfig(name=project)
+    ExperimentConfigManager.set_config(experiment_config)
+    floyd_logger.info("Project \"{}\" initialized in current directory".format(project))
+
     project_obj = ProjectClient().get_by_name(project)
     if not project_obj:
         create_project_base_url = "{}/projects/create".format(floyd.floyd_web_host)
         create_project_url = "{}?name={}".format(create_project_base_url, project)
-        floyd_logger.error(("Project name does not match your list of projects. "
+        floyd_logger.info(("Project name does not yet exist on floydhub.com. "
                             "Create your new project in the web dashboard:\n\t%s"),
                            create_project_base_url)
         webbrowser.open(create_project_url)
         return
 
-    experiment_config = ExperimentConfig(name=project,
-                                         family_id=project_obj.id)
+    experiment_config.family_id = project_obj.id
     ExperimentConfigManager.set_config(experiment_config)
-    FloydIgnoreManager.init()
-    floyd_logger.info("Project \"{}\" initialized in current directory".format(project))
 
 
 @click.command()
