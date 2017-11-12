@@ -4,6 +4,7 @@ from floyd.exceptions import FloydException
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.experiment_config import ExperimentConfigManager
 
+
 from floyd.constants import DOCKER_IMAGES
 
 def get_docker_image(env, gpu):
@@ -59,9 +60,6 @@ def get_data_id(data_str):
 
 
 def normalize_data_name(raw_name, default_username=None, default_dataset_name=None):
-    from floyd.manager.auth_config import AuthConfigManager
-    from floyd.manager.experiment_config import ExperimentConfigManager
-
     if raw_name.endswith('/output'):
         return normalize_job_name(raw_name[:-len('/output')], default_username, default_dataset_name) + '/output'
 
@@ -113,9 +111,6 @@ def normalize_data_name(raw_name, default_username=None, default_dataset_name=No
 
 
 def normalize_job_name(raw_job_name, default_username=None, default_project_name=None):
-    from floyd.manager.auth_config import AuthConfigManager
-    from floyd.manager.experiment_config import ExperimentConfigManager
-
     name_parts = raw_job_name.split('/')
 
     username = default_username or current_username()
@@ -184,6 +179,9 @@ def get_last_job_name(username, project_name):
 
     return project.latest_experiment_name
 
+# TODO: totalVersionsCount will not always get us the correct version number,
+# but it will be correct a lot of the time. The API will offer this information
+# in the future.
 def get_dataset_number(username, dataset_name):
     from floyd.client.dataset import DatasetClient
 
