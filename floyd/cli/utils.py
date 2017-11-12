@@ -93,7 +93,7 @@ def normalize_data_name(raw_name, default_username=None, default_dataset_name=No
     elif len(name_parts) == 1:
         if name_parts[0].isdigit():
             # 1
-            job_number = name_parts[0]
+            number = name_parts[0]
         else:
             # foo
             name = name_parts[0]
@@ -102,7 +102,7 @@ def normalize_data_name(raw_name, default_username=None, default_dataset_name=No
 
     # If no number/version is found, query the API for the most recent version
     if number is None:
-        name_from_api = get_dataset_number(username, name)
+        name_from_api = get_lateset_dataset_version(username, name)
         if not name_from_api:
             raise FloydException("Could not resolve %s. Make sure the project exists and has jobs." % raw_name)
         return name_from_api
@@ -151,7 +151,7 @@ def normalize_job_name(raw_job_name, default_username=None, default_project_name
 
     # If no job_number is found, query the API for the most recent job number
     if job_number is None:
-        job_name_from_api = get_last_job_name(username, project_name)
+        job_name_from_api = get_latest_job_name(username, project_name)
         if not job_name_from_api:
             raise FloydException("Could not resolve %s. Make sure the project exists and has jobs." % raw_job_name)
         return job_name_from_api
@@ -170,7 +170,7 @@ def current_experiment_name():
     experiment_config = ExperimentConfigManager.get_config()
     return experiment_config.name
 
-def get_last_job_name(username, project_name):
+def get_latest_job_name(username, project_name):
     from floyd.client.project import ProjectClient
     project = ProjectClient().get_by_name(project_name, username)
 
@@ -179,10 +179,7 @@ def get_last_job_name(username, project_name):
 
     return project.latest_experiment_name
 
-# TODO: totalVersionsCount will not always get us the correct version number,
-# but it will be correct a lot of the time. The API will offer this information
-# in the future.
-def get_dataset_number(username, dataset_name):
+def get_lateset_dataset_version(username, dataset_name):
     from floyd.client.dataset import DatasetClient
 
     dataset = DatasetClient().get_by_name(dataset_name, username=username)
@@ -190,4 +187,7 @@ def get_dataset_number(username, dataset_name):
     if not dataset:
         return ''
 
+    # TODO: totalVersionsCount will not always get us the correct version number,
+    # but it will be correct a lot of the time. The API will offer this information
+    # in the future.
     return '%s/datasets/%s/%s' % (username, dataset_name, dataset.totalVersionsCount)
