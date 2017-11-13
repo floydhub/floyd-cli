@@ -7,6 +7,7 @@ from floyd.manager.experiment_config import ExperimentConfigManager
 
 from floyd.constants import DOCKER_IMAGES
 
+
 def get_docker_image(env, gpu):
     gpu_cpu = "gpu" if gpu else "cpu"
     return DOCKER_IMAGES.get(gpu_cpu).get(env)
@@ -67,7 +68,7 @@ def normalize_data_name(raw_name, default_username=None, default_dataset_name=No
 
     username = default_username or current_username()
     name = default_dataset_name or current_experiment_name()
-    number = None # current job number
+    number = None  # current version number
 
     # When nothing is passed, use all the defaults
     if not raw_name:
@@ -115,33 +116,33 @@ def normalize_job_name(raw_job_name, default_username=None, default_project_name
 
     username = default_username or current_username()
     project_name = default_project_name or current_experiment_name()
-    job_number = None # current job number
+    number = None  # current job number
 
     # When nothing is passed, use all the defaults
     if not raw_job_name:
         pass
     elif len(name_parts) == 4:
         # mckay/projects/foo/1
-        username, _, project_name, job_number = name_parts
+        username, _, project_name, number = name_parts
     elif len(name_parts) == 3:
 
         if name_parts[2].isdigit():
             # mckay/foo/1
-            username, project_name, job_number = name_parts
+            username, project_name, number = name_parts
         else:
             # mckay/projects/foo
             username, _, project_name = name_parts
     elif len(name_parts) == 2:
         if name_parts[1].isdigit():
             # foo/1
-            project_name, job_number = name_parts
+            project_name, number = name_parts
         else:
             # mckay/foo
             username, project_name = name_parts
     elif len(name_parts) == 1:
         if name_parts[0].isdigit():
             # 1
-            job_number = name_parts[0]
+            number = name_parts[0]
         else:
             # foo
 
@@ -149,26 +150,29 @@ def normalize_job_name(raw_job_name, default_username=None, default_project_name
     else:
         return raw_job_name
 
-    # If no job_number is found, query the API for the most recent job number
-    if job_number is None:
+    # If no number is found, query the API for the most recent job number
+    if number is None:
         job_name_from_api = get_latest_job_name(username, project_name)
         if not job_name_from_api:
             raise FloydException("Could not resolve %s. Make sure the project exists and has jobs." % raw_job_name)
         return job_name_from_api
 
-    return '/'.join([username, 'projects', project_name, job_number])
+    return '/'.join([username, 'projects', project_name, number])
 
 
 def get_cli_version():
     return pkg_resources.require("floyd-cli")[0].version
 
+
 def current_username():
     access_token = AuthConfigManager.get_access_token()
     return access_token.username
 
+
 def current_experiment_name():
     experiment_config = ExperimentConfigManager.get_config()
     return experiment_config.name
+
 
 def get_latest_job_name(username, project_name):
     from floyd.client.project import ProjectClient
@@ -178,6 +182,7 @@ def get_latest_job_name(username, project_name):
         return ''
 
     return project.latest_experiment_name
+
 
 def get_lateset_dataset_version(username, dataset_name):
     from floyd.client.dataset import DatasetClient

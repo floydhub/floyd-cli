@@ -39,8 +39,8 @@ def init(project):
         create_project_base_url = "{}/projects/create".format(floyd.floyd_web_host)
         create_project_url = "{}?name={}".format(create_project_base_url, project)
         floyd_logger.info(("Project name does not yet exist on floydhub.com. "
-                            "Create your new project in the web dashboard:\n\t%s"),
-                           create_project_base_url)
+                          "Create your new project in the web dashboard:\n\t%s"),
+                          create_project_base_url)
         webbrowser.open(create_project_url)
         return
 

@@ -6,7 +6,7 @@ import webbrowser
 import sys
 try:
     from pipes import quote as shell_quote
-except:
+except ImportError:
     from shlex import quote as shell_quote
 
 import floyd
