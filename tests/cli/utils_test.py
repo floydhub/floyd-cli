@@ -8,8 +8,7 @@ class TestCliUtil(unittest.TestCase):
     """
     @patch('floyd.cli.utils.current_username', return_value='pete')
     @patch('floyd.cli.utils.current_experiment_name', return_value='test_proj')
-    @patch('floyd.cli.utils.get_latest_dataset_version', return_value='TEST')
-    def test_normalize_data_name(self, _0, _1, _2):
+    def test_normalize_data_name(self, _0, _1):
         from floyd.cli.utils import normalize_data_name
         assert normalize_data_name('foo/bar/1') == 'foo/datasets/bar/1'
         assert normalize_data_name('foo/datasets/bar/1') == 'foo/datasets/bar/1'
@@ -29,13 +28,13 @@ class TestCliUtil(unittest.TestCase):
         # Full job names are returned unchanged
         assert normalize_data_name('foo/projects/bar/1') == 'foo/datasets/bar/1'
 
-        # If no job number is passed, get_latest_dataset_version is used
-        assert normalize_data_name('foo/datasets/bar') == 'TEST'
+        # If no job number is passed, it is not used
+        assert normalize_data_name('foo/datasets/bar') == 'foo/datasets/bar/'
 
 
     @patch('floyd.cli.utils.current_username', return_value='pete')
     @patch('floyd.cli.utils.current_experiment_name', return_value='test_proj')
-    @patch('floyd.cli.utils.get_latest_job_name', return_value='TEST')
+    @patch('floyd.cli.utils.get_latest_job_name_for_project', return_value='TEST')
     def test_normalize_job_name(self, _0, _1, _2):
         from floyd.cli.utils import normalize_job_name
 

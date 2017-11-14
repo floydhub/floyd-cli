@@ -68,7 +68,7 @@ def normalize_data_name(raw_name, default_username=None, default_dataset_name=No
 
     username = default_username or current_username()
     name = default_dataset_name or current_experiment_name()
-    number = None  # current version number
+    number = ''  # current version number
 
     # When nothing is passed, use all the defaults
     if not raw_name:
@@ -100,13 +100,6 @@ def normalize_data_name(raw_name, default_username=None, default_dataset_name=No
             name = name_parts[0]
     else:
         return raw_name
-
-    # If no number/version is found, query the API for the most recent version
-    if number is None:
-        name_from_api = get_latest_dataset_version(username, name)
-        if not name_from_api:
-            raise FloydException("Could not resolve %s. Make sure the dataset or job exists." % raw_name)
-        return name_from_api
 
     return '/'.join([username, 'datasets', name, number])
 
@@ -152,7 +145,7 @@ def normalize_job_name(raw_job_name, default_username=None, default_project_name
 
     # If no number is found, query the API for the most recent job number
     if number is None:
-        job_name_from_api = get_latest_job_name(username, project_name)
+        job_name_from_api = get_latest_job_name_for_project(username, project_name)
         if not job_name_from_api:
             raise FloydException("Could not resolve %s. Make sure the project exists and has jobs." % raw_job_name)
         return job_name_from_api
@@ -174,7 +167,7 @@ def current_experiment_name():
     return experiment_config.name
 
 
-def get_latest_job_name(username, project_name):
+def get_latest_job_name_for_project(username, project_name):
     from floyd.client.project import ProjectClient
     project = ProjectClient().get_by_name(project_name, username)
 
@@ -182,17 +175,3 @@ def get_latest_job_name(username, project_name):
         return ''
 
     return project.latest_experiment_name
-
-
-def get_latest_dataset_version(username, dataset_name):
-    from floyd.client.dataset import DatasetClient
-
-    dataset = DatasetClient().get_by_name(dataset_name, username=username)
-
-    if not dataset:
-        return ''
-
-    # TODO: totalVersionsCount will not always get us the correct version number,
-    # but it will be correct a lot of the time. The API will offer this information
-    # in the future.
-    return '%s/datasets/%s/%s' % (username, dataset_name, dataset.totalVersionsCount)
