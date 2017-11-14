@@ -28,23 +28,4 @@ class ExperimentConfigManager(object):
         with open(cls.CONFIG_FILE_PATH, "r") as config_file:
             experiment_config = json.loads(config_file.read())
 
-        # Get the family_id from the API and write it to the file
-        if not experiment_config['family_id']:
-            return cls.set_experiement_config_from_name(experiment_config['name'])
-
         return ExperimentConfig.from_dict(experiment_config)
-
-    @classmethod
-    def set_experiement_config_from_name(cls, name):
-        from floyd.client.project import ProjectClient
-        project = ProjectClient().get_by_name(name)
-
-        if not project:
-            raise FloydException('Project not yet initialized. Run `floyd init <project_name>` before continuing.')
-
-        e = ExperimentConfig(name, project.id)
-
-        with open(cls.CONFIG_FILE_PATH, "w") as config_file:
-            config_file.write(json.dumps(e.to_dict()))
-
-        return e

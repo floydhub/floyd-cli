@@ -13,6 +13,7 @@ from floyd.client.module import ModuleClient
 from floyd.client.project import ProjectClient
 from floyd.client.resource import ResourceClient
 from floyd.client.task_instance import TaskInstanceClient
+from floyd.exceptions import FloydException
 from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.model.experiment_config import ExperimentConfig
@@ -20,32 +21,40 @@ from floyd.log import logger as floyd_logger
 
 
 @click.command()
-@click.argument('project', nargs=1)
-def init(project):
+@click.argument('project_name', nargs=1)
+def init(project_name):
     """
     Initialize new project at the current dir.
     After init run your command. Example:
 
         floyd run 'python tensorflow.py > /output/model.1'
     """
-    FloydIgnoreManager.init()
 
-    experiment_config = ExperimentConfig(name=project)
-    ExperimentConfigManager.set_config(experiment_config)
-    floyd_logger.info("Project \"%s\" initialized in current directory", project)
+    project_obj = ProjectClient().get_by_name(project_name)
 
-    project_obj = ProjectClient().get_by_name(project)
     if not project_obj:
         create_project_base_url = "{}/projects/create".format(floyd.floyd_web_host)
-        create_project_url = "{}?name={}".format(create_project_base_url, project)
-        floyd_logger.info(("Project name does not yet exist on floydhub.com. "
-                          "Create your new project on floydhub.com:\n\t%s"),
+        create_project_url = "{}?name={}".format(create_project_base_url, project_name)
+        floyd_logger.info(('Project name does not yet exist on floydhub.com. '
+                          'Create your new project on floydhub.com:\n\t%s'),
                           create_project_base_url)
         webbrowser.open(create_project_url)
-        return
 
-    experiment_config.family_id = project_obj.id
+        floyd_logger.info('Please enter the name of the project as you created it on floydhub.com')
+        name = click.prompt('Or press ENTER to use "%s"' % project_name, default=project_name, show_default=False)
+
+        project_name = name.strip() or project_name
+        project_obj = ProjectClient().get_by_name(project_name)
+
+        if not project_obj:
+            raise FloydException('Project "%s" does not exist on floydhub.com. Ensure it exists before continuing.' % project_name)
+
+    experiment_config = ExperimentConfig(name=project_name,
+                                         family_id=project_obj.id)
     ExperimentConfigManager.set_config(experiment_config)
+    FloydIgnoreManager.init()
+
+    floyd_logger.info("Project \"%s\" initialized in current directory", project_name)
 
 
 @click.command()

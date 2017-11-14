@@ -6,7 +6,7 @@ from floyd.model.base import BaseModel
 class ExperimentConfigSchema(Schema):
 
     name = fields.Str()
-    family_id = fields.Str(allow_none=True)
+    family_id = fields.Str()
 
     @post_load
     def make_access_token(self, data):
