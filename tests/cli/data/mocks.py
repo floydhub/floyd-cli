@@ -1,3 +1,10 @@
+def mock_access_token():
+    class AccessToken:
+        username = 'foo_user'
+        token = '123'
+
+    return AccessToken()
+
 def mock_data(data_id):
     class Data:
         id = data_id

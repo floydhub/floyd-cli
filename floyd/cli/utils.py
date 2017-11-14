@@ -105,7 +105,7 @@ def normalize_data_name(raw_name, default_username=None, default_dataset_name=No
     if number is None:
         name_from_api = get_latest_dataset_version(username, name)
         if not name_from_api:
-            raise FloydException("Could not resolve %s. Make sure the project exists and has jobs." % raw_name)
+            raise FloydException("Could not resolve %s. Make sure the dataset or job exists." % raw_name)
         return name_from_api
 
     return '/'.join([username, 'datasets', name, number])

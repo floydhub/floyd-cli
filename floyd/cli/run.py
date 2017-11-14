@@ -45,6 +45,8 @@ def process_data_ids(data):
         path = None
         if ':' in data_name_or_id:
             data_name_or_id, path = data_name_or_id.split(':')
+            data_name_or_id = normalize_data_name(data_name_or_id)
+
         data_obj = DataClient().get(data_name_or_id)
         if not data_obj:
             floyd_logger.error("Data not found for name or id: {}".format(data_name_or_id))

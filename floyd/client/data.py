@@ -5,7 +5,6 @@ from floyd.exceptions import FloydException, BadRequestException
 from floyd.client.base import FloydHttpClient
 from floyd.model.data import Data
 from floyd.log import logger as floyd_logger
-from floyd.cli.utils import normalize_data_name
 
 
 def create_progress_callback(encoder):
@@ -62,7 +61,6 @@ class DataClient(FloydHttpClient):
 
     def get(self, id):
         try:
-            id = normalize_data_name(id)
             response = self.request("GET", self.url + id)
             data_dict = response.json()
             if data_dict['module_type'] != 'DataModule':

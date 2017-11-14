@@ -4,7 +4,7 @@ from mock import patch, call
 
 from floyd.cli.data import delete
 from floyd.model.experiment_config import ExperimentConfig
-from tests.cli.data.mocks import mock_data, mock_project_client
+from tests.cli.data.mocks import mock_data, mock_project_client, mock_access_token
 
 
 class TestDataDelete(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestDataDelete(unittest.TestCase):
 
     @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
     @patch('floyd.client.project.ProjectClient', side_effect=mock_project_client)
-    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.data.DataClient.get', side_effect=mock_data)
     @patch('floyd.cli.data.DataClient.delete', return_value=True)
@@ -36,7 +36,10 @@ class TestDataDelete(unittest.TestCase):
                                               get_access_token,
                                               get_project,
                                               get_config):
-        id_1, id_2, id_3 = '1', '2', '3'
+        id_1 = 'mckay/datasets/foo/1'
+        id_2 = 'mckay/datasets/bar/1'
+        id_3 = 'mckay/datasets/foo/1'
+
         result = self.runner.invoke(delete, ['-y', id_1, id_2, id_3])
 
         # Trigger a get and a delete for each id
@@ -59,7 +62,9 @@ class TestDataDelete(unittest.TestCase):
                                        get_access_token,
                                        project_client,
                                        get_config):
-        id_1, id_2, id_3 = '1', '2', '3'
+        id_1 = 'mckay/datasets/foo/1'
+        id_2 = 'mckay/datasets/bar/1'
+        id_3 = 'mckay/datasets/foo/1'
 
         # Tell prompt to skip id_1 and id_3
         result = self.runner.invoke(delete,
@@ -88,7 +93,10 @@ class TestDataDelete(unittest.TestCase):
                            get_access_token,
                            project_client,
                            get_config):
-        id_1, id_2, id_3 = '1', '2', '3'
+        id_1 = 'mckay/datasets/foo/1'
+        id_2 = 'mckay/datasets/bar/1'
+        id_3 = 'mckay/datasets/foo/1'
+
         result = self.runner.invoke(delete, ['-y', id_1, id_2, id_3])
 
         # Trigger a get and a delete for each id, even though each delete
@@ -100,12 +108,21 @@ class TestDataDelete(unittest.TestCase):
         # Exit 1 for failed deletes
         assert(result.exit_code == 1)
 
+    @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
     @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.data.DataClient.get', return_value=None)
     @patch('floyd.cli.data.DataClient.delete')
-    def test_failed_get(self, delete_data, get_data, assert_token_not_expired, get_access_token):
-        id_1, id_2, id_3 = '1', '2', '3'
+    def test_failed_get(self,
+                        delete_data,
+                        get_data,
+                        assert_token_not_expired,
+                        get_access_token,
+                        get_config):
+        id_1 = 'mckay/datasets/foo/1'
+        id_2 = 'mckay/datasets/bar/1'
+        id_3 = 'mckay/datasets/foo/1'
+
         result = self.runner.invoke(delete, ['-y', id_1, id_2, id_3])
 
         # Trigger a get for each id, even though each fails. (No early exit)

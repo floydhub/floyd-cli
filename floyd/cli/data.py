@@ -80,6 +80,7 @@ def status(id):
     It can also list status of all the runs in the project.
     """
     if id:
+        id = normalize_data_name(id)
         data_source = DataClient().get(id)
         print_data([data_source] if data_source else [])
     else:
@@ -109,6 +110,7 @@ def clone(id):
     """
     Download the code for the job to the current path
     """
+    id = normalize_data_name(id)
     data_source = DataClient().get(id)
 
     if not data_source:
@@ -132,6 +134,7 @@ def output(id, url):
     Shows the url of the dataset. You can use id or a friendly URI.
     By default opens the output page in your default browser.
     """
+    id = normalize_data_name(id)
     data_source = DataClient().get(id)
 
     if not data_source:
@@ -156,6 +159,7 @@ def delete(ids, yes):
     failures = False
 
     for id in ids:
+        id = normalize_data_name(id)
         data_source = DataClient().get(id)
         if not data_source:
             failures = True
