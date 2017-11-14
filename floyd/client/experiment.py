@@ -18,6 +18,7 @@ class ExperimentClient(FloydHttpClient):
 
     def get_all(self):
         experiment_config = ExperimentConfigManager.get_config()
+
         response = self.request("GET",
                                 self.url,
                                 params="family_id={}".format(experiment_config.family_id))

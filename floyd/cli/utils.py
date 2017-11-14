@@ -103,7 +103,7 @@ def normalize_data_name(raw_name, default_username=None, default_dataset_name=No
 
     # If no number/version is found, query the API for the most recent version
     if number is None:
-        name_from_api = get_lateset_dataset_version(username, name)
+        name_from_api = get_latest_dataset_version(username, name)
         if not name_from_api:
             raise FloydException("Could not resolve %s. Make sure the project exists and has jobs." % raw_name)
         return name_from_api
@@ -184,7 +184,7 @@ def get_latest_job_name(username, project_name):
     return project.latest_experiment_name
 
 
-def get_lateset_dataset_version(username, dataset_name):
+def get_latest_dataset_version(username, dataset_name):
     from floyd.client.dataset import DatasetClient
 
     dataset = DatasetClient().get_by_name(dataset_name, username=username)
