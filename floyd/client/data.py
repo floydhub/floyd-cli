@@ -70,7 +70,7 @@ class DataClient(FloydHttpClient):
 
             return Data.from_dict(data_dict)
         except FloydException as e:
-            floyd_logger.info("Data %s: ERROR! %s", id, e.message)
+            floyd_logger.info("Data %s: ERROR! %s\nIf you have already created the dataset, make sure you have uploaded at least one version.", id, e.message)
             return None
 
     def get_all(self):

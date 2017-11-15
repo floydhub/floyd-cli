@@ -125,7 +125,7 @@ def clone(id):
     """
 
     data_source = DataClient().get(normalize_data_name(id))
-    if not data_source:
+    if id and not data_source:
         # Try with the raw ID
         data_source = DataClient().get(id)
 
@@ -144,14 +144,14 @@ def clone(id):
 @click.command()
 @click.option('-u', '--url', is_flag=True, default=False,
               help='Only print url for viewing data')
-@click.argument('id', nargs=1)
+@click.argument('id', nargs=1, required=False)
 def output(id, url):
     """
     Shows the url of the dataset. You can use id or a friendly URI.
     By default opens the output page in your default browser.
     """
     data_source = DataClient().get(normalize_data_name(id))
-    if not data_source:
+    if id and not data_source:
         # Try with the raw ID
         data_source = DataClient().get(id)
 
