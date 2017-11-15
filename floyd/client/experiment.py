@@ -5,7 +5,6 @@ from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.model.experiment import Experiment
 from floyd.exceptions import FloydException, NotFoundException
 from floyd.log import logger as floyd_logger
-from floyd.cli.utils import normalize_job_name
 
 
 class ExperimentClient(FloydHttpClient):
@@ -26,7 +25,6 @@ class ExperimentClient(FloydHttpClient):
         return [Experiment.from_dict(expt) for expt in experiments_dict]
 
     def get(self, id):
-        id = normalize_job_name(id)
         response = self.request("GET",
                                 "{}{}".format(self.url, id))
         experiment_dict = response.json()

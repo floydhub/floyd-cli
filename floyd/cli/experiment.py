@@ -40,8 +40,7 @@ def init(project_name):
                           create_project_base_url)
         webbrowser.open(create_project_url)
 
-        floyd_logger.info('Please enter the name of the project as you created it on floydhub.com')
-        name = click.prompt('Or press ENTER to use "%s"' % project_name, default=project_name, show_default=False)
+        name = click.prompt('Press ENTER to use project name "%s" or enter a different name' % project_name, default=project_name, show_default=False)
 
         project_name = name.strip() or project_name
         project_obj = ProjectClient().get_by_name(project_name)
@@ -65,7 +64,11 @@ def status(id):
     It can also list status of all the runs in the project.
     """
     if id:
-        experiment = ExperimentClient().get(id)
+        try:
+            experiment = ExperimentClient().get(normalize_job_name(id))
+        except FloydException:
+            experiment = ExperimentClient().get(id)
+
         print_experiments([experiment])
     else:
         experiments = ExperimentClient().get_all()
@@ -92,7 +95,11 @@ def clone(id):
     """
     Download the code for the experiment to the current path
     """
-    experiment = ExperimentClient().get(id)
+    try:
+        experiment = ExperimentClient().get(normalize_job_name(id))
+    except FloydException:
+        experiment = ExperimentClient().get(id)
+
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
     if not task_instance:
@@ -106,12 +113,17 @@ def clone(id):
 
 
 @click.command()
-@click.argument('job_name', nargs=1)
-def info(job_name):
+@click.argument('job_name_or_id', nargs=1, required=False)
+def info(job_name_or_id):
     """
     Prints detailed info for the run
     """
-    experiment = ExperimentClient().get(job_name)
+    try:
+        experiment = ExperimentClient().get(normalize_job_name(job_name_or_id))
+    except FloydException:
+        experiment = ExperimentClient().get(job_name_or_id)
+
+    experiment = ExperimentClient().get(job_name_or_id)
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
     table = [["Job name", normalize_job_name(experiment.name)],
@@ -131,12 +143,16 @@ def info(job_name):
 @click.command()
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
 @click.option('-t', '--tail', is_flag=True, default=False, help='Stream the logs')
-@click.argument('id', nargs=1)
+@click.argument('id', nargs=1, required=False)
 def logs(id, url, tail, sleep_duration=1):
     """
     Print the logs of the run.
     """
-    experiment = ExperimentClient().get(id)
+    try:
+        experiment = ExperimentClient().get(normalize_job_name(id))
+    except FloydException:
+        experiment = ExperimentClient().get(id)
+
     if experiment.state == 'queued':
         floyd_logger.info("Job is currently in a queue")
         return
@@ -172,13 +188,17 @@ def logs(id, url, tail, sleep_duration=1):
 
 @click.command()
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
-@click.argument('id', nargs=1)
+@click.argument('id', nargs=1, required=False)
 def output(id, url):
     """
     Shows the output url of the run.
     By default opens the output page in your default browser.
     """
-    experiment = ExperimentClient().get(id)
+    try:
+        experiment = ExperimentClient().get(normalize_job_name(id))
+    except FloydException:
+        experiment = ExperimentClient().get(id)
+
     output_dir_url = "%s/%s/output" % (floyd.floyd_web_host, experiment.name)
     if url:
         floyd_logger.info(output_dir_url)
@@ -188,12 +208,16 @@ def output(id, url):
 
 
 @click.command()
-@click.argument('id', nargs=1)
+@click.argument('id', nargs=1, required=False)
 def stop(id):
     """
     Stop a run before it can finish.
     """
-    experiment = ExperimentClient().get(id)
+    try:
+        experiment = ExperimentClient().get(normalize_job_name(id))
+    except FloydException:
+        experiment = ExperimentClient().get(id)
+
     if experiment.state not in ["queued", "running"]:
         floyd_logger.info("Job in {} state cannot be stopped".format(experiment.state))
         return
@@ -213,7 +237,11 @@ def delete(ids, yes):
     """
     failures = False
     for id in ids:
-        experiment = ExperimentClient().get(id)
+        try:
+            experiment = ExperimentClient().get(normalize_job_name(id))
+        except FloydException:
+            experiment = ExperimentClient().get(id)
+
         if not experiment:
             failures = True
             continue

@@ -3,6 +3,7 @@ import pkg_resources
 from floyd.exceptions import FloydException
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.experiment_config import ExperimentConfigManager
+from floyd.manager.data_config import DataConfigManager
 
 from floyd.constants import DOCKER_IMAGES
 
@@ -60,13 +61,15 @@ def get_data_id(data_str):
 
 
 def normalize_data_name(raw_name, default_username=None, default_dataset_name=None):
+    raw_name = raw_name or ''
+
     if raw_name.endswith('/output'):
         return normalize_job_name(raw_name[:-len('/output')], default_username, default_dataset_name) + '/output'
 
     name_parts = raw_name.split('/')
 
     username = default_username or current_username()
-    name = default_dataset_name or current_experiment_name()
+    name = default_dataset_name or current_dataset_name()
     number = None  # current version number
 
     # When nothing is passed, use all the defaults
@@ -109,6 +112,8 @@ def normalize_data_name(raw_name, default_username=None, default_dataset_name=No
 
 
 def normalize_job_name(raw_job_name, default_username=None, default_project_name=None):
+    raw_job_name = raw_job_name or ''
+
     name_parts = raw_job_name.split('/')
 
     username = default_username or current_username()
@@ -162,13 +167,15 @@ def get_cli_version():
 
 
 def current_username():
-    access_token = AuthConfigManager.get_access_token()
-    return access_token.username
+    return AuthConfigManager.get_access_token().username
 
 
 def current_experiment_name():
-    experiment_config = ExperimentConfigManager.get_config()
-    return experiment_config.name
+    return ExperimentConfigManager.get_config().name
+
+
+def current_dataset_name():
+    return DataConfigManager.get_config().name
 
 
 def get_latest_job_name_for_project(username, project_name):

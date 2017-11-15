@@ -6,6 +6,7 @@ import webbrowser
 import floyd
 from floyd.client.data import DataClient
 from floyd.client.dataset import DatasetClient
+from floyd.exceptions import FloydException
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.data_config import DataConfig, DataConfigManager
 from floyd.log import logger as floyd_logger
@@ -39,11 +40,18 @@ def init(dataset_name):
     if not dataset_obj:
         create_dataset_base_url = "{}/datasets/create".format(floyd.floyd_web_host)
         create_dataset_url = "{}?name={}".format(create_dataset_base_url, dataset_name)
-        floyd_logger.error(("Dataset name does not match your list of datasets. "
-                            "Create your new dataset in the web dashboard:\n\t%s"),
-                           create_dataset_base_url)
+        floyd_logger.info(("Dataset name does not match your list of datasets. "
+                           "Create your new dataset in the web dashboard:\n\t%s"),
+                          create_dataset_base_url)
         webbrowser.open(create_dataset_url)
-        return
+
+        name = click.prompt('Press ENTER to use dataset name "%s" or enter a different name' % dataset_name, default=dataset_name, show_default=False)
+
+        dataset_name = name.strip() or dataset_name
+        dataset_obj = DatasetClient().get_by_name(dataset_name)
+
+        if not dataset_obj:
+            raise FloydException('Dataset "%s" does not exist on floydhub.com. Ensure it exists before continuing.' % dataset_name)
 
     data_config = DataConfig(name=dataset_name, family_id=dataset_obj.id)
     DataConfigManager.set_config(data_config)

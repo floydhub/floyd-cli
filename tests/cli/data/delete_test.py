@@ -5,6 +5,7 @@ from mock import patch, call
 from floyd.cli.data import delete
 from floyd.model.experiment_config import ExperimentConfig
 from tests.cli.data.mocks import mock_data, mock_project_client, mock_access_token
+from tests.cli.mocks import mock_data_config
 
 
 class TestDataDelete(unittest.TestCase):
@@ -23,6 +24,7 @@ class TestDataDelete(unittest.TestCase):
 
         assert(result.exit_code == 0)
 
+    @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
     @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
     @patch('floyd.client.project.ProjectClient', side_effect=mock_project_client)
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
@@ -35,7 +37,8 @@ class TestDataDelete(unittest.TestCase):
                                               assert_token_not_expired,
                                               get_access_token,
                                               get_project,
-                                              get_config):
+                                              get_expt_config,
+                                              get_data_config):
         id_1 = 'mckay/datasets/foo/1'
         id_2 = 'mckay/datasets/bar/1'
         id_3 = 'mckay/datasets/foo/1'
@@ -49,6 +52,7 @@ class TestDataDelete(unittest.TestCase):
 
         assert(result.exit_code == 0)
 
+    @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
     @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
     @patch('floyd.client.project.ProjectClient', side_effect=mock_project_client)
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
@@ -61,7 +65,8 @@ class TestDataDelete(unittest.TestCase):
                                        assert_token_not_expired,
                                        get_access_token,
                                        project_client,
-                                       get_config):
+                                       get_expt_config,
+                                       get_data_config):
         id_1 = 'mckay/datasets/foo/1'
         id_2 = 'mckay/datasets/bar/1'
         id_3 = 'mckay/datasets/foo/1'
@@ -80,6 +85,7 @@ class TestDataDelete(unittest.TestCase):
 
         assert(result.exit_code == 0)
 
+    @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
     @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
     @patch('floyd.client.project.ProjectClient', side_effect=mock_project_client)
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
@@ -92,7 +98,8 @@ class TestDataDelete(unittest.TestCase):
                            assert_token_not_expired,
                            get_access_token,
                            project_client,
-                           get_config):
+                           get_expt_config,
+                           get_data_config):
         id_1 = 'mckay/datasets/foo/1'
         id_2 = 'mckay/datasets/bar/1'
         id_3 = 'mckay/datasets/foo/1'
@@ -108,6 +115,7 @@ class TestDataDelete(unittest.TestCase):
         # Exit 1 for failed deletes
         assert(result.exit_code == 1)
 
+    @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
     @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
     @patch('floyd.model.access_token.assert_token_not_expired')
@@ -118,7 +126,8 @@ class TestDataDelete(unittest.TestCase):
                         get_data,
                         assert_token_not_expired,
                         get_access_token,
-                        get_config):
+                        get_expt_config,
+                        get_data_config):
         id_1 = 'mckay/datasets/foo/1'
         id_2 = 'mckay/datasets/bar/1'
         id_3 = 'mckay/datasets/foo/1'
