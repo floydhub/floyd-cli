@@ -30,7 +30,7 @@ class BadRequestException(FloydException):
     def __init__(self, response):
         try:
             message = "One or more request parameters is incorrect\n%s" % response.json()['message']
-        except:
+        except (KeyError, AttributeError):
             message = "One or more request parameters is incorrect, %s" % response.content
         super(BadRequestException, self).__init__(message=message)
 

@@ -1,5 +1,10 @@
 import pkg_resources
 
+from floyd.exceptions import FloydException
+from floyd.manager.auth_config import AuthConfigManager
+from floyd.manager.experiment_config import ExperimentConfigManager
+from floyd.manager.data_config import DataConfigManager
+
 from floyd.constants import DOCKER_IMAGES
 
 
@@ -55,28 +60,129 @@ def get_data_id(data_str):
         return data_str
 
 
-def normalize_data_name(data_name):
-    if data_name.endswith('/output'):
-        name_parts = data_name.split('/')
-        if len(name_parts) <= 4:
-            name_parts.insert(1, 'projects')
-            data_name = '/'.join(name_parts)
-        return data_name
+def normalize_data_name(raw_name, default_username=None, default_dataset_name=None):
+    raw_name = raw_name or ''
+
+    if raw_name.endswith('/output'):
+        return normalize_job_name(raw_name[:-len('/output')], default_username, default_dataset_name) + '/output'
+
+    name_parts = raw_name.split('/')
+
+    username = default_username or current_username()
+    name = default_dataset_name or current_dataset_name()
+    number = None  # current version number
+
+    # When nothing is passed, use all the defaults
+    if not raw_name:
+        pass
+    elif len(name_parts) == 4:
+        # mckay/datasets/foo/1
+        username, _, name, number = name_parts
+    elif len(name_parts) == 3:
+
+        if name_parts[2].isdigit():
+            # mckay/foo/1
+            username, name, number = name_parts
+        else:
+            # mckay/projects/foo
+            username, _, name = name_parts
+    elif len(name_parts) == 2:
+        if name_parts[1].isdigit():
+            # foo/1
+            name, number = name_parts
+        else:
+            # mckay/foo
+            username, name = name_parts
+    elif len(name_parts) == 1:
+        if name_parts[0].isdigit():
+            # 1
+            number = name_parts[0]
+        else:
+            # foo
+            name = name_parts[0]
     else:
-        name_parts = data_name.split('/')
-        if len(name_parts) <= 3:
-            name_parts.insert(1, 'datasets')
-            data_name = '/'.join(name_parts)
-        return data_name
+        return raw_name
+
+    name_parts = [username, 'datasets', name]
+
+    if number is not None:
+        name_parts.append(number)
+
+    return '/'.join(name_parts)
 
 
-def normalize_job_name(job_name):
-    job_name_parts = job_name.split('/')
-    if len(job_name_parts) <= 3:
-        job_name_parts.insert(1, 'projects')
-        job_name = '/'.join(job_name_parts)
-    return job_name
+def normalize_job_name(raw_job_name, default_username=None, default_project_name=None):
+    raw_job_name = raw_job_name or ''
+
+    name_parts = raw_job_name.split('/')
+
+    username = default_username or current_username()
+    project_name = default_project_name or current_experiment_name()
+    number = None  # current job number
+
+    # When nothing is passed, use all the defaults
+    if not raw_job_name:
+        pass
+    elif len(name_parts) == 4:
+        # mckay/projects/foo/1
+        username, _, project_name, number = name_parts
+    elif len(name_parts) == 3:
+
+        if name_parts[2].isdigit():
+            # mckay/foo/1
+            username, project_name, number = name_parts
+        else:
+            # mckay/projects/foo
+            username, _, project_name = name_parts
+    elif len(name_parts) == 2:
+        if name_parts[1].isdigit():
+            # foo/1
+            project_name, number = name_parts
+        else:
+            # mckay/foo
+            username, project_name = name_parts
+    elif len(name_parts) == 1:
+        if name_parts[0].isdigit():
+            # 1
+            number = name_parts[0]
+        else:
+            # foo
+
+            project_name = name_parts[0]
+    else:
+        return raw_job_name
+
+    # If no number is found, query the API for the most recent job number
+    if number is None:
+        job_name_from_api = get_latest_job_name_for_project(username, project_name)
+        if not job_name_from_api:
+            raise FloydException("Could not resolve %s. Make sure the project exists and has jobs." % raw_job_name)
+        return job_name_from_api
+
+    return '/'.join([username, 'projects', project_name, number])
 
 
 def get_cli_version():
     return pkg_resources.require("floyd-cli")[0].version
+
+
+def current_username():
+    return AuthConfigManager.get_access_token().username
+
+
+def current_experiment_name():
+    return ExperimentConfigManager.get_config().name
+
+
+def current_dataset_name():
+    return DataConfigManager.get_config().name
+
+
+def get_latest_job_name_for_project(username, project_name):
+    from floyd.client.project import ProjectClient
+    project = ProjectClient().get_by_name(project_name, username)
+
+    if not project:
+        return ''
+
+    return project.latest_experiment_name

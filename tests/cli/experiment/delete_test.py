@@ -3,7 +3,7 @@ import unittest
 from mock import patch, call, Mock
 
 from floyd.cli.experiment import delete
-from tests.cli.mocks import mock_exp, mock_task_inst
+from tests.cli.mocks import mock_exp, mock_task_inst, mock_access_token
 
 
 class TestExperimentDelete(unittest.TestCase):
@@ -25,8 +25,7 @@ class TestExperimentDelete(unittest.TestCase):
             client.assert_not_called()
 
 
-    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
-    @patch('floyd.model.access_token.assert_token_not_expired')
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.experiment.TaskInstanceClient')
     @patch('floyd.cli.experiment.ModuleClient')
     @patch('floyd.cli.experiment.ExperimentClient.get', side_effect=mock_exp)
@@ -36,9 +35,11 @@ class TestExperimentDelete(unittest.TestCase):
                                               get_experiment,
                                               module_client,
                                               task_instance_client,
-                                              assert_token_not_expired,
                                               get_access_token):
-        id_1, id_2, id_3 = '1', '2', '3'
+        id_1 = 'mckay/projects/foo/1'
+        id_2 = 'mckay/projects/foo/2'
+        id_3 = 'mckay/projects/foo/3'
+
         result = self.runner.invoke(delete, ['-y', id_1, id_2, id_3])
 
         # Trigger a get and a delete for each id
@@ -49,8 +50,7 @@ class TestExperimentDelete(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
-    @patch('floyd.model.access_token.assert_token_not_expired')
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.experiment.TaskInstanceClient')
     @patch('floyd.cli.experiment.ModuleClient')
     @patch('floyd.cli.experiment.ExperimentClient.get', side_effect=mock_exp)
@@ -60,9 +60,10 @@ class TestExperimentDelete(unittest.TestCase):
                                        get_experiment,
                                        module_client,
                                        task_instance_client,
-                                       assert_token_not_expired,
                                        get_access_token):
-        id_1, id_2, id_3 = '1', '2', '3'
+        id_1 = 'mckay/projects/foo/1'
+        id_2 = 'mckay/projects/foo/2'
+        id_3 = 'mckay/projects/foo/3'
 
         # Tell prompt to skip id_1 and id_3
         result = self.runner.invoke(delete,
@@ -83,16 +84,19 @@ class TestExperimentDelete(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
-    @patch('floyd.model.access_token.assert_token_not_expired')
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.experiment.TaskInstanceClient')
     @patch('floyd.cli.experiment.ModuleClient')
     @patch('floyd.cli.experiment.ExperimentClient.get', side_effect=mock_exp)
     @patch('floyd.cli.experiment.ExperimentClient.delete', return_value=False)
     def test_failed_delete(self, delete_experiment, get_experiment,
                            task_instance_client, module_client,
-                           assert_token_not_expired, get_access_token):
-        id_1, id_2, id_3 = '1', '2', '3'
+                           get_access_token):
+
+        id_1 = 'mckay/projects/foo/1'
+        id_2 = 'mckay/projects/foo/2'
+        id_3 = 'mckay/projects/foo/3'
+
         result = self.runner.invoke(delete, ['-y', id_1, id_2, id_3])
 
         # Trigger a get and a delete for each id, even though each delete
@@ -104,11 +108,13 @@ class TestExperimentDelete(unittest.TestCase):
         # Exit 1 for failed deletes
         self.assertEqual(result.exit_code, 1)
 
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.experiment.ExperimentClient')
     def test_with_no_found_task_instance(self,
-                                         experiment_client):
+                                         experiment_client,
+                                         access_token):
         experiment_client.return_value.get.return_value = None
-        id_1 = '1'
+        id_1 = 'mckay/projects/foo/1'
         result = self.runner.invoke(delete, ['-y', id_1])
 
         experiment_client.return_value.get.assert_called_once_with(id_1)
@@ -118,11 +124,13 @@ class TestExperimentDelete(unittest.TestCase):
         # Exit 1 for unsuccessful experiment delete
         assert(result.exit_code == 1)
 
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.experiment.ExperimentClient')
     def test_with_found_task_instance(self,
-                                      experiment_client):
+                                      experiment_client,
+                                      access_token):
         experiment_client.return_value.get.return_value = Mock(id='999999')
-        id_1 = '1'
+        id_1 = 'mckay/projects/foo/1'
         result = self.runner.invoke(delete, ['-y', id_1])
 
         experiment_client.return_value.get.assert_called_once_with(id_1)
@@ -133,8 +141,7 @@ class TestExperimentDelete(unittest.TestCase):
         # Exit 0 for successful experiment delete
         assert(result.exit_code == 0)
 
-    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
-    @patch('floyd.model.access_token.assert_token_not_expired')
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.experiment.TaskInstanceClient.get', side_effect=mock_task_inst)
     @patch('floyd.cli.experiment.get_module_task_instance_id', return_value='123')
     @patch('floyd.cli.experiment.ModuleClient.delete')
@@ -146,9 +153,8 @@ class TestExperimentDelete(unittest.TestCase):
                                                   delete_module,
                                                   get_module_task_instance_id,
                                                   get_task_instance,
-                                                  assert_token_not_expired,
                                                   get_access_token):
-        id_1 = '1'
+        id_1 = 'mckay/projects/foo/1'
         result = self.runner.invoke(delete, ['-y', id_1])
 
         # Call delete on the experiment

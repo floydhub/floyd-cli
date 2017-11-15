@@ -6,6 +6,7 @@ import webbrowser
 import floyd
 from floyd.client.data import DataClient
 from floyd.client.dataset import DatasetClient
+from floyd.exceptions import FloydException
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.data_config import DataConfig, DataConfigManager
 from floyd.log import logger as floyd_logger
@@ -35,14 +36,22 @@ def init(dataset_name):
         floyd data upload
     """
     dataset_obj = DatasetClient().get_by_name(dataset_name)
+
     if not dataset_obj:
         create_dataset_base_url = "{}/datasets/create".format(floyd.floyd_web_host)
         create_dataset_url = "{}?name={}".format(create_dataset_base_url, dataset_name)
-        floyd_logger.error(("Dataset name does not match your list of datasets. "
-                            "Create your new dataset in the web dashboard:\n\t%s"),
-                           create_dataset_base_url)
+        floyd_logger.info(("Dataset name does not match your list of datasets. "
+                           "Create your new dataset in the web dashboard:\n\t%s"),
+                          create_dataset_base_url)
         webbrowser.open(create_dataset_url)
-        return
+
+        name = click.prompt('Press ENTER to use dataset name "%s" or enter a different name' % dataset_name, default=dataset_name, show_default=False)
+
+        dataset_name = name.strip() or dataset_name
+        dataset_obj = DatasetClient().get_by_name(dataset_name)
+
+        if not dataset_obj:
+            raise FloydException('Dataset "%s" does not exist on floydhub.com. Ensure it exists before continuing.' % dataset_name)
 
     data_config = DataConfig(name=dataset_name, family_id=dataset_obj.id)
     DataConfigManager.set_config(data_config)
@@ -80,7 +89,12 @@ def status(id):
     It can also list status of all the runs in the project.
     """
     if id:
-        data_source = DataClient().get(id)
+        data_source = DataClient().get(normalize_data_name(id))
+
+        if not data_source:
+            # Try with the raw ID
+            data_source = DataClient().get(id)
+
         print_data([data_source] if data_source else [])
     else:
         data_sources = DataClient().get_all()
@@ -97,7 +111,7 @@ def print_data(data_sources):
     headers = ["DATA NAME", "CREATED", "STATUS", "DISK USAGE"]
     data_list = []
     for data_source in data_sources:
-        data_list.append([normalize_data_name(data_source.name),
+        data_list.append([data_source.name,
                           data_source.created_pretty,
                           data_source.state, data_source.size])
     floyd_logger.info(tabulate(data_list, headers=headers))
@@ -109,7 +123,11 @@ def clone(id):
     """
     Download the code for the job to the current path
     """
-    data_source = DataClient().get(id)
+
+    data_source = DataClient().get(normalize_data_name(id))
+    if id and not data_source:
+        # Try with the raw ID
+        data_source = DataClient().get(id)
 
     if not data_source:
         if 'output' in id:
@@ -126,13 +144,16 @@ def clone(id):
 @click.command()
 @click.option('-u', '--url', is_flag=True, default=False,
               help='Only print url for viewing data')
-@click.argument('id', nargs=1)
+@click.argument('id', nargs=1, required=False)
 def output(id, url):
     """
     Shows the url of the dataset. You can use id or a friendly URI.
     By default opens the output page in your default browser.
     """
-    data_source = DataClient().get(id)
+    data_source = DataClient().get(normalize_data_name(id))
+    if id and not data_source:
+        # Try with the raw ID
+        data_source = DataClient().get(id)
 
     if not data_source:
         sys.exit()
@@ -156,7 +177,12 @@ def delete(ids, yes):
     failures = False
 
     for id in ids:
-        data_source = DataClient().get(id)
+
+        data_source = DataClient().get(normalize_data_name(id))
+        if not data_source:
+            # Try with the raw ID
+            data_source = DataClient().get(id)
+
         if not data_source:
             failures = True
             continue

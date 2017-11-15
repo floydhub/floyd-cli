@@ -26,5 +26,6 @@ class ExperimentConfigManager(object):
             raise FloydException("Missing .floydexpt file, run floyd init first")
 
         with open(cls.CONFIG_FILE_PATH, "r") as config_file:
-            experiment_config_str = config_file.read()
-        return ExperimentConfig.from_dict(json.loads(experiment_config_str))
+            experiment_config = json.loads(config_file.read())
+
+        return ExperimentConfig.from_dict(experiment_config)

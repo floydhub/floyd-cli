@@ -6,7 +6,7 @@ import webbrowser
 import sys
 try:
     from pipes import quote as shell_quote
-except:
+except ImportError:
     from shlex import quote as shell_quote
 
 import floyd
@@ -14,7 +14,7 @@ from floyd.constants import DEFAULT_ENV, INSTANCE_NAME_MAP
 from floyd.client.data import DataClient
 from floyd.client.project import ProjectClient
 from floyd.cli.utils import (
-    get_mode_parameter, get_data_name, normalize_job_name
+    get_mode_parameter, get_data_name, normalize_data_name
 )
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
@@ -45,7 +45,14 @@ def process_data_ids(data):
         path = None
         if ':' in data_name_or_id:
             data_name_or_id, path = data_name_or_id.split(':')
-        data_obj = DataClient().get(data_name_or_id)
+            data_name_or_id = normalize_data_name(data_name_or_id)
+
+        data_obj = DataClient().get(normalize_data_name(data_name_or_id))
+
+        if not data_obj:
+            # Try with the raw ID
+            data_obj = DataClient().get(data_name_or_id)
+
         if not data_obj:
             floyd_logger.error("Data not found for name or id: {}".format(data_name_or_id))
             return False, None
@@ -213,7 +220,7 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, tensorboard, gpup, cp
     expt_info = expt_client.create(experiment_request)
     floyd_logger.debug("Created job : %s", expt_info['id'])
 
-    job_name = normalize_job_name(expt_info['name'])
+    job_name = expt_info['name']
     floyd_logger.info("")
     table_output = [["JOB NAME"], [job_name]]
     floyd_logger.info(tabulate(table_output, headers="firstrow"))
@@ -233,6 +240,11 @@ def get_command_line(instance_type, env, message, data, mode, open_notebook, ten
         floyd_command += ["--message", shell_quote(message)]
     if data:
         for data_item in data:
+            parts = data_item.split(':')
+
+            if len(parts) > 1:
+                data_item = normalize_data_name(parts[0]) + ':' + parts[1]
+
             floyd_command += ["--data", data_item]
     if tensorboard:
         floyd_command.append("--tensorboard")
