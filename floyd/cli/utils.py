@@ -4,7 +4,6 @@ from floyd.exceptions import FloydException
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.experiment_config import ExperimentConfigManager
 
-
 from floyd.constants import DOCKER_IMAGES
 
 
@@ -68,7 +67,7 @@ def normalize_data_name(raw_name, default_username=None, default_dataset_name=No
 
     username = default_username or current_username()
     name = default_dataset_name or current_experiment_name()
-    number = ''  # current version number
+    number = None  # current version number
 
     # When nothing is passed, use all the defaults
     if not raw_name:
@@ -101,7 +100,12 @@ def normalize_data_name(raw_name, default_username=None, default_dataset_name=No
     else:
         return raw_name
 
-    return '/'.join([username, 'datasets', name, number])
+    name_parts = [username, 'datasets', name]
+
+    if number is not None:
+        name_parts.append(number)
+
+    return '/'.join(name_parts)
 
 
 def normalize_job_name(raw_job_name, default_username=None, default_project_name=None):

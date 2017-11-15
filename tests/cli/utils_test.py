@@ -29,7 +29,7 @@ class TestCliUtil(unittest.TestCase):
         assert normalize_data_name('foo/projects/bar/1') == 'foo/datasets/bar/1'
 
         # If no job number is passed, it is not used
-        assert normalize_data_name('foo/datasets/bar') == 'foo/datasets/bar/'
+        assert normalize_data_name('foo/datasets/bar') == 'foo/datasets/bar'
 
 
     @patch('floyd.cli.utils.current_username', return_value='pete')
@@ -54,6 +54,7 @@ class TestCliUtil(unittest.TestCase):
 
         # If no job number is passed, get_last_job_name is used
         assert normalize_job_name('foo/projects/bar') == 'TEST'
+
 
     def test_current_username(self):
         pass

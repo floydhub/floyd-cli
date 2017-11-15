@@ -35,6 +35,7 @@ def init(dataset_name):
         floyd data upload
     """
     dataset_obj = DatasetClient().get_by_name(dataset_name)
+
     if not dataset_obj:
         create_dataset_base_url = "{}/datasets/create".format(floyd.floyd_web_host)
         create_dataset_url = "{}?name={}".format(create_dataset_base_url, dataset_name)
@@ -80,8 +81,12 @@ def status(id):
     It can also list status of all the runs in the project.
     """
     if id:
-        id = normalize_data_name(id)
-        data_source = DataClient().get(id)
+        data_source = DataClient().get(normalize_data_name(id))
+
+        if not data_source:
+            # Try with the raw ID
+            data_source = DataClient().get(id)
+
         print_data([data_source] if data_source else [])
     else:
         data_sources = DataClient().get_all()
@@ -98,7 +103,7 @@ def print_data(data_sources):
     headers = ["DATA NAME", "CREATED", "STATUS", "DISK USAGE"]
     data_list = []
     for data_source in data_sources:
-        data_list.append([normalize_data_name(data_source.name),
+        data_list.append([data_source.name,
                           data_source.created_pretty,
                           data_source.state, data_source.size])
     floyd_logger.info(tabulate(data_list, headers=headers))
@@ -110,8 +115,11 @@ def clone(id):
     """
     Download the code for the job to the current path
     """
-    id = normalize_data_name(id)
-    data_source = DataClient().get(id)
+
+    data_source = DataClient().get(normalize_data_name(id))
+    if not data_source:
+        # Try with the raw ID
+        data_source = DataClient().get(id)
 
     if not data_source:
         if 'output' in id:
@@ -134,8 +142,10 @@ def output(id, url):
     Shows the url of the dataset. You can use id or a friendly URI.
     By default opens the output page in your default browser.
     """
-    id = normalize_data_name(id)
-    data_source = DataClient().get(id)
+    data_source = DataClient().get(normalize_data_name(id))
+    if not data_source:
+        # Try with the raw ID
+        data_source = DataClient().get(id)
 
     if not data_source:
         sys.exit()
@@ -159,8 +169,12 @@ def delete(ids, yes):
     failures = False
 
     for id in ids:
-        id = normalize_data_name(id)
-        data_source = DataClient().get(id)
+
+        data_source = DataClient().get(normalize_data_name(id))
+        if not data_source:
+            # Try with the raw ID
+            data_source = DataClient().get(id)
+
         if not data_source:
             failures = True
             continue
