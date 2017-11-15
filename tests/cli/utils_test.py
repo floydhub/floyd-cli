@@ -2,6 +2,8 @@ import unittest
 
 from mock import patch
 
+from tests.cli.mocks import mock_access_token, mock_experiment_config
+
 class TestCliUtil(unittest.TestCase):
     """
     Tests cli utils helper functions
@@ -57,11 +59,19 @@ class TestCliUtil(unittest.TestCase):
         assert normalize_job_name('foo/projects/bar') == 'TEST'
 
 
-    def test_current_username(self):
-        pass
 
-    def test_current_experiment_name(self):
-        pass
 
-    def test_get_last_job_name(self):
-        pass
+    @patch('floyd.cli.utils.AuthConfigManager.get_access_token', side_effect=mock_access_token)
+    def test_current_username(self, token):
+        from floyd.cli.utils import current_username
+
+        # Returns the username of AuthConfigManager().get_access_token()
+        assert current_username() == token().username
+
+
+    @patch('floyd.cli.utils.ExperimentConfigManager.get_config', side_effect=mock_experiment_config)
+    def test_current_experiment_name(self, expt_config):
+        from floyd.cli.utils import current_experiment_name
+
+        # Returns the name of ExperimentConfigManager().get_config()
+        assert current_experiment_name() == expt_config().name

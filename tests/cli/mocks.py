@@ -10,6 +10,15 @@ def mock_exp(exp_id):
     return Experiment()
 
 
+def mock_exp(exp_id):
+    class Experiment:
+        id = exp_id
+        state = 'success'
+        name = 'test_name'
+        task_instances = []
+    return Experiment()
+
+
 def mock_task_inst(exp_id):
     class TaskInstance:
         module_id = '999999'
