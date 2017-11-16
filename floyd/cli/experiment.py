@@ -123,7 +123,6 @@ def info(job_name_or_id):
     except FloydException:
         experiment = ExperimentClient().get(job_name_or_id)
 
-    experiment = ExperimentClient().get(job_name_or_id)
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
     table = [["Job name", normalize_job_name(experiment.name)],
