@@ -14,11 +14,12 @@ from floyd.constants import DEFAULT_ENV, INSTANCE_NAME_MAP
 from floyd.client.data import DataClient
 from floyd.client.project import ProjectClient
 from floyd.cli.utils import (
-    get_mode_parameter, get_data_name, normalize_data_name
+    get_mode_parameter, get_data_name, normalize_data_name, normalize_job_name
 )
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
 from floyd.client.env import EnvClient
+from floyd.exceptions import FloydException
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.constants import (
@@ -283,7 +284,11 @@ def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cp
     parameters = {}
 
     expt_client = ExperimentClient()
-    job = expt_client.get(job_name)
+
+    try:
+        job = expt_client.get(normalize_job_name(job_name))
+    except FloydException:
+        job = expt_client.get(job_name)
 
     if gpup:
         instance_type = G1P_INSTANCE_TYPE
