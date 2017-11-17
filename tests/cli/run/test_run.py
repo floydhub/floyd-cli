@@ -62,7 +62,7 @@ class TestExperimentRun(unittest.TestCase):
         result = self.runner.invoke(run, ['command', '--data', 'data-id1', '--data', 'data-id2'], catch_exceptions=False)
         assert(result.exit_code == 0)
 
-    def test_get_command_line(self, _):
+    def test_get_command_line(self):
         re = get_command_line(
             instance_type='g1p',
             env='pytorch-2.0:py2',
