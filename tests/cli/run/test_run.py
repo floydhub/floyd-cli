@@ -62,7 +62,6 @@ class TestExperimentRun(unittest.TestCase):
         result = self.runner.invoke(run, ['command', '--data', 'data-id1', '--data', 'data-id2'], catch_exceptions=False)
         assert(result.exit_code == 0)
 
-    @patch('floyd.cli.run.normalize_data_name', return_value='mckay/datasets/foo/1')
     def test_get_command_line(self, _):
         re = get_command_line(
             instance_type='g1p',
