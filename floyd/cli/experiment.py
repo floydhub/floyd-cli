@@ -96,9 +96,9 @@ def clone(id):
     Download the code for the experiment to the current path
     """
     try:
-        experiment = ExperimentClient().get(normalize_job_name(id))
+        experiment = ExperimentClient().get(normalize_job_name(id, use_config=False))
     except FloydException:
-        experiment = ExperimentClient().get(id)
+        experiment = ExperimentClient().get(id, use_config=False)
 
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
