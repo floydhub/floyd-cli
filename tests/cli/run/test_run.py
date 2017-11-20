@@ -62,12 +62,13 @@ class TestExperimentRun(unittest.TestCase):
         result = self.runner.invoke(run, ['command', '--data', 'data-id1', '--data', 'data-id2'], catch_exceptions=False)
         assert(result.exit_code == 0)
 
-    def test_get_command_line(self):
+    @patch('floyd.cli.run.normalize_data_name', return_value='mckay/datasets/foo/1')
+    def test_get_command_line(self, _):
         re = get_command_line(
             instance_type='g1p',
             env='pytorch-2.0:py2',
             message='test\' message',
-            data=['mckay/datasets/foo/1:input'],
+            data=['foo:input'],
             mode='job',
             open_notebook=False,
             tensorboard=True,
@@ -79,7 +80,7 @@ class TestExperimentRun(unittest.TestCase):
             instance_type='c1',
             env='tensorflow',
             message=None,
-            data=['mckay/datasets/foo/1:input', 'bar'],
+            data=['foo:input', 'bar'],
             mode='jupyter',
             open_notebook=True,
             tensorboard=False,
@@ -91,7 +92,7 @@ class TestExperimentRun(unittest.TestCase):
             instance_type='g1',
             env='tensorflow',
             message=None,
-            data=['mckay/datasets/foo/1:input'],
+            data=['foo:input'],
             mode='job',
             open_notebook=False,
             tensorboard=True,

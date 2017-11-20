@@ -14,7 +14,7 @@ from floyd.constants import DEFAULT_ENV, INSTANCE_NAME_MAP
 from floyd.client.data import DataClient
 from floyd.client.project import ProjectClient
 from floyd.cli.utils import (
-    get_mode_parameter, get_data_name, normalize_job_name
+    get_mode_parameter, get_data_name, normalize_data_name, normalize_job_name
 )
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
@@ -46,9 +46,9 @@ def process_data_ids(data):
         path = None
         if ':' in data_name_or_id:
             data_name_or_id, path = data_name_or_id.split(':')
-            data_name_or_id = data_name_or_id
+            data_name_or_id = normalize_data_name(data_name_or_id, use_data_config=False)
 
-        data_obj = DataClient().get(data_name_or_id)
+        data_obj = DataClient().get(normalize_data_name(data_name_or_id, use_data_config=False))
 
         if not data_obj:
             # Try with the raw ID
@@ -244,7 +244,7 @@ def get_command_line(instance_type, env, message, data, mode, open_notebook, ten
             parts = data_item.split(':')
 
             if len(parts) > 1:
-                data_item = parts[0] + ':' + parts[1]
+                data_item = normalize_data_name(parts[0], use_data_config=False) + ':' + parts[1]
 
             floyd_command += ["--data", data_item]
     if tensorboard:

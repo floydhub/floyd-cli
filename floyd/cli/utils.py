@@ -60,8 +60,10 @@ def get_data_id(data_str):
         return data_str
 
 
-def normalize_data_name(raw_name, default_username=None, default_dataset_name=None):
+def normalize_data_name(raw_name, default_username='', default_dataset_name='', use_data_config=True):
     raw_name = raw_name or ''
+    if use_data_config:
+        default_dataset_name = default_dataset_name or current_dataset_name()
 
     if raw_name.endswith('/output'):
         return normalize_job_name(raw_name[:-len('/output')], default_username, default_dataset_name) + '/output'
@@ -69,7 +71,7 @@ def normalize_data_name(raw_name, default_username=None, default_dataset_name=No
     name_parts = raw_name.split('/')
 
     username = default_username or current_username()
-    name = default_dataset_name or current_dataset_name()
+    name = default_dataset_name
     number = None  # current version number
 
     # When nothing is passed, use all the defaults
@@ -108,17 +110,23 @@ def normalize_data_name(raw_name, default_username=None, default_dataset_name=No
     if number is not None:
         name_parts.append(number)
 
+    if not name:
+        raise FloydException('Dataset name resolution: Could not infer a name from "%s". Please include a name to identify the dataset' % raw_name)
+
     return '/'.join(name_parts)
 
 
-def normalize_job_name(raw_job_name, default_username=None, default_project_name=None):
+def normalize_job_name(raw_job_name, default_username='', default_project_name='', use_config=True):
     raw_job_name = raw_job_name or ''
+
+    if use_config:
+        default_project_name = default_project_name or current_experiment_name()
 
     name_parts = raw_job_name.split('/')
 
     username = default_username or current_username()
-    project_name = default_project_name or current_experiment_name()
-    number = None  # current job number
+    project_name = default_project_name
+    number = ''  # current job number
 
     # When nothing is passed, use all the defaults
     if not raw_job_name:
@@ -153,11 +161,14 @@ def normalize_job_name(raw_job_name, default_username=None, default_project_name
         return raw_job_name
 
     # If no number is found, query the API for the most recent job number
-    if number is None:
+    if not number:
         job_name_from_api = get_latest_job_name_for_project(username, project_name)
         if not job_name_from_api:
             raise FloydException("Could not resolve %s. Make sure the project exists and has jobs." % raw_job_name)
         return job_name_from_api
+
+    if not project_name:
+        raise FloydException('Job name resolution: Could not infer a project name from "%s". Please include a name to identify the project' % raw_job_name)
 
     return '/'.join([username, 'projects', project_name, number])
 
