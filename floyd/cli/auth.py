@@ -1,5 +1,6 @@
 import click
 import webbrowser
+import sys
 
 import floyd
 from floyd.client.auth import AuthClient
@@ -20,8 +21,11 @@ def login(token, username, password):
     if username:
         # Use username / password login
         if not password:
-            floyd_logger.info("Missing --password field")
-            return
+            password = click.prompt('Please enter your password', type=str, hide_input=True)
+            password = password.strip()
+            if not password:
+                floyd_logger.info('You entered an empty string. Please make sure you enter your password correctly.')
+                sys.exit(1)
 
         login_credentials = Credentials(username=username,
                                         password=password)
