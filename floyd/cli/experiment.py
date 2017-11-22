@@ -98,7 +98,7 @@ def clone(id):
     try:
         experiment = ExperimentClient().get(normalize_job_name(id, use_config=False))
     except FloydException:
-        experiment = ExperimentClient().get(id, use_config=False)
+        experiment = ExperimentClient().get(id)
 
     task_instance_id = get_module_task_instance_id(experiment.task_instances)
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
