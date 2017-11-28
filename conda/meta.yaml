@@ -1,8 +1,6 @@
 {% set name = "floyd-cli" %}
-{% set version = "0.10.18" %}
+{% set version = "0.10.22" %}
 {% set file_ext = "tar.gz" %}
-{% set hash_type = "sha256" %}
-{% set hash_value = "945d52a861638ae20b8096b25d21613a3f32fae8ee6d21260d75d86e47a0b049" %}
 
 package:
   name: '{{ name|lower }}'
@@ -11,7 +9,6 @@ package:
 source:
   fn: '{{ name }}-{{ version }}.{{ file_ext }}'
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.{{ file_ext }}
-  '{{ hash_type }}': '{{ hash_value }}'
 
 build:
   number: 0
@@ -70,17 +67,8 @@ about:
   license_family: AGPL
   license_file: ''
   summary: Command line tool for Floyd
-  description: "=========\nfloyd-cli\n=========\nCommand line tool for Floyd. Use this to interact with Floyd (`www.floydhub.com <http://www.floydhub.com>`_).\n\n.. image:: https://circleci.com/gh/floydhub/floyd-cli/tree/master.svg?style=shield\n\
-    \   :target: https://circleci.com/gh/floydhub/floyd-cli/tree/master\n\n.. image:: https://badge.fury.io/py/floyd-cli.svg\n   :target: https://badge.fury.io/py/floyd-cli\n\n* `Installation <http://docs.floydhub.com/guides/basics/install/>`_\n\
-    * `Quick Start <http://docs.floydhub.com/getstarted/quick_start/>`_\n* `Documentation <http://docs.floydhub.com/>`_\n* `Issue Tracking <https://github.com/floydhub/floyd-cli/issues>`_\n* `Forum <https://forum.floydhub.com/>`_\n\
-    \n-----------\nQuick Start\n-----------\n\n1.    Install the cli using pip::\n\n          $ pip install -U floyd-cli\n\n2.    Visit `floydhub.com <https://www.floydhub.com/>`_ and create a free account\n\
-    \      by clicking the ``SIGN UP FOR FREE`` button.\n\n3.    Login with the cli by typing::\n\n          $ floyd login\n\nWhen prompted, enter ``Y`` and press ``ENTER``. This will open your web\nbrowser.\
-    \ At the bottom of the page, copy your login token by clicking the\n``COPY TO CLIPBOARD`` button. Go back to the terminal and paste the token into\nthe prompt and press ``ENTER``. You are now logged\
-    \ in and ready to rock.\n\n-----------------------------------\nReady to run your first experiment?\n-----------------------------------\nVisit the `quick start guide <http://docs.floydhub.com/getstarted/quick_start/>`_.\n\
-    \n--------------------------------\nWant to learn more?\n--------------------------------\nCheck out the `documentation <http://docs.floydhub.com/>`_.\n\n--------------\nHaving issues?\n--------------\n\
-    Ask a question on the `forum <https://forum.floydhub.com/>`_, or log an issue in our `issue tracker <https://github.com/floydhub/floyd-cli/issues>`_.\n"
   doc_url: ''
   dev_url: ''
 
 extra:
-  recipe-maintainers: ''
+  recipe-maintainers: 'support@floydhub.com'
