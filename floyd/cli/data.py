@@ -124,7 +124,7 @@ def clone(id):
     Download the code for the job to the current path
     """
 
-    data_source = DataClient().get(normalize_data_name(id))
+    data_source = DataClient().get(normalize_data_name(id, use_data_config=False))
     if id and not data_source:
         # Try with the raw ID
         data_source = DataClient().get(id)
