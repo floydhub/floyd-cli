@@ -40,5 +40,6 @@ deployment:
       - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
       - bash miniconda.sh -b -p $HOME/miniconda3
       - $HOME/miniconda3/bin/conda config --set always_yes yes
+      - $HOME/miniconda3/bin/conda config --add channels conda-forge
       - $HOME/miniconda3/bin/conda install conda-build
       - $HOME/miniconda3/bin/conda build conda
