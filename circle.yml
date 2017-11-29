@@ -36,8 +36,7 @@ deployment:
       - python setup.py register -r pypi
       - python setup.py sdist upload -r pypi
   anaconda:
-    #branch: /release.*/
-    branch: /.*/
+    branch: /release.*/
     commands:
       # Install conda, conda-build, and anaconda-client
       - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
