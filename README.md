@@ -26,7 +26,7 @@ Quick Start
     ```
     Using `conda`:
     ```
-    $ conda install -c floydhub floyd-cli
+    $ conda install -y -c conda-forge -c floydhub floyd-cli
     ```
 
 2.  Visit [floydhub.com](https://www.floydhub.com/) and create a free
