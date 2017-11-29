@@ -43,18 +43,21 @@ def check_cli_version():
         print("""
 Your version of CLI (%s) is no longer compatible with server.""" % current_version)
         if click.confirm('Do you want to upgrade to version %s now?' % server_version.latest_version):
-            from floyd.cli.version import pip_upgrade
-            pip_upgrade()
+            upgrade()
             sys.exit(0)
         else:
             print("""Your can manually run:
     pip install -U floyd-cli
-to upgrade to the latest version (%s))""" % server_version.latest_version)
+(or if you prefer to use conda):
+    conda install -y -c conda-forge -c floydhub floyd-cli
+to upgrade to the latest version (%s)""" % server_version.latest_version)
             sys.exit(0)
     elif LooseVersion(current_version) < LooseVersion(server_version.latest_version):
         print("""
 New version of CLI (%s) is now available. To upgrade run:
     pip install -U floyd-cli
+Or if you prefer to use conda:
+    conda install -y -c conda-forge -c floydhub floyd-cli
             """ % server_version.latest_version)
 
 
