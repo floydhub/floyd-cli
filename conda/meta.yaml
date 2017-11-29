@@ -1,0 +1,73 @@
+{% set name = "floyd-cli" %}
+{% set version = "0.10.22" %}
+{% set file_ext = "tar.gz" %}
+
+package:
+  name: '{{ name|lower }}'
+  version: '{{ version }}'
+
+source:
+  fn: '{{ name }}-{{ version }}.{{ file_ext }}'
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.{{ file_ext }}
+
+build:
+  number: 0
+  entry_points:
+    - floyd = floyd.main:cli
+    - floyd-dev = floyd.development.dev:cli
+    - floyd-local = floyd.development.local:cli
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - click >=6.7
+    - clint >=0.5.1
+    - requests >=2.12.4
+    - requests-toolbelt >=0.7.1
+    - marshmallow >=2.11.1
+    - pytz >=2016.10
+    - tabulate >=0.7.7
+    - pathlib2 >=2.2.1
+    - raven
+    - nose
+  run:
+    - python
+    - click >=6.7
+    - clint >=0.5.1
+    - requests >=2.12.4
+    - requests-toolbelt >=0.7.1
+    - marshmallow >=2.11.1
+    - pytz >=2016.10
+    - tabulate >=0.7.7
+    - pathlib2 >=2.2.1
+    - raven
+    - nose
+
+test:
+  imports:
+    - floyd
+    - floyd.cli
+    - floyd.client
+    - floyd.development
+    - floyd.manager
+    - floyd.model
+  commands:
+    - floyd --help
+    - floyd-dev --help
+    - floyd-local --help
+  requires:
+    - mock >=1.0.1
+    - nose >=1.0
+
+about:
+  home: https://github.com/floydhub/floyd-cli
+  license: ''
+  license_family: AGPL
+  license_file: ''
+  summary: Command line tool for Floyd
+  doc_url: https://docs.floydhub.com
+  dev_url: ''
+
+extra:
+  recipe-maintainers: 'support@floydhub.com'

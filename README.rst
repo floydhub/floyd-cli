@@ -9,6 +9,9 @@ Command line tool for Floyd. Use this to interact with Floyd (`www.floydhub.com 
 .. image:: https://badge.fury.io/py/floyd-cli.svg
    :target: https://badge.fury.io/py/floyd-cli
 
+.. image:: https://anaconda.org/floydhub/floyd-cli/badges/version.svg
+   :target: https://anaconda.org/floydhub/floyd-cli
+
 * `Installation <http://docs.floydhub.com/guides/basics/install/>`_
 * `Quick Start <http://docs.floydhub.com/getstarted/quick_start/>`_
 * `Documentation <http://docs.floydhub.com/>`_
