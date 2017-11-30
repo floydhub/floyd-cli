@@ -3,7 +3,7 @@ import os
 from setuptools import find_packages, setup
 
 project = "floyd-cli"
-version = "0.10.23"
+version = "0.10.24"
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
     long_description = readme.read()
