@@ -320,6 +320,8 @@ def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cp
     success, data_ids = process_data_ids(data)
     if not success:
         sys.exit(1)
+    if data_ids:
+        parameters['data_ids'] = data_ids
 
     if message:
         parameters['message'] = message
