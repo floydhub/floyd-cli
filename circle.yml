@@ -25,16 +25,16 @@ deployment:
     branch: /release.*/
     owner: floydhub
     commands:
-      #- echo "[distutils]" > ~/.pypirc
-      #- echo "index-servers =" >> ~/.pypirc
-      #- echo "    pypi" >> ~/.pypirc
-      #- echo >> ~/.pypirc
-      #- echo "[pypi]" >> ~/.pypirc
-      #- echo "username:$PYPI_USERNAME" >> ~/.pypirc
-      #- echo "password:$PYPI_PASSWORD" >> ~/.pypirc
-      #- echo >> ~/.pypirc
-      #- python setup.py register -r pypi
-      #- python setup.py sdist upload -r pypi
+      - echo "[distutils]" > ~/.pypirc
+      - echo "index-servers =" >> ~/.pypirc
+      - echo "    pypi" >> ~/.pypirc
+      - echo >> ~/.pypirc
+      - echo "[pypi]" >> ~/.pypirc
+      - echo "username:$PYPI_USERNAME" >> ~/.pypirc
+      - echo "password:$PYPI_PASSWORD" >> ~/.pypirc
+      - echo >> ~/.pypirc
+      - python setup.py register -r pypi
+      - python setup.py sdist upload -r pypi
       # Run conda release now
       # Install conda, conda-build, and anaconda-client
       - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
