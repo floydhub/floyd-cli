@@ -30,6 +30,7 @@ setup(
         "tabulate>=0.7.7",
         "pathlib2>=2.2.1",
         "raven",
+        "conda",
     ],
     setup_requires=[
         "nose>=1.0",
