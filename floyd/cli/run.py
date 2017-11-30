@@ -132,9 +132,14 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 @click.option('--open/--no-open', 'open_notebook',
               help='Automatically open the notebook url',
               default=True)
+# To enforce having a single --env, we have to allow multiple --env flags and
+# then manually enforce that just one was passed. Otherwise all but the last
+# --env will just be ignored. This is a way around the limitations of click's
+# behavior.
 @click.option('--env',
               help='Environment type to use',
-              default=DEFAULT_ENV)
+              default=[DEFAULT_ENV],
+              multiple=True)
 @click.option('--message', '-m',
               help='Job commit message')
 @click.option('--tensorboard/--no-tensorboard',
@@ -151,6 +156,17 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, tensorboard, gpup, cp
     current directory and run your command remotely.
     This command will generate a run id for reference.
     """
+    # Error early if more than one --env is passed.  Then get the first/only
+    # --env out of the list so all other operations work normally (they don't
+    # expect an iterable). For details on this approach, see the comment above
+    # the --env click option
+    if len(env) > 1:
+        floyd_logger.error(
+            "You passed more than one environment: {}. Please specify a single environment.".format(env)
+        )
+        sys.exit(1)
+    env = env[0]
+
     experiment_config = ExperimentConfigManager.get_config()
     if not ProjectClient().exists(experiment_config.family_id):
         floyd_logger.error('Invalid project id, please run '
@@ -272,9 +288,14 @@ def get_command_line(instance_type, env, message, data, mode, open_notebook, ten
 @click.option('--open/--no-open', 'open_notebook',
               help='Automatically open the notebook url',
               default=True)
+# To enforce having a single --env, we have to allow multiple --env flags and
+# then manually enforce that just one was passed. Otherwise all but the last
+# --env will just be ignored. This is a way around the limitations of click's
+# behavior.
 @click.option('--env',
               help='Environment type to use',
-              default=None)
+              default=[None],
+              multiple=True)
 @click.option('--message', '-m',
               help='Job commit message')
 @click.option('--gpu', is_flag=True, help='Run on a GPU instance')
@@ -287,6 +308,17 @@ def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cp
     """
     Restart a given job as a new job.
     """
+    # Error early if more than one --env is passed. Then get the first/only
+    # --env out of the list so all other operations work normally (they don't
+    # expect an iterable). For details on this approach, see the comment above
+    # the --env click option
+    if len(env) > 1:
+        floyd_logger.error(
+            "You passed more than one environment: {}. Please specify a single environment.".format(env)
+        )
+        sys.exit(1)
+    env = env[0]
+
     parameters = {}
 
     expt_client = ExperimentClient()
