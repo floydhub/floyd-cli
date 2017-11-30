@@ -4,9 +4,7 @@ Command line tool for Floyd. Use this to interact with Floyd
 ([www.floydhub.com](http://www.floydhub.com)).
 
 [![image](https://circleci.com/gh/floydhub/floyd-cli/tree/master.svg?style=shield)](https://circleci.com/gh/floydhub/floyd-cli/tree/master)
-
 [![image](https://badge.fury.io/py/floyd-cli.svg)](https://badge.fury.io/py/floyd-cli)
-
 [![image](https://anaconda.org/floydhub/floyd-cli/badges/version.svg)](https://anaconda.org/floydhub/floyd-cli)
 
 -   [Installation](http://docs.floydhub.com/guides/basics/install/)
