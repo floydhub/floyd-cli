@@ -19,10 +19,13 @@ Quick Start
 1.  Install the cli:
 
     Using `pip`:
+
     ```
     $ pip install -U floyd-cli
     ```
+
     Using `conda`:
+
     ```
     $ conda install -y -c conda-forge -c floydhub floyd-cli
     ```

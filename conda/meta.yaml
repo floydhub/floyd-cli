@@ -64,12 +64,11 @@ test:
 
 about:
   home: https://github.com/floydhub/floyd-cli
-  license: ''
   license_family: AGPL
-  license_file: ''
+  license: Apache
   summary: Command line tool for Floyd
   doc_url: https://docs.floydhub.com
-  dev_url: ''
+  description: README.md
 
 extra:
   recipe-maintainers: 'support@floydhub.com'
