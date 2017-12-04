@@ -4,7 +4,6 @@ import click
 import sys
 
 from floyd.log import logger as floyd_logger
-from conda import cli as conda_cli
 
 
 PROJECT_NAME = "floyd-cli"
@@ -15,7 +14,7 @@ def pip_upgrade():
 
 
 def conda_upgrade():
-    conda_cli.main("install", "-y", "-c", "floydhub", "-c", "conda-forge", "floyd-cli")
+    floyd_logger.info("To upgrade please run:\nconda install -y -c floydhub -c conda-forge floyd-cli")
 
 
 @click.command()
