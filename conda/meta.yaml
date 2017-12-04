@@ -31,7 +31,6 @@ requirements:
     - pathlib2 >=2.2.1
     - raven
     - nose
-    - conda
   run:
     - python
     - click >=6.7
@@ -44,7 +43,6 @@ requirements:
     - pathlib2 >=2.2.1
     - raven
     - nose
-    - conda
 
 test:
   imports:
