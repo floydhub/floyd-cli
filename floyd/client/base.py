@@ -11,7 +11,7 @@ from floyd.exceptions import (AuthenticationException, AuthorizationException,
                               BadGatewayException, BadRequestException,
                               FloydException, GatewayTimeoutException,
                               NotFoundException, OverLimitException,
-                              ServerException)
+                              ServerException, LockedException)
 
 from floyd.log import logger as floyd_logger
 
@@ -154,6 +154,8 @@ class FloydHttpClient(object):
                 raise BadGatewayException()
             elif response.status_code == 504:
                 raise GatewayTimeoutException()
+            elif response.status_code == 423:
+                raise LockedException()
             elif 500 <= response.status_code < 600:
                 if 'Server under maintenance' in response.content.decode():
                     raise ServerException('Server under maintenance, please try again later.')

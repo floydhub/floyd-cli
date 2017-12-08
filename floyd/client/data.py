@@ -50,7 +50,7 @@ class DataClient(FloydHttpClient):
         try:
             response = self.request(
                 "POST",
-                "%s%s/upload_credentials" % (self.url, data_id))
+                "%s%s/upload_v2_credentials" % (self.url, data_id))
             data_dict = response.json()
             return (data_dict["data_upload_id"], data_dict["token"])
         except FloydException as e:

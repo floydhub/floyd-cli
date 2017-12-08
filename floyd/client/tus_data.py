@@ -5,7 +5,7 @@ import os
 import requests
 
 import floyd
-from floyd.exceptions import FloydException
+from floyd.exceptions import FloydException, LockedException
 from floyd.client.base import FloydHttpClient
 from floyd.log import logger as floyd_logger
 
@@ -53,7 +53,7 @@ class TusDataClient(FloydHttpClient):
             self.check_response_status(response)
 
             location = response.headers["Location"]
-            floyd_logger.debug("Data upload enpoint: %s", location)
+            floyd_logger.debug("Data upload endpoint: %s", location)
         except FloydException as e:
             floyd_logger.info("Data upload create: ERROR! %s", e.message)
             location = ""
@@ -76,6 +76,9 @@ class TusDataClient(FloydHttpClient):
 
         try:
             offset = self._get_offset(file_endpoint, headers=headers, auth=auth)
+        except LockedException:
+            floyd_logger.error("Server busy handling last uploaded part, please wait and try again later.")
+            return False
         except FloydException as e:
             floyd_logger.error(
                 "Failed to fetch offset data from upload server! %s",
