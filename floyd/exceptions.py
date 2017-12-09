@@ -63,3 +63,9 @@ class WaitTimeoutException(FloydException):
 
     def __init__(self, message="Timeout waiting for server state update."):
         super(WaitTimeoutException, self).__init__(message=message)
+
+
+class LockedException(FloydException):
+
+    def __init__(self, message="Resource locked."):
+        super(LockedException, self).__init__(message=message)
