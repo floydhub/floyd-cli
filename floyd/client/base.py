@@ -145,7 +145,7 @@ class FloydHttpClient(object):
             elif response.status_code == 401:
                 raise AuthenticationException()
             elif response.status_code == 403:
-                raise AuthorizationException()
+                raise AuthorizationException(response)
             elif response.status_code == 404:
                 raise NotFoundException()
             elif response.status_code == 429:
