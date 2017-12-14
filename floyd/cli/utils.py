@@ -1,4 +1,5 @@
 import pkg_resources
+import sys
 
 from floyd.exceptions import FloydException
 from floyd.manager.auth_config import AuthConfigManager
@@ -197,3 +198,7 @@ def get_latest_job_name_for_project(username, project_name):
         return ''
 
     return project.latest_experiment_name
+
+
+def is_conda_env():
+    return 'conda' in sys.version or 'ontinuum' in sys.version
