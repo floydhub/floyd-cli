@@ -14,7 +14,7 @@ class TestFloydVersion(unittest.TestCase):
 
     @patch('floyd.cli.version.pip_upgrade')
     @patch('floyd.cli.version.conda_upgrade')
-    @patch('floyd.cli.version.sys')
+    @patch('floyd.cli.utils.sys')
     def test_floyd_upgrade_with_standard_python(self, mock_sys, conda_upgrade, pip_upgrade):
         mock_sys.version = '2.7.13 (default, Jan 19 2017, 14:48:08) \n[GCC 6.3.0 20170118]'
 
@@ -25,7 +25,7 @@ class TestFloydVersion(unittest.TestCase):
 
     @patch('floyd.cli.version.pip_upgrade')
     @patch('floyd.cli.version.conda_upgrade')
-    @patch('floyd.cli.version.sys')
+    @patch('floyd.cli.utils.sys')
     def test_floyd_upgrade_with_anaconda_python(self, mock_sys, conda_upgrade, pip_upgrade):
         mock_sys.version = '3.6.3 |Anaconda, Inc.| (default, Oct 13 2017, 12:02:49) \n[GCC 7.2.0]'
 

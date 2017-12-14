@@ -3,12 +3,12 @@ import sys
 from distutils.version import LooseVersion
 
 import floyd
-from floyd.cli.utils import get_cli_version
+from floyd.cli.utils import get_cli_version, is_conda_env
 from floyd.cli.auth import login, logout
 from floyd.cli.data import data
 from floyd.cli.experiment import clone, delete, info, init, logs, output, status, stop
 from floyd.cli.run import run, restart
-from floyd.cli.version import upgrade, version
+from floyd.cli.version import upgrade, version, auto_upgrade
 from floyd.client.version import VersionClient
 from floyd.log import configure_logger
 
@@ -37,28 +37,34 @@ def check_cli_version():
     """
     Check if the current cli version satisfies the server requirements
     """
+    should_exit = False
     server_version = VersionClient().get_cli_version()
     current_version = get_cli_version()
+
     if LooseVersion(current_version) < LooseVersion(server_version.min_version):
-        print("""
-Your version of CLI (%s) is no longer compatible with server.""" % current_version)
-        if click.confirm('Do you want to upgrade to version %s now?' % server_version.latest_version):
-            upgrade()
-            sys.exit(0)
-        else:
-            print("""Your can manually run:
-    pip install -U floyd-cli
-(or if you prefer to use conda):
-    conda install -y -c conda-forge -c floydhub floyd-cli
-to upgrade to the latest version (%s)""" % server_version.latest_version)
-            sys.exit(0)
+        print("\nYour version of CLI (%s) is no longer compatible with server." % current_version)
+        should_exit = True
     elif LooseVersion(current_version) < LooseVersion(server_version.latest_version):
-        print("""
-New version of CLI (%s) is now available. To upgrade run:
-    pip install -U floyd-cli
-Or if you prefer to use conda:
-    conda install -y -c conda-forge -c floydhub floyd-cli
-            """ % server_version.latest_version)
+        print("\nNew version of CLI (%s) is now available." % server_version.latest_version)
+    else:
+        return
+
+    # new version is ready
+    if should_exit and click.confirm('\nDo you want to upgrade to version %s now?' % server_version.latest_version):
+        auto_upgrade()
+        sys.exit(0)
+    else:
+        msg_parts = []
+        msg_parts.append("\nTo manually upgrade run:")
+        msg_parts.append("    pip install -U floyd-cli")
+        if is_conda_env():
+            msg_parts.append("Or if you prefer to use conda:")
+            msg_parts.apend("    conda install -y -c conda-forge -c floydhub floyd-cli")
+        print("\n".join(msg_parts))
+        print("")
+
+    if should_exit:
+        sys.exit(0)
 
 
 def add_commands(cli):

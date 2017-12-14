@@ -1,8 +1,8 @@
 import pip
 import pkg_resources
 import click
-import sys
 
+from floyd.cli.utils import is_conda_env
 from floyd.log import logger as floyd_logger
 
 
@@ -26,15 +26,19 @@ def version():
     floyd_logger.info(version)
 
 
-@click.command()
-def upgrade():
-    """
-    Upgrade floyd command line
-    """
+def auto_upgrade():
     try:
-        if 'conda' in sys.version or 'ontinuum' in sys.version:
+        if is_conda_env():
             conda_upgrade()
         else:
             pip_upgrade()
     except Exception as e:
         floyd_logger.error(e)
+
+
+@click.command()
+def upgrade():
+    """
+    Upgrade floyd command line
+    """
+    auto_upgrade()
