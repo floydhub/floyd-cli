@@ -15,7 +15,11 @@ class AuthenticationException(FloydException):
 
 class AuthorizationException(FloydException):
 
-    def __init__(self, message="You are not authorized to access this resource on FloydHub."):
+    def __init__(self, response):
+        try:
+            message = response.json()["message"]
+        except (KeyError, AttributeError):
+            message = "You are not authorized to access this resource on FloydHub."
         super(AuthorizationException, self).__init__(message=message)
 
 
