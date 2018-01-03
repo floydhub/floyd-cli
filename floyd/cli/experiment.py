@@ -142,11 +142,13 @@ def info(job_name_or_id):
 @click.command()
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
 @click.option('-t', '--tail', is_flag=True, default=False, help='Stream the logs')
+@click.option('-f', '--follow', is_flag=True, default=False, help='Stream the logs (alias for -t/--tail)')
 @click.argument('id', nargs=1, required=False)
-def logs(id, url, tail, sleep_duration=1):
+def logs(id, url, tail, follow, sleep_duration=1):
     """
     Print the logs of the run.
     """
+    tail = tail or follow
     try:
         experiment = ExperimentClient().get(normalize_job_name(id))
     except FloydException:
