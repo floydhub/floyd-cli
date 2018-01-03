@@ -60,7 +60,7 @@ class FloydHttpClient(object):
                                         headers=request_headers,
                                         files=files,
                                         timeout=timeout)
-        except requests.exceptions.ConnectionError as exception:
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as exception:
             floyd_logger.debug("Exception: %s", exception, exc_info=True)
             sys.exit("Cannot connect to the Floyd server. Check your internet connection.")
 
