@@ -63,6 +63,9 @@ class FloydHttpClient(object):
         except requests.exceptions.ConnectionError as exception:
             floyd_logger.debug("Exception: %s", exception, exc_info=True)
             sys.exit("Cannot connect to the Floyd server. Check your internet connection.")
+        except requests.exceptions.Timeout as exception:
+            floyd_logger.debug("Exception: %s", exception, exc_info=True)
+            sys.exit("Connection to FloydHub server timed out. Please retry or check your internet connection.")
 
         floyd_logger.debug("Response Content: %s, Headers: %s" % (response.content, response.headers))
         self.check_response_status(response)
