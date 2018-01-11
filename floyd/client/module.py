@@ -26,7 +26,7 @@ class ModuleClient(FloydHttpClient):
     Client to interact with modules api
     """
 
-    MAX_UPLOAD_SIZE = 1024 * 1024 * 150
+    MAX_UPLOAD_SIZE = 1024 * 1024 * 100
 
     def __init__(self):
         self.url = "/modules/"
