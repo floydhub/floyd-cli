@@ -230,18 +230,18 @@ def stop(id):
 
 
 @click.command()
-@click.argument('ids', nargs=-1)
+@click.argument('names', nargs=-1)
 @click.option('-y', '--yes', is_flag=True, default=False, help='Skip confirmation')
-def delete(ids, yes):
+def delete(names, yes):
     """
     Delete project runs
     """
     failures = False
-    for id in ids:
+    for name in names:
         try:
-            experiment = ExperimentClient().get(normalize_job_name(id))
+            experiment = ExperimentClient().get(normalize_job_name(name))
         except FloydException:
-            experiment = ExperimentClient().get(id)
+            experiment = ExperimentClient().get(name)
 
         if not experiment:
             failures = True
