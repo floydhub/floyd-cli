@@ -82,6 +82,12 @@ def validate_env(env, instance_type):
 
 
 def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True):
+    table_output = [["JOB NAME"], [job_name]]
+    floyd_logger.info('\n' + tabulate(table_output, headers="firstrow") + '\n')
+
+    job_url = '%s/%s' % (floyd.floyd_web_host, job_name)
+    floyd_logger.info("URL to job: %s", job_url)
+
     if mode in ['jupyter', 'serve']:
         while True:
             # Wait for the experiment / task instances to become available
@@ -96,20 +102,18 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
             sleep(3)
             continue
 
-        # Print the path to jupyter notebook
+        # Print the url to jupyter notebook
         if mode == 'jupyter':
             if not experiment.service_url:
                 floyd_logger.error("Jupyter not available, please check job state and log for error.")
                 sys.exit(1)
 
-            jupyter_url = '%s/%s' % (floyd.floyd_web_host, job_name)
-            floyd_logger.info("\nPath to jupyter notebook: %s", jupyter_url)
             if open_notebook:
-                webbrowser.open(jupyter_url)
+                webbrowser.open(job_url)
 
-        # Print the path to serving endpoint
+        # Print the url to serving endpoint
         if mode == 'serve':
-            floyd_logger.info("Path to service endpoint: %s", experiment.service_url)
+            floyd_logger.info("URL to service endpoint: %s", experiment.service_url)
 
         if experiment.timeout_seconds < 24 * 60 * 60:
             floyd_logger.info("\nYour job timeout is currently set to %s seconds",
@@ -118,7 +122,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
                               "See https://www.floydhub.com/pricing for details")
 
     else:
-        floyd_logger.info("To view logs enter:")
+        floyd_logger.info("\nTo view logs enter:")
         floyd_logger.info("   floyd logs %s", job_name)
 
 
@@ -244,10 +248,6 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, tensorboard, gpup, cp
     floyd_logger.debug("Created job : %s", expt_info['id'])
 
     job_name = expt_info['name']
-    floyd_logger.info("")
-    table_output = [["JOB NAME"], [job_name]]
-    floyd_logger.info(tabulate(table_output, headers="firstrow"))
-    floyd_logger.info("")
     show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook)
 
 
@@ -367,9 +367,5 @@ def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cp
     if not new_job_info:
         floyd_logger.error("Failed to restart job")
         sys.exit(1)
-
-    floyd_logger.info('New job created:')
-    table_output = [["JOB NAME"], [new_job_info['name']]]
-    floyd_logger.info('\n' + tabulate(table_output, headers="firstrow") + '\n')
 
     show_new_job_info(expt_client, new_job_info['name'], new_job_info, job.mode, open_notebook)
