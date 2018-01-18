@@ -27,8 +27,6 @@ class ModuleSchema(Schema):
 
 class Module(BaseModel):
     schema = ModuleSchema(strict=True)
-    default_outputs = [{'name': 'output', 'type': 'dir'}]
-    default_inputs = [{'name': 'input', 'type': 'dir'}]
 
     def __init__(self,
                  name,
@@ -39,8 +37,8 @@ class Module(BaseModel):
                  module_type="code",
                  default_container=DEFAULT_DOCKER_IMAGE,
                  family_id=None,
-                 outputs=default_outputs,
-                 inputs=default_inputs,
+                 outputs=None,
+                 inputs=None,
                  env=DEFAULT_ENV,
                  arch=DEFAULT_ARCH,
                  resource_id=None,):
@@ -52,8 +50,8 @@ class Module(BaseModel):
         self.module_type = module_type
         self.default_container = default_container
         self.family_id = family_id
-        self.outputs = outputs
-        self.inputs = inputs
+        self.outputs = outputs if outputs else [{'name': 'output', 'type': 'dir'}]
+        self.inputs = inputs if inputs else [{'name': 'input', 'type': 'dir'}]
         self.env = env
         self.arch = arch
         self.resource_id = resource_id
