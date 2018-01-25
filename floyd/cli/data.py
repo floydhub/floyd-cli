@@ -14,7 +14,10 @@ from floyd.cli.data_upload_utils import (
     opt_to_resume, upload_is_resumable, abort_previous_upload,
     initialize_new_upload, complete_upload
 )
-from floyd.cli.utils import normalize_data_name
+from floyd.cli.utils import (
+    normalize_data_name,
+    get_namespace_from_name
+)
 
 
 @click.group()
@@ -35,7 +38,8 @@ def init(dataset_name):
 
         floyd data upload
     """
-    dataset_obj = DatasetClient().get_by_name(dataset_name)
+    namespace = get_namespace_from_name(dataset_name)
+    dataset_obj = DatasetClient().get_by_name(dataset_name, namespace=namespace)
 
     if not dataset_obj:
         create_dataset_base_url = "{}/datasets/create".format(floyd.floyd_web_host)

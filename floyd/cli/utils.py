@@ -202,3 +202,11 @@ def get_latest_job_name_for_project(username, project_name):
 
 def is_conda_env():
     return 'conda' in sys.version or 'ontinuum' in sys.version
+
+
+def get_namespace_from_name(name):
+    name_parts = name.split("/", 1)
+    if len(name_parts) > 1:
+        return name_parts[0]
+    else:
+        return None

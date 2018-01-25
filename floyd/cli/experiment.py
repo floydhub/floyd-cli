@@ -6,7 +6,9 @@ import sys
 
 import floyd
 from floyd.cli.utils import (
-    get_module_task_instance_id, normalize_job_name
+    get_module_task_instance_id,
+    normalize_job_name,
+    get_namespace_from_name
 )
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
@@ -30,7 +32,8 @@ def init(project_name):
         floyd run 'python tensorflow.py > /output/model.1'
     """
 
-    project_obj = ProjectClient().get_by_name(project_name)
+    namespace = get_namespace_from_name(project_name)
+    project_obj = ProjectClient().get_by_name(project_name, namespace=namespace)
 
     if not project_obj:
         create_project_base_url = "{}/projects/create".format(floyd.floyd_web_host)
