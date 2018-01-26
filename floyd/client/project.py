@@ -38,9 +38,9 @@ class ProjectClient(FloydHttpClient):
         except NotFoundException:
             return None
 
-    def exists(self, project_id):
+    def exists(self, name, namespace=None):
         try:
-            response = self.request("GET", '%s/id/%s' % (self.url, project_id))
+            response = self.request("GET", '{}/{}/{}'.format(self.url, namespace, name))
             if response.status_code == 200:
                 return True
             else:

@@ -52,7 +52,8 @@ def initialize_new_upload(data_config, access_token, description=None):
     data_config.set_data_endpoint(None)
     data_config.set_resource_id(None)
 
-    data_name = "{}/{}".format(access_token.username, data_config.name)
+    namespace = data_config.namespace or access_token.username
+    data_name = "{}/{}".format(namespace, data_config.name)
 
     # Create tarball of the data using the ID returned from the API
     temp_dir = tempfile.mkdtemp()
