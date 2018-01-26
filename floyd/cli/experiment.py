@@ -54,6 +54,7 @@ def init(project_name):
             raise FloydException('Project "%s" does not exist on floydhub.com. Ensure it exists before continuing.' % project_name)
 
     experiment_config = ExperimentConfig(name=project_name,
+                                         namespace=namespace,
                                          family_id=project_obj.id)
     ExperimentConfigManager.set_config(experiment_config)
     FloydIgnoreManager.init()
