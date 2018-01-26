@@ -29,10 +29,10 @@ class DatasetClient(FloydHttpClient):
             floyd_logger.info("Error while retrieving datasets: {}".format(e.message))
             return []
 
-    def get_by_name(self, name, username=None):
-        username = username or AuthConfigManager.get_access_token().username
+    def get_by_name(self, name, namespace=None):
+        namespace = namespace or AuthConfigManager.get_access_token().username
         try:
-            response = self.request('GET', '%s/%s/%s' % (self.url, username, name))
+            response = self.request('GET', '%s/%s/%s' % (self.url, namespace, name))
             return Dataset.from_dict(response.json())
         except NotFoundException:
             return None
