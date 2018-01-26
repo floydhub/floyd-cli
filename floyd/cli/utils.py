@@ -207,6 +207,6 @@ def is_conda_env():
 def get_namespace_from_name(name):
     name_parts = name.split("/", 1)
     if len(name_parts) > 1:
-        return name_parts[0]
+        return name_parts[0], name_parts[1]
     else:
         return None

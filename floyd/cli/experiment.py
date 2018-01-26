@@ -32,7 +32,9 @@ def init(project_name):
         floyd run 'python tensorflow.py > /output/model.1'
     """
 
-    namespace = get_namespace_from_name(project_name)
+    namespace, name = get_namespace_from_name(project_name)
+    if namespace:
+        project_name = name
     project_obj = ProjectClient().get_by_name(project_name, namespace=namespace)
 
     if not project_obj:
