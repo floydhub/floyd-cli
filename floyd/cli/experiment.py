@@ -16,7 +16,6 @@ from floyd.client.project import ProjectClient
 from floyd.client.resource import ResourceClient
 from floyd.client.task_instance import TaskInstanceClient
 from floyd.exceptions import FloydException
-from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.model.experiment_config import ExperimentConfig
@@ -36,8 +35,9 @@ def init(project_name):
     project_obj = ProjectClient().get_by_name(project_name)
 
     if not project_obj:
+        namespace, name = get_namespace_from_name(dataset_name)
         create_project_base_url = "{}/projects/create".format(floyd.floyd_web_host)
-        create_project_url = "{}?name={}".format(create_project_base_url, project_name)
+        create_project_url = "{}?name={}&namespace={}".format(create_project_base_url, name, namespace)
         floyd_logger.info(('Project name does not yet exist on floydhub.com. '
                           'Create your new project on floydhub.com:\n\t%s'),
                           create_project_base_url)
@@ -51,10 +51,7 @@ def init(project_name):
         if not project_obj:
             raise FloydException('Project "%s" does not exist on floydhub.com. Ensure it exists before continuing.' % project_name)
 
-
     namespace, name = get_namespace_from_name(project_name)
-    if not namespace:
-        namespace = AuthConfigManager.get_access_token().username
     experiment_config = ExperimentConfig(name=name,
                                          namespace=namespace,
                                          family_id=project_obj.id)

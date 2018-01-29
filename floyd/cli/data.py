@@ -41,8 +41,9 @@ def init(dataset_name):
     dataset_obj = DatasetClient().get_by_name(dataset_name)
 
     if not dataset_obj:
+        namespace, name = get_namespace_from_name(dataset_name)
         create_dataset_base_url = "{}/datasets/create".format(floyd.floyd_web_host)
-        create_dataset_url = "{}?name={}".format(create_dataset_base_url, dataset_name)
+        create_dataset_url = "{}?name={}&namespace={}".format(create_dataset_base_url, name, namespace)
         floyd_logger.info(("Dataset name does not match your list of datasets. "
                            "Create your new dataset in the web dashboard:\n\t%s"),
                           create_dataset_base_url)
@@ -57,8 +58,6 @@ def init(dataset_name):
             raise FloydException('Dataset "%s" does not exist on floydhub.com. Ensure it exists before continuing.' % dataset_name)
 
     namespace, name = get_namespace_from_name(dataset_name)
-    if not namespace:
-        namespace = AuthConfigManager.get_access_token().username
     data_config = DataConfig(name=name,
                              namespace=namespace,
                              family_id=dataset_obj.id)

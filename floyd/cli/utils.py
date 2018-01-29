@@ -215,4 +215,4 @@ def get_namespace_from_name(name):
     if len(name_parts) > 1:
         return name_parts[0], name_parts[-1]
     else:
-        return None, name
+        return current_username(), name
