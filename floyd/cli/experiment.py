@@ -16,6 +16,7 @@ from floyd.client.project import ProjectClient
 from floyd.client.resource import ResourceClient
 from floyd.client.task_instance import TaskInstanceClient
 from floyd.exceptions import FloydException
+from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.model.experiment_config import ExperimentConfig
@@ -32,10 +33,7 @@ def init(project_name):
         floyd run 'python tensorflow.py > /output/model.1'
     """
 
-    namespace, name = get_namespace_from_name(project_name)
-    if namespace:
-        project_name = name
-    project_obj = ProjectClient().get_by_name(project_name, namespace=namespace)
+    project_obj = ProjectClient().get_by_name(project_name)
 
     if not project_obj:
         create_project_base_url = "{}/projects/create".format(floyd.floyd_web_host)
