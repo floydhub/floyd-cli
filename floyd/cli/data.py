@@ -38,7 +38,7 @@ def init(dataset_name):
 
         floyd data upload
     """
-    namespace, name = get_namespace_from_name(project_name)
+    namespace, name = get_namespace_from_name(dataset_name)
     if namespace:
         dataset_name = name
     dataset_obj = DatasetClient().get_by_name(dataset_name, namespace=namespace)
