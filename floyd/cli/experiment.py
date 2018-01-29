@@ -53,7 +53,11 @@ def init(project_name):
         if not project_obj:
             raise FloydException('Project "%s" does not exist on floydhub.com. Ensure it exists before continuing.' % project_name)
 
-    experiment_config = ExperimentConfig(name=project_name,
+
+    namespace, name = get_namespace_from_name(project_name)
+    if not namespace:
+        namespace = AuthConfigManager.get_access_token().username
+    experiment_config = ExperimentConfig(name=name,
                                          namespace=namespace,
                                          family_id=project_obj.id)
     ExperimentConfigManager.set_config(experiment_config)

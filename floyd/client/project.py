@@ -6,6 +6,7 @@ from floyd.exceptions import (
 from floyd.client.base import FloydHttpClient
 from floyd.model.project import Project
 from floyd.log import logger as floyd_logger
+from floyd.cli.utils import get_namespace_from_name
 
 
 class ProjectClient(FloydHttpClient):
@@ -29,9 +30,14 @@ class ProjectClient(FloydHttpClient):
             return []
 
     def get_by_name(self, name, namespace=None):
+        """
+        name: can be either <namespace>/<project_name> or just <project_name>
+        namespace: if specified, will skip name parsing, defaults to current user's username
+        """
         if not namespace:
-            access_token = AuthConfigManager.get_access_token()
-            namespace = access_token.username
+            namespace, name = get_namespace_from_name(name)
+        if not namespace:
+            namespace = AuthConfigManager.get_access_token().username
         try:
             response = self.request('GET', '%s/%s/%s' % (self.url, namespace, name))
             return Project.from_dict(response.json())

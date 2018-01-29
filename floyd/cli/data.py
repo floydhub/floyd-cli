@@ -38,10 +38,7 @@ def init(dataset_name):
 
         floyd data upload
     """
-    namespace, name = get_namespace_from_name(dataset_name)
-    if namespace:
-        dataset_name = name
-    dataset_obj = DatasetClient().get_by_name(dataset_name, namespace=namespace)
+    dataset_obj = DatasetClient().get_by_name(dataset_name)
 
     if not dataset_obj:
         create_dataset_base_url = "{}/datasets/create".format(floyd.floyd_web_host)
@@ -59,7 +56,12 @@ def init(dataset_name):
         if not dataset_obj:
             raise FloydException('Dataset "%s" does not exist on floydhub.com. Ensure it exists before continuing.' % dataset_name)
 
-    data_config = DataConfig(name=dataset_name, family_id=dataset_obj.id)
+    namespace, name = get_namespace_from_name(dataset_name)
+    if not namespace:
+        namespace = AuthConfigManager.get_access_token().username
+    data_config = DataConfig(name=name,
+                             namespace=namespace,
+                             family_id=dataset_obj.id)
     DataConfigManager.set_config(data_config)
     floyd_logger.info("Data source \"{}\" initialized in current directory".format(dataset_name))
     floyd_logger.info("""

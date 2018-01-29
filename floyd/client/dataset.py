@@ -7,6 +7,7 @@ from floyd.exceptions import (
 from floyd.model.dataset import Dataset
 from floyd.log import logger as floyd_logger
 from floyd.manager.data_config import DataConfigManager
+from floyd.cli.utils import get_namespace_from_name
 
 
 class DatasetClient(FloydHttpClient):
@@ -30,7 +31,14 @@ class DatasetClient(FloydHttpClient):
             return []
 
     def get_by_name(self, name, namespace=None):
-        namespace = namespace or AuthConfigManager.get_access_token().username
+        """
+        name: can be either <namespace>/<dataset_name> or just <dataset_name>
+        namespace: if specified, will skip name parsing, defaults to current user's username
+        """
+        if not namespace:
+            namespace, name = get_namespace_from_name(name)
+        if not namespace:
+            namespace = AuthConfigManager.get_access_token().username
         try:
             response = self.request('GET', '%s/%s/%s' % (self.url, namespace, name))
             return Dataset.from_dict(response.json())
