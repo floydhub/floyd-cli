@@ -5,13 +5,14 @@ from marshmallow import Schema, fields, post_load
 from floyd.exceptions import FloydException
 from floyd.model.base import BaseModel
 from floyd.log import logger as floyd_logger
+from floyd.manager.auth_config import AuthConfigManager
 
 
 class DataConfigSchema(Schema):
 
     name = fields.Str()
-    namespace = fields.Str()
     family_id = fields.Str()
+    namespace = fields.Str(allow_none=True)
     data_id = fields.Str(allow_none=True)
     tarball_path = fields.Str(allow_none=True)
     data_endpoint = fields.Str(allow_none=True)
@@ -37,7 +38,7 @@ class DataConfig(BaseModel):
                  resource_id=None,
                  data_name=None):
         self.name = name
-        self.namespace = namespace
+        self.namespace = namespace or AuthConfigManager.get_access_token().username
         self.family_id = family_id
         self.data_id = data_id
         self.tarball_path = tarball_path
