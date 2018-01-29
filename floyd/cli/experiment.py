@@ -35,7 +35,7 @@ def init(project_name):
     project_obj = ProjectClient().get_by_name(project_name)
 
     if not project_obj:
-        namespace, name = get_namespace_from_name(dataset_name)
+        namespace, name = get_namespace_from_name(project_name)
         create_project_base_url = "{}/projects/create".format(floyd.floyd_web_host)
         create_project_url = "{}?name={}&namespace={}".format(create_project_base_url, name, namespace)
         floyd_logger.info(('Project name does not yet exist on floydhub.com. '
