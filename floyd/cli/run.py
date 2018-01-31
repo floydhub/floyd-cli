@@ -179,7 +179,7 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, tensorboard, gpup, cp
                            '"floyd init PROJECT_NAME" before scheduling a job.')
         sys.exit(1)
 
-    experiment_name = "{}/{}".format(namespace,  experiment_config.name)
+    experiment_name = "{}/{}".format(namespace, experiment_config.name)
 
     success, data_ids = process_data_ids(data)
     if not success:
