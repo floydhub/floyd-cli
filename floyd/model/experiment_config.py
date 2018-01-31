@@ -1,5 +1,4 @@
 from marshmallow import Schema, fields, post_load
-
 from floyd.model.base import BaseModel
 from floyd.manager.auth_config import AuthConfigManager
 
@@ -24,5 +23,5 @@ class ExperimentConfig(BaseModel):
                  namespace=None,
                  family_id=None):
         self.name = name
-        self.namespace = namespace or AuthConfigManager.get_access_token().username
+        self.namespace = namespace
         self.family_id = family_id

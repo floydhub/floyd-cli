@@ -1,8 +1,12 @@
 import unittest
-
+import pytest
 from mock import patch
-
+from floyd.model.experiment_config import ExperimentConfig
+from floyd.manager.data_config import DataConfig
 from tests.cli.mocks import mock_access_token, mock_experiment_config
+
+
+data_config = DataConfig('test_dataset', namespace='pete')
 
 class TestCliUtil(unittest.TestCase):
     """
@@ -11,7 +15,8 @@ class TestCliUtil(unittest.TestCase):
     @patch('floyd.cli.utils.current_username', return_value='pete')
     @patch('floyd.cli.utils.current_dataset_name', return_value='test_dataset')
     @patch('floyd.cli.utils.current_project_name', return_value='my_expt')
-    def test_normalize_data_name(self, _0, _1, _2):
+    @patch('floyd.cli.utils.DataConfigManager.get_config', return_value=data_config)
+    def test_normalize_data_name(self, _0, _1, _2, _3):
         from floyd.cli.utils import normalize_data_name
         assert normalize_data_name('foo/bar/1') == 'foo/datasets/bar/1'
         assert normalize_data_name('foo/datasets/bar/1') == 'foo/datasets/bar/1'

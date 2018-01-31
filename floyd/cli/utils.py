@@ -187,7 +187,7 @@ def current_project_name():
 
 
 def current_project_namespace():
-    return ExperimentConfigManager.get_config().namespace
+    return ExperimentConfigManager.get_config().namespace or current_username()
 
 
 def current_dataset_name():
@@ -195,7 +195,7 @@ def current_dataset_name():
 
 
 def current_dataset_namespace():
-    return DataConfigManager.get_config().namespace
+    return DataConfigManager.get_config().namespace or current_username()
 
 
 def get_latest_job_name_for_project(username, project_name):

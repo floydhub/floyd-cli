@@ -38,7 +38,7 @@ class DataConfig(BaseModel):
                  resource_id=None,
                  data_name=None):
         self.name = name
-        self.namespace = namespace or AuthConfigManager.get_access_token().username
+        self.namespace = namespace
         self.family_id = family_id
         self.data_id = data_id
         self.tarball_path = tarball_path
