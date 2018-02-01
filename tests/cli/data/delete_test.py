@@ -1,5 +1,3 @@
-import pytest
-import traceback
 from click.testing import CliRunner
 import unittest
 from mock import patch, call
@@ -8,6 +6,7 @@ from floyd.cli.data import delete
 from floyd.model.experiment_config import ExperimentConfig
 from tests.cli.data.mocks import mock_data, mock_project_client, mock_access_token
 from tests.cli.mocks import mock_data_config
+from tests.cli import assert_exit_code
 
 
 class TestDataDelete(unittest.TestCase):
@@ -24,7 +23,7 @@ class TestDataDelete(unittest.TestCase):
         # No calls to api, exit 0
         data_client.assert_not_called()
 
-        assert(result.exit_code == 0)
+        assert_exit_code(result, 0)
 
     @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
     @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
@@ -53,7 +52,6 @@ class TestDataDelete(unittest.TestCase):
         get_data.assert_has_calls(calls, any_order=True)
         delete_data.assert_has_calls(calls, any_order=True)
 
-        assert(result.exit_code == 0)
 
     @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
     @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
@@ -86,7 +84,7 @@ class TestDataDelete(unittest.TestCase):
         # Calls delete for only id_2
         delete_data.assert_called_once_with(id_2)
 
-        assert(result.exit_code == 0)
+        assert_exit_code(result, 0)
 
     @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
     @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
@@ -116,7 +114,7 @@ class TestDataDelete(unittest.TestCase):
         delete_data.assert_has_calls(calls, any_order=True)
 
         # Exit 1 for failed deletes
-        assert(result.exit_code == 1)
+        assert_exit_code(result, 1)
 
     @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
     @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
@@ -145,4 +143,4 @@ class TestDataDelete(unittest.TestCase):
         delete_data.assert_not_called()
 
         # Exit 1 for failed get requests
-        assert(result.exit_code == 1)
+        assert_exit_code(result, 1)

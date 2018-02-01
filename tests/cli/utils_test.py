@@ -1,5 +1,4 @@
 import unittest
-import pytest
 from mock import patch
 from floyd.model.experiment_config import ExperimentConfig
 from floyd.manager.data_config import DataConfig

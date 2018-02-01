@@ -2,6 +2,7 @@ from click.testing import CliRunner
 import unittest
 from mock import patch
 
+from tests.cli import assert_exit_code
 from floyd.cli.run import run, get_command_line
 from tests.cli.mocks import mock_access_token, mock_experiment_config, mock_data_config
 
@@ -34,7 +35,7 @@ class TestExperimentRun(unittest.TestCase):
         Simple experiment with no data attached
         """
         result = self.runner.invoke(run, ['command'], catch_exceptions=False)
-        assert(result.exit_code == 0)
+        assert_exit_code(result, 0)
 
     @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
     @patch('floyd.cli.run.DataClient.get')
@@ -60,7 +61,7 @@ class TestExperimentRun(unittest.TestCase):
         """
         data_get.return_value.id = 'data_id'
         result = self.runner.invoke(run, ['command', '--data', 'data-id1', '--data', 'data-id2'], catch_exceptions=False)
-        assert(result.exit_code == 0)
+        assert_exit_code(result, 0)
 
     @patch('floyd.cli.run.normalize_data_name', return_value='mckay/datasets/foo/1')
     def test_get_command_line(self, _):
@@ -121,8 +122,7 @@ class TestExperimentRun(unittest.TestCase):
         CLI should fail if more than one --env is passed
         """
         result = self.runner.invoke(run, ['--env', 'foo', '--env', 'bar', 'ls'])
-        assert(result.exit_code != 0)
+        assert_exit_code(result, 1)
 
         result = self.runner.invoke(run, ['--env', 'foo', 'ls'])
-        assert(result.exit_code == 0)
-
+        assert_exit_code(result, 0)
