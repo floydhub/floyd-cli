@@ -31,11 +31,8 @@ setup(
         "pathlib2>=2.2.1",
         "raven",
     ],
-    setup_requires=[
-        "nose>=1.0",
-    ],
-    dependency_links=[
-    ],
+    setup_requires=[],
+    dependency_links=[],
     entry_points={
         "console_scripts": [
             "floyd = floyd.main:cli",
@@ -44,7 +41,7 @@ setup(
         ],
     },
     tests_require=[
-        "nose>=1.0",
+        "pytest",
         "mock>=1.0.1",
     ],
 )

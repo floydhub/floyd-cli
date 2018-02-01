@@ -184,7 +184,6 @@ def delete(ids, yes):
     failures = False
 
     for id in ids:
-
         data_source = DataClient().get(normalize_data_name(id))
         if not data_source:
             # Try with the raw ID

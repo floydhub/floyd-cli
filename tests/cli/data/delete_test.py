@@ -1,3 +1,5 @@
+import pytest
+import traceback
 from click.testing import CliRunner
 import unittest
 from mock import patch, call
@@ -45,6 +47,7 @@ class TestDataDelete(unittest.TestCase):
 
         result = self.runner.invoke(delete, ['-y', id_1, id_2, id_3])
 
+        assert_exit_code(result, 0)
         # Trigger a get and a delete for each id
         calls = [call(id_1), call(id_2), call(id_3)]
         get_data.assert_has_calls(calls, any_order=True)
