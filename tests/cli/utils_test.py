@@ -11,11 +11,13 @@ class TestCliUtil(unittest.TestCase):
     """
     Tests cli utils helper functions
     """
+    @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config')
     @patch('floyd.cli.utils.current_username', return_value='pete')
     @patch('floyd.cli.utils.current_dataset_name', return_value='test_dataset')
     @patch('floyd.cli.utils.current_project_name', return_value='my_expt')
     @patch('floyd.cli.utils.DataConfigManager.get_config', return_value=data_config)
-    def test_normalize_data_name(self, _0, _1, _2, _3):
+    def test_normalize_data_name(self, _0, _1, _2, _3, mock_get_config):
+        mock_get_config.return_value.namespace = None
         from floyd.cli.utils import normalize_data_name
         assert normalize_data_name('foo/bar/1') == 'foo/datasets/bar/1'
         assert normalize_data_name('foo/datasets/bar/1') == 'foo/datasets/bar/1'
@@ -39,10 +41,13 @@ class TestCliUtil(unittest.TestCase):
         assert normalize_data_name('foo/datasets/bar') == 'foo/datasets/bar'
 
 
+    @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config')
     @patch('floyd.cli.utils.current_username', return_value='pete')
     @patch('floyd.cli.utils.current_project_name', return_value='test_proj')
     @patch('floyd.cli.utils.get_latest_job_name_for_project', return_value='TEST')
-    def test_normalize_job_name(self, _0, _1, _2):
+    def test_normalize_job_name(self, _0, _1, _2, mock_get_config):
+        mock_get_config.return_value.namespace = None
+
         from floyd.cli.utils import normalize_job_name
 
         # Make sure that the current_username and current_project_name are
