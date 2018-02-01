@@ -1,6 +1,5 @@
 from marshmallow import Schema, fields, post_load
 from floyd.model.base import BaseModel
-from floyd.manager.auth_config import AuthConfigManager
 
 
 class ExperimentConfigSchema(Schema):

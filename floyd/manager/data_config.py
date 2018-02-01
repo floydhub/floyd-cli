@@ -5,7 +5,6 @@ from marshmallow import Schema, fields, post_load
 from floyd.exceptions import FloydException
 from floyd.model.base import BaseModel
 from floyd.log import logger as floyd_logger
-from floyd.manager.auth_config import AuthConfigManager
 
 
 class DataConfigSchema(Schema):
