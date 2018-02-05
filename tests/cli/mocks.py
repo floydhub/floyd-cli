@@ -32,6 +32,7 @@ def mock_experiment_config():
 def mock_data_config():
     class DataConfig:
         name = 'my_dataset'
+        namespace = None
     return DataConfig()
 
 

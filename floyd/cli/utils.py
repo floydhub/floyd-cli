@@ -71,7 +71,7 @@ def normalize_data_name(raw_name, default_username='', default_dataset_name='', 
 
     name_parts = raw_name.split('/')
 
-    username = default_username or current_username()
+    namespace = default_username or current_dataset_namespace()
     name = default_dataset_name
     number = None  # current version number
 
@@ -80,22 +80,22 @@ def normalize_data_name(raw_name, default_username='', default_dataset_name='', 
         pass
     elif len(name_parts) == 4:
         # mckay/datasets/foo/1
-        username, _, name, number = name_parts
+        namespace, _, name, number = name_parts
     elif len(name_parts) == 3:
 
         if name_parts[2].isdigit():
             # mckay/foo/1
-            username, name, number = name_parts
+            namespace, name, number = name_parts
         else:
             # mckay/projects/foo
-            username, _, name = name_parts
+            namespace, _, name = name_parts
     elif len(name_parts) == 2:
         if name_parts[1].isdigit():
             # foo/1
             name, number = name_parts
         else:
             # mckay/foo
-            username, name = name_parts
+            namespace, name = name_parts
     elif len(name_parts) == 1:
         if name_parts[0].isdigit():
             # 1
@@ -106,7 +106,7 @@ def normalize_data_name(raw_name, default_username='', default_dataset_name='', 
     else:
         return raw_name
 
-    name_parts = [username, 'datasets', name]
+    name_parts = [namespace, 'datasets', name]
 
     if number is not None:
         name_parts.append(number)
@@ -121,11 +121,11 @@ def normalize_job_name(raw_job_name, default_username='', default_project_name='
     raw_job_name = raw_job_name or ''
 
     if use_config:
-        default_project_name = default_project_name or current_experiment_name()
+        default_project_name = default_project_name or current_project_name()
 
     name_parts = raw_job_name.split('/')
 
-    username = default_username or current_username()
+    namespace = default_username or current_project_namespace()
     project_name = default_project_name
     number = ''  # current job number
 
@@ -134,22 +134,22 @@ def normalize_job_name(raw_job_name, default_username='', default_project_name='
         pass
     elif len(name_parts) == 4:
         # mckay/projects/foo/1
-        username, _, project_name, number = name_parts
+        namespace, _, project_name, number = name_parts
     elif len(name_parts) == 3:
 
         if name_parts[2].isdigit():
             # mckay/foo/1
-            username, project_name, number = name_parts
+            namespace, project_name, number = name_parts
         else:
             # mckay/projects/foo
-            username, _, project_name = name_parts
+            namespace, _, project_name = name_parts
     elif len(name_parts) == 2:
         if name_parts[1].isdigit():
             # foo/1
             project_name, number = name_parts
         else:
             # mckay/foo
-            username, project_name = name_parts
+            namespace, project_name = name_parts
     elif len(name_parts) == 1:
         if name_parts[0].isdigit():
             # 1
@@ -163,7 +163,7 @@ def normalize_job_name(raw_job_name, default_username='', default_project_name='
 
     # If no number is found, query the API for the most recent job number
     if not number:
-        job_name_from_api = get_latest_job_name_for_project(username, project_name)
+        job_name_from_api = get_latest_job_name_for_project(namespace, project_name)
         if not job_name_from_api:
             raise FloydException("Could not resolve %s. Make sure the project exists and has jobs." % raw_job_name)
         return job_name_from_api
@@ -171,7 +171,7 @@ def normalize_job_name(raw_job_name, default_username='', default_project_name='
     if not project_name:
         raise FloydException('Job name resolution: Could not infer a project name from "%s". Please include a name to identify the project' % raw_job_name)
 
-    return '/'.join([username, 'projects', project_name, number])
+    return '/'.join([namespace, 'projects', project_name, number])
 
 
 def get_cli_version():
@@ -182,12 +182,20 @@ def current_username():
     return AuthConfigManager.get_access_token().username
 
 
-def current_experiment_name():
+def current_project_name():
     return ExperimentConfigManager.get_config().name
+
+
+def current_project_namespace():
+    return ExperimentConfigManager.get_config().namespace or current_username()
 
 
 def current_dataset_name():
     return DataConfigManager.get_config().name
+
+
+def current_dataset_namespace():
+    return DataConfigManager.get_config().namespace or current_username()
 
 
 def get_latest_job_name_for_project(username, project_name):
@@ -202,3 +210,17 @@ def get_latest_job_name_for_project(username, project_name):
 
 def is_conda_env():
     return 'conda' in sys.version or 'ontinuum' in sys.version
+
+
+def get_namespace_from_name(name):
+    """
+    can be either
+    <namespace>/projects/<project_name>
+    or
+    <namespace>/<project_name>
+    """
+    name_parts = name.split("/", 2)
+    if len(name_parts) > 1:
+        return name_parts[0], name_parts[-1]
+    else:
+        return current_username(), name

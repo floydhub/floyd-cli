@@ -2,6 +2,7 @@ from click.testing import CliRunner
 import unittest
 from mock import patch, call, Mock
 
+from tests.cli import assert_exit_code
 from floyd.cli.experiment import delete
 from tests.cli.mocks import mock_exp, mock_task_inst, mock_access_token
 
@@ -18,7 +19,7 @@ class TestExperimentDelete(unittest.TestCase):
     @patch('floyd.cli.experiment.ExperimentClient')
     def test_with_no_arguments(self, *api_clients):
         result = self.runner.invoke(delete)
-        self.assertEqual(result.exit_code, 0)
+        assert_exit_code(result, 0)
 
         # No calls to API clients, exit 0
         for client in api_clients:
@@ -47,7 +48,7 @@ class TestExperimentDelete(unittest.TestCase):
         get_experiment.assert_has_calls(calls, any_order=True)
         delete_experiment.assert_has_calls(calls, any_order=True)
 
-        self.assertEqual(result.exit_code, 0)
+        assert_exit_code(result, 0)
 
 
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
@@ -81,7 +82,7 @@ class TestExperimentDelete(unittest.TestCase):
         task_instance_client.assert_not_called()
         module_client.assert_not_called()
 
-        self.assertEqual(result.exit_code, 0)
+        assert_exit_code(result, 0)
 
 
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
@@ -106,7 +107,7 @@ class TestExperimentDelete(unittest.TestCase):
         delete_experiment.assert_has_calls(calls, any_order=True)
 
         # Exit 1 for failed deletes
-        self.assertEqual(result.exit_code, 1)
+        assert_exit_code(result, 1)
 
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.experiment.ExperimentClient')
@@ -122,7 +123,7 @@ class TestExperimentDelete(unittest.TestCase):
         experiment_client.return_value.delete.assert_not_called()
 
         # Exit 1 for unsuccessful experiment delete
-        assert(result.exit_code == 1)
+        assert_exit_code(result, 1)
 
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.experiment.ExperimentClient')
@@ -139,7 +140,7 @@ class TestExperimentDelete(unittest.TestCase):
         experiment_client.return_value.delete.assert_called_once_with('999999')
 
         # Exit 0 for successful experiment delete
-        assert(result.exit_code == 0)
+        assert_exit_code(result, 0)
 
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.experiment.TaskInstanceClient.get', side_effect=mock_task_inst)
@@ -164,4 +165,4 @@ class TestExperimentDelete(unittest.TestCase):
         delete_module.assert_not_called()
 
         # Exit 1 for failed experiment delete
-        assert(result.exit_code == 1)
+        assert_exit_code(result, 1)

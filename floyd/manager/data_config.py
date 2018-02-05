@@ -11,6 +11,7 @@ class DataConfigSchema(Schema):
 
     name = fields.Str()
     family_id = fields.Str()
+    namespace = fields.Str(allow_none=True)
     data_id = fields.Str(allow_none=True)
     tarball_path = fields.Str(allow_none=True)
     data_endpoint = fields.Str(allow_none=True)
@@ -28,6 +29,7 @@ class DataConfig(BaseModel):
 
     def __init__(self,
                  name,
+                 namespace=None,
                  family_id=None,
                  data_id=None,
                  tarball_path=None,
@@ -35,6 +37,7 @@ class DataConfig(BaseModel):
                  resource_id=None,
                  data_name=None):
         self.name = name
+        self.namespace = namespace
         self.family_id = family_id
         self.data_id = data_id
         self.tarball_path = tarball_path
