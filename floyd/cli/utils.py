@@ -63,15 +63,16 @@ def get_data_id(data_str):
 
 def normalize_data_name(raw_name, default_username='', default_dataset_name='', use_data_config=True):
     raw_name = raw_name or ''
-    if use_data_config:
-        default_dataset_name = default_dataset_name or current_dataset_name()
-
     if raw_name.endswith('/output'):
         return normalize_job_name(raw_name[:-len('/output')], default_username, default_dataset_name) + '/output'
 
     name_parts = raw_name.split('/')
 
-    namespace = default_username or current_dataset_namespace()
+    namespace = default_username
+    if use_data_config:
+        default_dataset_name = default_dataset_name or current_dataset_name()
+        namespace = namespace or current_dataset_namespace()
+
     name = default_dataset_name
     number = None  # current version number
 
@@ -82,7 +83,6 @@ def normalize_data_name(raw_name, default_username='', default_dataset_name='', 
         # mckay/datasets/foo/1
         namespace, _, name, number = name_parts
     elif len(name_parts) == 3:
-
         if name_parts[2].isdigit():
             # mckay/foo/1
             namespace, name, number = name_parts
