@@ -165,7 +165,7 @@ def logs(id, url, tail, follow, sleep_duration=1):
             floyd_logger.info("Waiting for logs ...\n")
             log_msg_printed = True
 
-        sleep(0.2)
+        sleep(1)
 
     log_url = "{}/api/v1/resources/{}?content=true".format(
         floyd.floyd_host, instance_log_id)
