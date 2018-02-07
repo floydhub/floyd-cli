@@ -150,26 +150,22 @@ def logs(id, url, tail, follow, sleep_duration=1):
     Print the logs of the run.
     """
     tail = tail or follow
-    was_queued = False
+
+    log_msg_printed = False
     while True:
         try:
             experiment = ExperimentClient().get(normalize_job_name(id))
         except FloydException:
             experiment = ExperimentClient().get(id)
 
-        if experiment.state == 'queued':
-            floyd_logger.info("Job is currently in a queue ...")
-            was_queued = True
-            sleep(1)
-        else:
+        instance_log_id = experiment.instance_log_id
+        if instance_log_id:
             break
-    if was_queued:
-        floyd_logger.info("")  # print a newline
+        elif not log_msg_printed:
+            floyd_logger.info("Waiting for logs ...\n")
+            log_msg_printed = True
 
-    instance_log_id = experiment.instance_log_id
-    if not instance_log_id:
-        floyd_logger.info("Job not started yet, no log to show.")
-        sys.exit(1)
+        sleep(0.2)
 
     log_url = "{}/api/v1/resources/{}?content=true".format(
         floyd.floyd_host, instance_log_id)
