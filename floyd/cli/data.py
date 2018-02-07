@@ -149,6 +149,66 @@ def clone(id):
 
 
 @click.command()
+@click.argument('id', nargs=1)
+def listfiles(id):
+    """
+    List files in the given dataset
+    """
+
+    data_source = DataClient().get(normalize_data_name(id, use_data_config=False))
+    if id and not data_source:
+        # Try with the raw ID
+        data_source = DataClient().get(id)
+
+    if not data_source:
+        if 'output' in id:
+            floyd_logger.info("Note: You cannot clone the output of a running job. You need to wait for it to finish.")
+        sys.exit()
+
+    # Depth-first search
+    dirs = ['']
+    paths = []
+    while dirs:
+        dir = dirs.pop()
+        url = "/resources/{}/{}?content=true".format(data_source.resource_id, dir)
+        files = DataClient().request("GET", url).json()['files']
+        files.sort(key=lambda f: f['name'])
+        for file in files:
+            path = dir + '/' + file['name']
+            if file['type'] == 'directory':
+                path += '/'
+            paths.append(path)
+
+            if file['type'] == 'directory':
+                dirs.append(dir + '/' + file['name'])
+    for path in paths:
+        floyd_logger.info(path)
+
+
+@click.command()
+@click.argument('id', nargs=1)
+@click.argument('path', nargs=1)
+def getfile(id, path):
+    """
+    Get the specified individual file from a dataset
+    """
+
+    data_source = DataClient().get(normalize_data_name(id, use_data_config=False))
+    if id and not data_source:
+        # Try with the raw ID
+        data_source = DataClient().get(id)
+
+    if not data_source:
+        if 'output' in id:
+            floyd_logger.info("Note: You cannot clone the output of a running job. You need to wait for it to finish.")
+        sys.exit()
+
+    url = "{}/api/v1/resources/{}/{}?content=true".format(floyd.floyd_host, data_source.resource_id, path)
+    fname = path.split('/')[-1]
+    DataClient().download(url, filename=fname)
+
+
+@click.command()
 @click.option('-u', '--url', is_flag=True, default=False,
               help='Only print url for viewing data')
 @click.argument('id', nargs=1, required=False)
@@ -234,3 +294,5 @@ data.add_command(upload)
 data.add_command(status)
 data.add_command(output)
 data.add_command(add)
+data.add_command(listfiles)
+data.add_command(getfile)
