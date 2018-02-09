@@ -144,19 +144,19 @@ def clone(id):
 
 
 @click.command()
-@click.argument('dataset_name', nargs=1)
-def listfiles(dataset_name):
+@click.argument('data_name', nargs=1)
+def listfiles(data_name):
     """
     List files in the given dataset
     """
 
-    data_source = DataClient().get(normalize_data_name(dataset_name, use_data_config=False))
-    if dataset_name and not data_source:
+    data_source = DataClient().get(normalize_data_name(data_name, use_data_config=False))
+    if data_name and not data_source:
         # Try with the raw ID
-        data_source = DataClient().get(dataset_name)
+        data_source = DataClient().get(data_name)
 
     if not data_source:
-        if 'output' in dataset_name:
+        if 'output' in data_name:
             floyd_logger.info("Note: You cannot clone the output of a running job. You need to wait for it to finish.")
         sys.exit()
 
@@ -169,37 +169,37 @@ def listfiles(dataset_name):
         response = DataClient().request("GET", url).json()
 
         if response['skipped_files'] > 0:
-            floyd_logger.info("Warning: in directory '{}', {}/{} files skipped (too many files)".format(cur_dir, response['skipped_files'], response['total_files']))
+            floyd_logger.info("Warning: in directory '%s', %s/%s files skipped (too many files)", cur_dir, response['skipped_files'], response['total_files'])
 
         files = response['files']
         files.sort(key=lambda f: f['name'])
-        for file in files:
-            path = os.path.join(cur_dir, file['name'])
-            if file['type'] == 'directory':
+        for f in files:
+            path = os.path.join(cur_dir, f['name'])
+            if f['type'] == 'directory':
                 path += os.sep
             paths.append(path)
 
-            if file['type'] == 'directory':
-                dirs.append(os.path.join(cur_dir, file['name']))
+            if f['type'] == 'directory':
+                dirs.append(os.path.join(cur_dir, f['name']))
     for path in paths:
         floyd_logger.info(path)
 
 
 @click.command()
-@click.argument('dataset_name', nargs=1)
+@click.argument('data_name', nargs=1)
 @click.argument('path', nargs=1)
-def getfile(dataset_name, path):
+def getfile(data_name, path):
     """
     Get the specified individual file from a dataset
     """
 
-    data_source = DataClient().get(normalize_data_name(dataset_name, use_data_config=False))
-    if dataset_name and not data_source:
+    data_source = DataClient().get(normalize_data_name(data_name, use_data_config=False))
+    if data_name and not data_source:
         # Try with the raw ID
-        data_source = DataClient().get(dataset_name)
+        data_source = DataClient().get(data_name)
 
     if not data_source:
-        if 'output' in dataset_name:
+        if 'output' in data_name:
             floyd_logger.info("Note: You cannot clone the output of a running job. You need to wait for it to finish.")
         sys.exit()
 
