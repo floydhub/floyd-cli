@@ -30,7 +30,7 @@ from floyd.model.module import Module
 from floyd.model.experiment import ExperimentRequest
 from floyd.log import logger as floyd_logger
 from floyd.exceptions import BadRequestException
-from floyd.cli.experiment import logs as cli_logs
+from floyd.cli.experiment import get_log_id, follow_logs
 
 
 def process_data_ids(data):
@@ -257,8 +257,8 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, follow, tensorboard, 
         # log output and not in anything that would be displayed by
         # show_new_job_info.
         floyd_logger.info("Opening logs ...")
-        ctx.invoke(cli_logs, id=job_name, follow=True)
-
+        instance_log_id = instance_log_id = get_log_id(job_name)
+        follow_logs(instance_log_id)
 
 
 def get_command_line(instance_type, env, message, data, mode, open_notebook, tensorboard, command_str):
