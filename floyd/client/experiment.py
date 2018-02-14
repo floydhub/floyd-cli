@@ -55,7 +55,7 @@ class ExperimentClient(FloydHttpClient):
             floyd_logger.info(
                 ("Job {}: ERROR! A deletable job with this "
                  "id was not found. Make sure you have the correct id and "
-                 "that the experiment is not "
+                 "that the job is not "
                  "queued or running.".format(id))
             )
             return False

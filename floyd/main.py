@@ -59,7 +59,7 @@ def check_cli_version():
         msg_parts.append("    pip install -U floyd-cli")
         if is_conda_env():
             msg_parts.append("Or if you prefer to use conda:")
-            msg_parts.apend("    conda install -y -c conda-forge -c floydhub floyd-cli")
+            msg_parts.append("    conda install -y -c conda-forge -c floydhub floyd-cli")
         print("\n".join(msg_parts))
         print("")
 

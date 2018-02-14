@@ -6,7 +6,9 @@ import sys
 
 import floyd
 from floyd.cli.utils import (
-    get_module_task_instance_id, normalize_job_name
+    get_module_task_instance_id,
+    normalize_job_name,
+    get_namespace_from_name
 )
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
@@ -33,8 +35,9 @@ def init(project_name):
     project_obj = ProjectClient().get_by_name(project_name)
 
     if not project_obj:
+        namespace, name = get_namespace_from_name(project_name)
         create_project_base_url = "{}/projects/create".format(floyd.floyd_web_host)
-        create_project_url = "{}?name={}".format(create_project_base_url, project_name)
+        create_project_url = "{}?name={}&namespace={}".format(create_project_base_url, name, namespace)
         floyd_logger.info(('Project name does not yet exist on floydhub.com. '
                           'Create your new project on floydhub.com:\n\t%s'),
                           create_project_base_url)
@@ -48,7 +51,9 @@ def init(project_name):
         if not project_obj:
             raise FloydException('Project "%s" does not exist on floydhub.com. Ensure it exists before continuing.' % project_name)
 
-    experiment_config = ExperimentConfig(name=project_name,
+    namespace, name = get_namespace_from_name(project_name)
+    experiment_config = ExperimentConfig(name=name,
+                                         namespace=namespace,
                                          family_id=project_obj.id)
     ExperimentConfigManager.set_config(experiment_config)
     FloydIgnoreManager.init()
@@ -150,19 +155,22 @@ def logs(id, url, tail, follow, sleep_duration=1):
     Print the logs of the run.
     """
     tail = tail or follow
-    try:
-        experiment = ExperimentClient().get(normalize_job_name(id))
-    except FloydException:
-        experiment = ExperimentClient().get(id)
 
-    if experiment.state == 'queued':
-        floyd_logger.info("Job is currently in a queue")
-        return
+    log_msg_printed = False
+    while True:
+        try:
+            experiment = ExperimentClient().get(normalize_job_name(id))
+        except FloydException:
+            experiment = ExperimentClient().get(id)
 
-    instance_log_id = experiment.instance_log_id
-    if not instance_log_id:
-        floyd_logger.info("Job not started yet, no log to show.")
-        sys.exit(1)
+        instance_log_id = experiment.instance_log_id
+        if instance_log_id:
+            break
+        elif not log_msg_printed:
+            floyd_logger.info("Waiting for logs ...\n")
+            log_msg_printed = True
+
+        sleep(1)
 
     log_url = "{}/api/v1/resources/{}?content=true".format(
         floyd.floyd_host, instance_log_id)

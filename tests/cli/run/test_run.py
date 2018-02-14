@@ -2,6 +2,7 @@ from click.testing import CliRunner
 import unittest
 from mock import patch
 
+from tests.cli import assert_exit_code
 from floyd.cli.run import run, get_command_line
 from tests.cli.mocks import mock_access_token, mock_experiment_config, mock_data_config
 
@@ -34,7 +35,7 @@ class TestExperimentRun(unittest.TestCase):
         Simple experiment with no data attached
         """
         result = self.runner.invoke(run, ['command'], catch_exceptions=False)
-        assert(result.exit_code == 0)
+        assert_exit_code(result, 0)
 
     @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
     @patch('floyd.cli.run.DataClient.get')
@@ -60,7 +61,7 @@ class TestExperimentRun(unittest.TestCase):
         """
         data_get.return_value.id = 'data_id'
         result = self.runner.invoke(run, ['command', '--data', 'data-id1', '--data', 'data-id2'], catch_exceptions=False)
-        assert(result.exit_code == 0)
+        assert_exit_code(result, 0)
 
     @patch('floyd.cli.run.normalize_data_name', return_value='mckay/datasets/foo/1')
     def test_get_command_line(self, _):
@@ -121,8 +122,32 @@ class TestExperimentRun(unittest.TestCase):
         CLI should fail if more than one --env is passed
         """
         result = self.runner.invoke(run, ['--env', 'foo', '--env', 'bar', 'ls'])
-        assert(result.exit_code != 0)
+        assert_exit_code(result, 1)
 
         result = self.runner.invoke(run, ['--env', 'foo', 'ls'])
-        assert(result.exit_code == 0)
+        assert_exit_code(result, 0)
 
+    @patch('floyd.cli.run.DataClient.get')
+    @patch('floyd.model.access_token.assert_token_not_expired')
+    @patch('floyd.cli.run.EnvClient.get_all', return_value={'cpu': {'foo': 'foo', 'bar': 'bar'}})
+    @patch('floyd.cli.run.AuthConfigManager.get_access_token', side_effect=mock_access_token)
+    @patch('floyd.cli.run.ExperimentConfigManager.get_config', side_effect=mock_experiment_config)
+    @patch('floyd.cli.run.ExperimentConfigManager.set_config')
+    @patch('floyd.cli.run.ModuleClient.create', return_value='module_id')
+    @patch('floyd.cli.run.ExperimentClient')
+    @patch('floyd.cli.run.ProjectClient.exists', return_value=True)
+    def test_mount_dataset_without_version(self,
+                                           exists,
+                                           expt_client,
+                                           create_module,
+                                           set_config,
+                                           get_config,
+                                           get_access_token,
+                                           get_all_env,
+                                           assert_token_not_expired,
+                                           data_client_get):
+        """
+        CLI should fail if more than one --env is passed
+        """
+        result = self.runner.invoke(run, ['--env', 'foo', '--data', 'foo/datasets/bar', 'ls'])
+        assert_exit_code(result, 0)

@@ -172,16 +172,16 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, follow, tensorboard, 
         )
         sys.exit(1)
     env = env[0]
-
     experiment_config = ExperimentConfigManager.get_config()
-    if not ProjectClient().exists(experiment_config.family_id):
+    access_token = AuthConfigManager.get_access_token()
+    namespace = experiment_config.namespace or access_token.username
+
+    if not ProjectClient().exists(experiment_config.name, namespace=namespace):
         floyd_logger.error('Invalid project id, please run '
                            '"floyd init PROJECT_NAME" before scheduling a job.')
         sys.exit(1)
 
-    access_token = AuthConfigManager.get_access_token()
-    experiment_name = "{}/{}".format(access_token.username,
-                                     experiment_config.name)
+    experiment_name = "{}/{}".format(namespace, experiment_config.name)
 
     success, data_ids = process_data_ids(data)
     if not success:

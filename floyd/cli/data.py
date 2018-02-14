@@ -14,7 +14,10 @@ from floyd.cli.data_upload_utils import (
     opt_to_resume, upload_is_resumable, abort_previous_upload,
     initialize_new_upload, complete_upload
 )
-from floyd.cli.utils import normalize_data_name
+from floyd.cli.utils import (
+    normalize_data_name,
+    get_namespace_from_name
+)
 
 
 @click.group()
@@ -38,8 +41,9 @@ def init(dataset_name):
     dataset_obj = DatasetClient().get_by_name(dataset_name)
 
     if not dataset_obj:
+        namespace, name = get_namespace_from_name(dataset_name)
         create_dataset_base_url = "{}/datasets/create".format(floyd.floyd_web_host)
-        create_dataset_url = "{}?name={}".format(create_dataset_base_url, dataset_name)
+        create_dataset_url = "{}?name={}&namespace={}".format(create_dataset_base_url, name, namespace)
         floyd_logger.info(("Dataset name does not match your list of datasets. "
                            "Create your new dataset in the web dashboard:\n\t%s"),
                           create_dataset_base_url)
@@ -53,7 +57,10 @@ def init(dataset_name):
         if not dataset_obj:
             raise FloydException('Dataset "%s" does not exist on floydhub.com. Ensure it exists before continuing.' % dataset_name)
 
-    data_config = DataConfig(name=dataset_name, family_id=dataset_obj.id)
+    namespace, name = get_namespace_from_name(dataset_name)
+    data_config = DataConfig(name=name,
+                             namespace=namespace,
+                             family_id=dataset_obj.id)
     DataConfigManager.set_config(data_config)
     floyd_logger.info("Data source \"{}\" initialized in current directory".format(dataset_name))
     floyd_logger.info("""
@@ -177,7 +184,6 @@ def delete(ids, yes):
     failures = False
 
     for id in ids:
-
         data_source = DataClient().get(normalize_data_name(id))
         if not data_source:
             # Try with the raw ID

@@ -1,5 +1,5 @@
 {% set name = "floyd-cli" %}
-{% set version = "0.10.31" %}
+{% set version = "0.10.33" %}
 {% set file_ext = "tar.gz" %}
 
 package:
@@ -30,7 +30,6 @@ requirements:
     - tabulate >=0.7.7
     - pathlib2 >=2.2.1
     - raven
-    - nose
   run:
     - python
     - click >=6.7
@@ -42,7 +41,6 @@ requirements:
     - tabulate >=0.7.7
     - pathlib2 >=2.2.1
     - raven
-    - nose
 
 test:
   imports:
@@ -58,7 +56,7 @@ test:
     - floyd-local --help
   requires:
     - mock >=1.0.1
-    - nose >=1.0
+    - pytest
 
 about:
   home: https://github.com/floydhub/floyd-cli

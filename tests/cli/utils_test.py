@@ -1,29 +1,35 @@
 import unittest
-
 from mock import patch
-
+from floyd.model.experiment_config import ExperimentConfig
+from floyd.manager.data_config import DataConfig
 from tests.cli.mocks import mock_access_token, mock_experiment_config
+
+
+data_config = DataConfig('test_dataset', namespace='pete')
 
 class TestCliUtil(unittest.TestCase):
     """
     Tests cli utils helper functions
     """
+    @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config')
     @patch('floyd.cli.utils.current_username', return_value='pete')
     @patch('floyd.cli.utils.current_dataset_name', return_value='test_dataset')
-    @patch('floyd.cli.utils.current_experiment_name', return_value='my_expt')
-    def test_normalize_data_name(self, _0, _1, _2):
+    @patch('floyd.cli.utils.current_project_name', return_value='my_expt')
+    @patch('floyd.cli.utils.DataConfigManager.get_config', return_value=data_config)
+    def test_normalize_data_name(self, _0, _1, _2, _3, mock_get_config):
+        mock_get_config.return_value.namespace = None
         from floyd.cli.utils import normalize_data_name
         assert normalize_data_name('foo/bar/1') == 'foo/datasets/bar/1'
         assert normalize_data_name('foo/datasets/bar/1') == 'foo/datasets/bar/1'
         assert normalize_data_name('foo/bar/1/output') == 'foo/projects/bar/1/output'
         assert normalize_data_name('foo/projects/bar/1/output') == 'foo/projects/bar/1/output'
-        # Make sure that the current_username and current_experiment_name are
+        # Make sure that the current_username and current_project_name are
         # honored:
         assert normalize_data_name('1') == 'pete/datasets/test_dataset/1'
         assert normalize_data_name('mnist/3') == 'pete/datasets/mnist/3'
         assert normalize_data_name('foo/mnist/3') == 'foo/datasets/mnist/3'
 
-        # current_username and current_experiment_name are overridden with the
+        # current_username and current_project_name are overridden with the
         # second and third args if passed
         assert normalize_data_name('bar/1', 'yoyo') == 'yoyo/datasets/bar/1'
         assert normalize_data_name('1', 'yoyo', 'ma') == 'yoyo/datasets/ma/1'
@@ -35,19 +41,22 @@ class TestCliUtil(unittest.TestCase):
         assert normalize_data_name('foo/datasets/bar') == 'foo/datasets/bar'
 
 
+    @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config')
     @patch('floyd.cli.utils.current_username', return_value='pete')
-    @patch('floyd.cli.utils.current_experiment_name', return_value='test_proj')
+    @patch('floyd.cli.utils.current_project_name', return_value='test_proj')
     @patch('floyd.cli.utils.get_latest_job_name_for_project', return_value='TEST')
-    def test_normalize_job_name(self, _0, _1, _2):
+    def test_normalize_job_name(self, _0, _1, _2, mock_get_config):
+        mock_get_config.return_value.namespace = None
+
         from floyd.cli.utils import normalize_job_name
 
-        # Make sure that the current_username and current_experiment_name are
+        # Make sure that the current_username and current_project_name are
         # honored:
         assert normalize_job_name('1') == 'pete/projects/test_proj/1'
         assert normalize_job_name('mnist/3') == 'pete/projects/mnist/3'
         assert normalize_job_name('foo/mnist/3') == 'foo/projects/mnist/3'
 
-        # current_username and current_experiment_name are overridden with the
+        # current_username and current_project_name are overridden with the
         # second and third args if passed
         assert normalize_job_name('bar/1', 'yoyo') == 'yoyo/projects/bar/1'
         assert normalize_job_name('1', 'yoyo', 'ma') == 'yoyo/projects/ma/1'
@@ -70,8 +79,8 @@ class TestCliUtil(unittest.TestCase):
 
 
     @patch('floyd.cli.utils.ExperimentConfigManager.get_config', side_effect=mock_experiment_config)
-    def test_current_experiment_name(self, expt_config):
-        from floyd.cli.utils import current_experiment_name
+    def test_current_project_name(self, expt_config):
+        from floyd.cli.utils import current_project_name
 
         # Returns the name of ExperimentConfigManager().get_config()
-        assert current_experiment_name() == expt_config().name
+        assert current_project_name() == expt_config().name
