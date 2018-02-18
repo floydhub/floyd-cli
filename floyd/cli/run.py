@@ -70,9 +70,11 @@ def validate_env(env, instance_type):
     envs = env_map.get(arch)
     if envs:
         if env not in envs:
-            floyd_logger.error(
-                "{} is not in the list of supported environments:\n{}".format(
-                    env, tabulate([[env_name] for env_name in envs.keys()])))
+            envlist = tabulate([
+                [env_name]
+                for env_name in sorted(envs.keys())
+            ])
+            floyd_logger.error("%s is not in the list of supported environments:\n%s", env, envlist)
             return False
     else:
         floyd_logger.error("invalid instance type")
@@ -96,7 +98,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
                 if experiment.task_instances:
                     break
             except Exception:
-                floyd_logger.debug("Job not available yet: %s", expt_info['id'])
+                pass
 
             floyd_logger.debug("Job not available yet: %s", expt_info['id'])
             sleep(3)
