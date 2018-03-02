@@ -172,8 +172,7 @@ def follow_logs(instance_log_id, sleep_duration=1):
         log_file_contents = ResourceClient().get_content(instance_log_id)
         print_output = log_file_contents[cur_idx:]
         cur_idx += len(print_output)
-        if len(print_output.strip()):
-            floyd_logger.info(print_output.rstrip())
+        sys.stdout.write(print_output)
         sleep(sleep_duration)
 
 
