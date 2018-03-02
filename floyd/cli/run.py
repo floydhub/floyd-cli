@@ -30,6 +30,7 @@ from floyd.model.module import Module
 from floyd.model.experiment import ExperimentRequest
 from floyd.log import logger as floyd_logger
 from floyd.exceptions import BadRequestException
+from floyd.cli.experiment import get_log_id, follow_logs
 
 
 def process_data_ids(data):
@@ -138,6 +139,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 @click.option('--open/--no-open', 'open_notebook',
               help='Automatically open the notebook url',
               default=True)
+@click.option('-f', '--follow', is_flag=True, default=False, help='Automatically follow logs')
 # To enforce having a single --env, we have to allow multiple --env flags and
 # then manually enforce that just one was passed. Otherwise all but the last
 # --env will just be ignored. This is a way around the limitations of click's
@@ -156,7 +158,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 @click.option('--cpu2', 'cpu2', is_flag=True, help='Run in a CPU2 instance')
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, gpu, env, message, data, mode, open_notebook, tensorboard, gpup, cpup, gpu2, cpu2, command):
+def run(ctx, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpup, cpup, gpu2, cpu2, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -250,7 +252,15 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, tensorboard, gpup, cp
     floyd_logger.debug("Created job : %s", expt_info['id'])
 
     job_name = expt_info['name']
-    show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook)
+    if not follow:
+        show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook)
+    else:
+        # If the user specified --follow, we assume they're only interested in
+        # log output and not in anything that would be displayed by
+        # show_new_job_info.
+        floyd_logger.info("Opening logs ...")
+        instance_log_id = instance_log_id = get_log_id(job_name)
+        follow_logs(instance_log_id)
 
 
 def get_command_line(instance_type, env, message, data, mode, open_notebook, tensorboard, command_str):

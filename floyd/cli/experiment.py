@@ -145,6 +145,37 @@ def info(job_name_or_id):
     floyd_logger.info(tabulate(table))
 
 
+def get_log_id(job_id):
+    log_msg_printed = False
+    while True:
+        try:
+            experiment = ExperimentClient().get(normalize_job_name(job_id))
+        except FloydException:
+            experiment = ExperimentClient().get(job_id)
+
+        instance_log_id = experiment.instance_log_id
+        if instance_log_id:
+            break
+        elif not log_msg_printed:
+            floyd_logger.info("Waiting for logs ...\n")
+            log_msg_printed = True
+
+        sleep(1)
+
+    return instance_log_id
+
+
+def follow_logs(instance_log_id, sleep_duration=1):
+    cur_idx = 0
+    while True:
+        # Get the logs in a loop and log the new lines
+        log_file_contents = ResourceClient().get_content(instance_log_id)
+        print_output = log_file_contents[cur_idx:]
+        cur_idx += len(print_output)
+        sys.stdout.write(print_output)
+        sleep(sleep_duration)
+
+
 @click.command()
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
 @click.option('-t', '--tail', is_flag=True, default=False, help='Stream the logs')
@@ -156,42 +187,21 @@ def logs(id, url, tail, follow, sleep_duration=1):
     """
     tail = tail or follow
 
-    log_msg_printed = False
-    while True:
-        try:
-            experiment = ExperimentClient().get(normalize_job_name(id))
-        except FloydException:
-            experiment = ExperimentClient().get(id)
+    instance_log_id = get_log_id(id)
 
-        instance_log_id = experiment.instance_log_id
-        if instance_log_id:
-            break
-        elif not log_msg_printed:
-            floyd_logger.info("Waiting for logs ...\n")
-            log_msg_printed = True
-
-        sleep(1)
-
-    log_url = "{}/api/v1/resources/{}?content=true".format(
-        floyd.floyd_host, instance_log_id)
     if url:
+        log_url = "{}/api/v1/resources/{}?content=true".format(
+            floyd.floyd_host, instance_log_id)
         floyd_logger.info(log_url)
         return
+
     if tail:
         floyd_logger.info("Launching job ...")
-        current_shell_output = ""
-        while True:
-            # Get the logs in a loop and log the new lines
-            log_file_contents = ResourceClient().get_content(instance_log_id)
-            print_output = log_file_contents[len(current_shell_output):]
-            if len(print_output.strip()):
-                floyd_logger.info(print_output)
-            current_shell_output = log_file_contents
-            sleep(sleep_duration)
+        follow_logs(instance_log_id, sleep_duration)
     else:
         log_file_contents = ResourceClient().get_content(instance_log_id)
         if len(log_file_contents.strip()):
-            floyd_logger.info(log_file_contents)
+            floyd_logger.info(log_file_contents.rstrip())
         else:
             floyd_logger.info("Launching job now. Try after a few seconds.")
 
