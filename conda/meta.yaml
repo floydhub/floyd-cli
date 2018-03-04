@@ -14,8 +14,6 @@ build:
   number: 0
   entry_points:
     - floyd = floyd.main:cli
-    - floyd-dev = floyd.development.dev:cli
-    - floyd-local = floyd.development.local:cli
 
 requirements:
   build:
