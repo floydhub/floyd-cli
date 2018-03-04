@@ -21,25 +21,25 @@ requirements:
   build:
     - python
     - setuptools
-    - click >=6.7
-    - clint >=0.5.1
-    - requests >=2.12.4
-    - requests-toolbelt >=0.7.1
-    - marshmallow >=2.11.1
+    - click >=6.7,<7
+    - clint >=0.5.1,<1
+    - requests >=2.12.4,<3
+    - requests-toolbelt >=0.7.1,<1
+    - marshmallow >=2.11.1,<3
     - pytz >=2016.10
-    - tabulate >=0.7.7
-    - pathlib2 >=2.2.1
+    - tabulate >=0.7.7,<1
+    - pathlib2 >=2.2.1,<3
     - raven
   run:
     - python
-    - click >=6.7
-    - clint >=0.5.1
-    - requests >=2.12.4
-    - requests-toolbelt >=0.7.1
-    - marshmallow >=2.11.1
+    - click >=6.7,<7
+    - clint >=0.5.1,<1
+    - requests >=2.12.4,<3
+    - requests-toolbelt >=0.7.1,<1
+    - marshmallow >=2.11.1,<3
     - pytz >=2016.10
-    - tabulate >=0.7.7
-    - pathlib2 >=2.2.1
+    - tabulate >=0.7.7,<1
+    - pathlib2 >=2.2.1,<3
     - raven
 
 test:
