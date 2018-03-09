@@ -17,6 +17,9 @@ from floyd.model.data import DataRequest
 from floyd.cli.utils import normalize_data_name
 
 
+MAX_UPLOAD_SIZE = 1024 * 1024 * 1024 * 100  # bytes = 100 GiB
+
+
 class ResourceWaitIter(object):
     def __init__(self, resource_id):
         self.resource_id = resource_id
@@ -123,6 +126,17 @@ def complete_upload(data_config):
             sys.exit(1)
 
         file_size = os.path.getsize(tarball_path)
+        # check for upload limit dimension
+        if file_size > MAX_UPLOAD_SIZE:
+            try:
+                floyd_logger.info("Removing compressed data...")
+                rmtree(os.path.dirname(tarball_path))
+            except (OSError, TypeError):
+                pass
+
+            sys.exit(("Data size too large to upload, please keep it under %s.\n") %
+                     (sizeof_fmt(MAX_UPLOAD_SIZE)))
+
         floyd_logger.info("Uploading compressed data. Total upload size: %s",
                           sizeof_fmt(file_size))
         tus_client = TusDataClient()
