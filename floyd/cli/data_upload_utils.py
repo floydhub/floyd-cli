@@ -134,8 +134,8 @@ def complete_upload(data_config):
             except (OSError, TypeError):
                 pass
 
-            sys.exit(("Data size too large to upload, please keep it under %s.\n") % \
-                (sizeof_fmt(MAX_UPLOAD_SIZE)))
+            sys.exit(("Data size too large to upload, please keep it under %s.\n") %
+                     (sizeof_fmt(MAX_UPLOAD_SIZE)))
 
         floyd_logger.info("Uploading compressed data. Total upload size: %s",
                           sizeof_fmt(file_size))
