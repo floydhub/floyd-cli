@@ -1,8 +1,5 @@
-import pip
-import pkg_resources
 import click
 
-from floyd.cli.utils import is_conda_env
 from floyd.log import logger as floyd_logger
 
 
@@ -10,7 +7,10 @@ PROJECT_NAME = "floyd-cli"
 
 
 def pip_upgrade():
-    pip.main(["install", "--upgrade", PROJECT_NAME])
+    import sys
+    import subprocess
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', "--upgrade", PROJECT_NAME])
+    floyd_logger.info("Upgrade completed.")
 
 
 def conda_upgrade():
@@ -22,12 +22,14 @@ def version():
     """
     Prints the current version of the CLI
     """
+    import pkg_resources
     version = pkg_resources.require(PROJECT_NAME)[0].version
     floyd_logger.info(version)
 
 
 def auto_upgrade():
     try:
+        from floyd.cli.utils import is_conda_env
         if is_conda_env():
             conda_upgrade()
         else:
