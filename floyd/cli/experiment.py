@@ -238,14 +238,15 @@ def stop(id):
     except FloydException:
         experiment = ExperimentClient().get(id)
 
-    if experiment.state not in ["queued", "running"]:
+    if experiment.state not in ["queued", "queue_scheduled", "running"]:
         floyd_logger.info("Job in {} state cannot be stopped".format(experiment.state))
-        return
+        sys.exit(1)
 
-    if ExperimentClient().stop(experiment.id):
-        floyd_logger.info("Experiment shutdown request submitted. Check status to confirm shutdown")
-    else:
+    if not ExperimentClient().stop(experiment.id):
         floyd_logger.error("Failed to stop job")
+        sys.exit(1)
+
+    floyd_logger.info("Experiment shutdown request submitted. Check status to confirm shutdown")
 
 
 @click.command()
