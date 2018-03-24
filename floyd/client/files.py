@@ -52,10 +52,13 @@ def ignore_path(path, ignore_list=None, whitelist=None):
     ignore_list and a whitelist of glob patterns.
     """
     if ignore_list is None:
-        ignore_list = []
+        return True
+
+    should_ignore = matches_glob_list(path, ignore_list)
     if whitelist is None:
-        whitelist = []
-    return matches_glob_list(path, ignore_list) and not matches_glob_list(path, whitelist)
+        return should_ignore
+
+    return should_ignore and not matches_glob_list(path, whitelist)
 
 
 def matches_glob_list(path, glob_list):
