@@ -57,15 +57,16 @@ class TestFilesClientGetUnignoredFilePaths(unittest.TestCase):
         result = get_unignored_file_paths(ignore_list, white_list)
         result.sort()
 
-        # Mocking os.walk() means we are not operating on a real file system.
-        # This works fine for most tests, but we have a limitation. Changes to
-        # the `root`, `dirs` and `files` variables during an iteration have no
-        # impact on subsequent iterations. We leverage the effects of changing
-        # the `dirs` variable in place to prevent os.walk() from continuing
-        # down a directory that we want to ignore. This behavior is not
-        # mockable with our current approach. However, we can see that if a
-        # directory is ignored, the files inside that directory are ignored, as
-        # we do here with './foo_dir/foo_file.py'
-        self.assertFalse('./foo_dir/foo_file.py' in result)
-        self.assertTrue('./hello_world.py' in result)
-        self.assertTrue('./README.md' in result)
+        assert result == ['./README.md', './hello_world.py']
+
+    @patch('floyd.client.files.os.walk', side_effect=mock_fs1)
+    def test_ignoring_subdirectory_without_leading_slash(self, pure_path):
+        ignore_list = ['bar_dir/bar_dir_2', 'baz_dir_2']
+        white_list = []
+        result = get_unignored_file_paths(ignore_list, white_list)
+        # Does not include the files in baz_dir_2
+        expected = ['./bar_dir/bar_data.h5', './hello_world.py', './foo_dir/foo_file.py', './README.md']
+        result.sort()
+        expected.sort()
+
+        self.assertEqual(result, expected)
