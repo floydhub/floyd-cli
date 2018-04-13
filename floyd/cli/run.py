@@ -156,9 +156,10 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 @click.option('--cpu+', 'cpup', is_flag=True, help='Run in a CPU+ instance')
 @click.option('--gpu2', 'gpu2', is_flag=True, help='Run in a GPU2 instance')
 @click.option('--cpu2', 'cpu2', is_flag=True, help='Run in a CPU2 instance')
+@click.option('--max-runtime', '-m', help='Max runtime to override for the job, in seconds')
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpup, cpup, gpu2, cpu2, command):
+def run(ctx, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpup, cpup, gpu2, cpu2, max_runtime, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -238,11 +239,14 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, follow, tensorboard, 
 
     # Create experiment request
     # Get the actual command entered in the command line
+    if max_runtime:
+        max_runtime = int(max_runtime)
     full_command = get_command_line(instance_type, env, message, data, mode, open_notebook, tensorboard, command_str)
     experiment_request = ExperimentRequest(name=experiment_name,
                                            description=message,
                                            full_command=full_command,
                                            module_id=module_id,
+                                           max_runtime=max_runtime,
                                            env=env,
                                            data_ids=data_ids,
                                            family_id=experiment_config.family_id,

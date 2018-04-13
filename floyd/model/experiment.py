@@ -105,6 +105,7 @@ class ExperimentRequestSchema(Schema):
     family_id = fields.Str(allow_none=True)
     instance_type = fields.Str(allow_none=True)
     env = fields.Str(allow_none=True)
+    max_runtime = fields.Integer(allow_none=True)
 
     @post_load
     def make_experiment_request(self, kwargs):
@@ -122,7 +123,8 @@ class ExperimentRequest(BaseModel):
                  env=None,
                  data_ids=None,
                  family_id=None,
-                 instance_type=None):
+                 instance_type=None,
+                 max_runtime=None):
         self.name = name
         self.description = description
         self.full_command = full_command
@@ -131,3 +133,4 @@ class ExperimentRequest(BaseModel):
         self.family_id = family_id
         self.instance_type = instance_type
         self.env = env
+        self.max_runtime = max_runtime
