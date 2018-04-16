@@ -156,7 +156,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 @click.option('--cpu+', 'cpup', is_flag=True, help='Run in a CPU+ instance')
 @click.option('--gpu2', 'gpu2', is_flag=True, help='Run in a GPU2 instance')
 @click.option('--cpu2', 'cpu2', is_flag=True, help='Run in a CPU2 instance')
-@click.option('--max-runtime', '-m', help='Max runtime to override for the job, in seconds')
+@click.option('--max-runtime', '-r', help='Max runtime to override for the job, in seconds')
 @click.argument('command', nargs=-1)
 @click.pass_context
 def run(ctx, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpup, cpup, gpu2, cpu2, max_runtime, command):
