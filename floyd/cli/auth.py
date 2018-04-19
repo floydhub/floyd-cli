@@ -1,5 +1,5 @@
 import click
-import webbrowser
+import getpass
 import sys
 
 import floyd
@@ -12,16 +12,39 @@ from floyd.log import logger as floyd_logger
 
 @click.command()
 @click.option('--token', is_flag=True, default=False, help='Just enter token')
-@click.option('--username', '-u', help='FloydHub username')
-@click.option('--password', '-p', help='FloydHub password')
+@click.option('--username', '-u', default=None, help='FloydHub username')
+@click.option('--password', '-p', default=None, help='FloydHub password')
 def login(token, username, password):
     """
     Log into Floyd via Auth0.
     """
-    if username:
+    if token:
+        # Login using authentication token
+        floyd_logger.info(
+            "Please paste the authentication token from {}/settings/security.".format(floyd.floyd_web_host))
+        access_code = click.prompt('This is an invisible field. Paste token and press ENTER', type=str, hide_input=True)
+        access_code = access_code.strip()
+
+        if not access_code:
+            floyd_logger.info("Empty token received. Make sure your shell is handling the token appropriately.")
+            floyd_logger.info("See docs for help: http://docs.floydhub.com/faqs/authentication/")
+            return
+
+        access_code = access_code.strip(" ")
+
+    else:
         # Use username / password login
+        floyd_logger.info("Login with your FloydHub username and password to run jobs.")
+
+        if not username:
+            username = click.prompt('Username', type=str, default=getpass.getuser())
+            username = username.strip()
+            if not username:
+                floyd_logger.info('You entered an empty string. Please make sure you enter your username correctly.')
+                sys.exit(1)
+
         if not password:
-            password = click.prompt('Please enter your password', type=str, hide_input=True)
+            password = click.prompt('Password', type=str, hide_input=True)
             password = password.strip()
             if not password:
                 floyd_logger.info('You entered an empty string. Please make sure you enter your password correctly.')
@@ -33,27 +56,6 @@ def login(token, username, password):
         if not access_code:
             floyd_logger.info("Failed to login")
             return
-
-    else:
-        # Fallback to the access token from the browser login
-        if not token:
-            cli_info_url = "{}/settings/security".format(floyd.floyd_web_host)
-            click.confirm('Authentication token page will now open in your browser. Continue?',
-                          abort=True,
-                          default=True)
-            webbrowser.open(cli_info_url)
-
-        floyd_logger.info("Please copy and paste the authentication token.")
-        access_code = click.prompt('This is an invisible field. Paste token and press ENTER', type=str, hide_input=True)
-
-        access_code = access_code.strip()
-
-        if not access_code:
-            floyd_logger.info("Empty token received. Make sure your shell is handling the token appropriately.")
-            floyd_logger.info("See docs for help: http://docs.floydhub.com/faqs/authentication/")
-            return
-
-        access_code = access_code.strip(" ")
 
     user = AuthClient().get_user(access_code)
     access_token = AccessToken(username=user.username,
