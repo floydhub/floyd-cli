@@ -84,13 +84,13 @@ def print_experiments(experiments):
     """
     Prints expt details in a table. Includes urls and mode parameters
     """
-    headers = ["JOB NAME", "CREATED", "STATUS", "DURATION(s)", "INSTANCE", "DESCRIPTION"]
+    headers = ["JOB NAME", "CREATED", "STATUS", "DURATION(s)", "INSTANCE", "DESCRIPTION", "METRICS"]
     expt_list = []
     for experiment in experiments:
         expt_list.append([normalize_job_name(experiment.name),
                           experiment.created_pretty, experiment.state,
-                          experiment.duration_rounded,
-                          experiment.instance_type_trimmed, experiment.description])
+                          experiment.duration_rounded, experiment.instance_type_trimmed,
+                          experiment.description, experiment.latest_metrics if experiment.latest_metrics else ''])
     floyd_logger.info(tabulate(expt_list, headers=headers))
 
 
