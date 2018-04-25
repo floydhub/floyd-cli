@@ -84,14 +84,20 @@ def print_experiments(experiments):
     """
     Prints expt details in a table. Includes urls and mode parameters
     """
-    headers = ["JOB NAME", "CREATED", "STATUS", "DURATION(s)", "INSTANCE", "DESCRIPTION"]
+    headers = ["JOB NAME", "CREATED", "STATUS", "DURATION(s)", "INSTANCE", "DESCRIPTION", "METRICS"]
     expt_list = []
     for experiment in experiments:
         expt_list.append([normalize_job_name(experiment.name),
                           experiment.created_pretty, experiment.state,
-                          experiment.duration_rounded,
-                          experiment.instance_type_trimmed, experiment.description])
+                          experiment.duration_rounded, experiment.instance_type_trimmed,
+                          experiment.description, format_metrics(experiment.latest_metrics)])
     floyd_logger.info(tabulate(expt_list, headers=headers))
+
+
+def format_metrics(latest_metrics):
+    return ', '.join(
+        ["%s=%s" % (k, latest_metrics[k]) for k in sorted(latest_metrics.keys())]
+    ) if latest_metrics else ''
 
 
 @click.command()
@@ -136,7 +142,8 @@ def info(job_name_or_id):
              ["Created", experiment.created_pretty],
              ["Status", experiment.state], ["Duration(s)", experiment.duration_rounded],
              ["Instance", experiment.instance_type_trimmed],
-             ["Description", experiment.description]]
+             ["Description", experiment.description],
+             ["Metrics", format_metrics(experiment.latest_metrics)]]
     if task_instance and task_instance.mode in ['jupyter', 'serving']:
         table.append(["Mode", task_instance.mode])
         table.append(["Url", experiment.service_url])

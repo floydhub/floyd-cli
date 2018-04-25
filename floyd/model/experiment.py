@@ -24,6 +24,7 @@ class ExperimentSchema(Schema):
     output_id = fields.Str(load_from="instanceOutputId", allow_none=True)
     instance_log_id = fields.Str(load_from="instanceLogId", allow_none=True)
     timeout_seconds = fields.Integer(allow_none=True)
+    latest_metrics = fields.Dict(load_from="latest_metrics", allow_none=True)
 
     @post_load
     def make_experiment(self, data):
@@ -48,6 +49,7 @@ class Experiment(BaseModel):
                  output_id=None,
                  instance_log_id=None,
                  timeout_seconds=None,
+                 latest_metrics=None,
                  mode=None):
         self.id = id
         self.name = name
@@ -67,6 +69,7 @@ class Experiment(BaseModel):
         self.output_id = output_id
         self.instance_log_id = instance_log_id
         self.timeout_seconds = timeout_seconds
+        self.latest_metrics = latest_metrics
         self.mode = mode
 
     def localize_date(self, date):
