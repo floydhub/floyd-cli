@@ -1,5 +1,6 @@
 import pkg_resources
 import sys
+import os
 
 from floyd.exceptions import FloydException
 from floyd.manager.auth_config import AuthConfigManager
@@ -224,3 +225,16 @@ def get_namespace_from_name(name):
         return name_parts[0], name_parts[-1]
     else:
         return current_username(), name
+
+
+yaml_config_names = ['floyd.yml', 'floyd.yaml']
+
+
+def read_yaml_config():
+    config = None
+    for filename in yaml_config_names:
+        if not os.path.exists(filename):
+            continue
+        with open(filename) as fd:
+            config = fd.read()
+    return config

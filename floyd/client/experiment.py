@@ -40,10 +40,13 @@ class ExperimentClient(FloydHttpClient):
         re = self.request("POST", "{}restart/{}".format(self.url, expt_id), json=parameters)
         return re.json()
 
-    def create(self, experiment_request):
+    def create(self, experiment_request, cli_default=None):
+        payload = experiment_request.to_dict()
+        if cli_default:
+            payload['cli_default'] = cli_default
         return self.request("POST",
-                            "{}run_module/".format(self.url),
-                            data=json.dumps(experiment_request.to_dict()),
+                            self.url + "run_module/",
+                            data=json.dumps(payload),
                             timeout=3600).json()
 
     def delete(self, id):

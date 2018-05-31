@@ -32,7 +32,7 @@ class ModuleClient(FloydHttpClient):
         self.url = "/modules/"
         super(ModuleClient, self).__init__()
 
-    def create(self, module):
+    def create(self, module, cli_default=None):
         try:
             upload_files, total_file_size = get_files_in_current_directory(file_type='code')
         except OSError:
@@ -57,7 +57,10 @@ class ModuleClient(FloydHttpClient):
         floyd_logger.info("Syncing code ...")
 
         # Add request data
-        upload_files.append(("json", json.dumps(module.to_dict())))
+        args_payload = module.to_dict()
+        if cli_default:
+            args_payload['cli_default'] = cli_default
+        upload_files.append(("json", json.dumps(args_payload)))
         multipart_encoder = MultipartEncoder(
             fields=upload_files
         )
