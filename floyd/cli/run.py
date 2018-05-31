@@ -31,6 +31,7 @@ from floyd.model.experiment import ExperimentRequest
 from floyd.log import logger as floyd_logger
 from floyd.exceptions import BadRequestException
 from floyd.cli.experiment import get_log_id, follow_logs
+from floyd.cli.utils import read_yaml_config
 
 
 def process_data_ids(data):
@@ -130,11 +131,12 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 
 
 @click.command()
-@click.option('--gpu/--cpu', default=False, help='Run on a GPU instance')
+@click.option('--cpu', default=False, help='Run on a CPU instance')
+@click.option('--gpu', default=False, help='Run on a GPU instance')
 @click.option('--data', multiple=True, help='Data source id to use')
 @click.option('--mode',
               help='Different floyd modes',
-              default='job',
+              default=None,
               type=click.Choice(['job', 'jupyter', 'serve']))
 @click.option('--open/--no-open', 'open_notebook',
               help='Automatically open the notebook url',
@@ -146,7 +148,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 # behavior.
 @click.option('--env',
               help='Environment type to use',
-              default=[DEFAULT_ENV],
+              default=None,
               multiple=True)
 @click.option('--message', '-m',
               help='Job commit message')
@@ -159,22 +161,33 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 @click.option('--max-runtime', '-r', help='Max runtime to override for the job, in seconds')
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpup, cpup, gpu2, cpu2, max_runtime, command):
+def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpup, cpup, gpu2, cpu2, max_runtime, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
     This command will generate a run id for reference.
     """
+    # cli_default is used for any option that has default value
+    cli_default = {}
     # Error early if more than one --env is passed.  Then get the first/only
     # --env out of the list so all other operations work normally (they don't
     # expect an iterable). For details on this approach, see the comment above
     # the --env click option
-    if len(env) > 1:
+    if not env:
+        env = DEFAULT_ENV
+        cli_default['env'] = env
+    elif len(env) > 1:
         floyd_logger.error(
             "You passed more than one environment: {}. Please specify a single environment.".format(env)
         )
         sys.exit(1)
-    env = env[0]
+    else:
+        env = env[0]
+
+    if not mode:
+        mode = 'job'
+        cli_default['mode'] = mode
+
     experiment_config = ExperimentConfigManager.get_config()
     access_token = AuthConfigManager.get_access_token()
     namespace = experiment_config.namespace or access_token.username
@@ -195,6 +208,7 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, follow, tensorboard, 
     module_inputs = [{'name': get_data_name(data_str, default_name),
                       'type': 'dir'} for data_str in data_ids]
 
+    instance_type = None
     if gpu2:
         instance_type = G2_INSTANCE_TYPE
     elif cpu2:
@@ -205,8 +219,12 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, follow, tensorboard, 
         instance_type = C1P_INSTANCE_TYPE
     elif gpu:
         instance_type = G1_INSTANCE_TYPE
-    else:
+    elif cpu:
         instance_type = C1_INSTANCE_TYPE
+
+    if not instance_type:
+        instance_type = C1_INSTANCE_TYPE
+        cli_default['instance_type'] = instance_type
 
     if not validate_env(env, instance_type):
         sys.exit(3)
@@ -216,6 +234,8 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, follow, tensorboard, 
         floyd_logger.error('Command argument "%s" cannot be used with mode: %s.\nSee http://docs.floydhub.com/guides/run_a_job/#mode for more information about run modes.', command_str, mode)  # noqa
         sys.exit(3)
 
+    yaml_config = read_yaml_config()
+
     module = Module(name=experiment_name,
                     description=message or '',
                     command=command_str,
@@ -224,10 +244,11 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, follow, tensorboard, 
                     family_id=experiment_config.family_id,
                     inputs=module_inputs,
                     env=env,
-                    arch=INSTANCE_ARCH_MAP[instance_type])
+                    arch=INSTANCE_ARCH_MAP[instance_type],
+                    yaml_config=yaml_config)
 
     try:
-        module_id = ModuleClient().create(module)
+        module_id = ModuleClient().create(module, cli_default)
     except BadRequestException as e:
         if 'Project not found, ID' in e.message:
             floyd_logger.error(
@@ -250,9 +271,10 @@ def run(ctx, gpu, env, message, data, mode, open_notebook, follow, tensorboard, 
                                            env=env,
                                            data_ids=data_ids,
                                            family_id=experiment_config.family_id,
-                                           instance_type=instance_type)
+                                           instance_type=instance_type,
+                                           yaml_config=yaml_config)
     expt_client = ExperimentClient()
-    expt_info = expt_client.create(experiment_request)
+    expt_info = expt_client.create(experiment_request, cli_default)
     floyd_logger.debug("Created job : %s", expt_info['id'])
 
     job_name = expt_info['name']

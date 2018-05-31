@@ -19,6 +19,7 @@ class ModuleSchema(Schema):
     env = fields.Str()
     arch = fields.Str()
     resource_id = fields.Str()
+    yaml_config = fields.Str()
 
     @post_load
     def make_module(self, data):
@@ -41,7 +42,8 @@ class Module(BaseModel):
                  inputs=None,
                  env=DEFAULT_ENV,
                  arch=DEFAULT_ARCH,
-                 resource_id=None,):
+                 resource_id=None,
+                 yaml_config=None):
         self.name = name
         self.description = description
         self.command = command
@@ -55,3 +57,4 @@ class Module(BaseModel):
         self.env = env
         self.arch = arch
         self.resource_id = resource_id
+        self.yaml_config = yaml_config
