@@ -20,6 +20,12 @@ class AuthConfigManager(object):
             config_file.write(json.dumps(access_token.to_dict()))
 
     @classmethod
+    def set_apikey(cls, username, apikey):
+        floyd_logger.debug("Setting apikey in the file %s", cls.CONFIG_FILE_PATH)
+        with open(cls.CONFIG_FILE_PATH, "w") as config_file:
+            config_file.write(json.dumps({'username': username, 'apikey': apikey}))
+
+    @classmethod
     def get_access_token(cls):
         if not os.path.isfile(cls.CONFIG_FILE_PATH):
             floyd_logger.error(

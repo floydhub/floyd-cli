@@ -18,6 +18,7 @@ class AccessTokenSchema(Schema):
 
     username = fields.Str()
     token = fields.Str()
+    apikey = fields.Str()
 
     @post_load
     def make_access_token(self, data):
@@ -30,7 +31,9 @@ class AccessToken(BaseModel):
 
     def __init__(self,
                  username,
-                 token):
-        assert_token_not_expired(token)
+                 token=None,
+                 apikey=None):
+        if token:
+            assert_token_not_expired(token)
         self.username = username
-        self.token = token
+        self.token = token or apikey
