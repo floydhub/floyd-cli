@@ -19,9 +19,10 @@ def login(token, apikey, username, password):
     """
     Log into Floyd via Auth0.
     """
-    if apikey and username:
-        AuthConfigManager.set_apikey(username=username, apikey=apikey)
-        floyd_logger.info("Login Successful as %s", username)
+    if apikey:
+        user = AuthClient().get_user(apikey, True)
+        AuthConfigManager.set_apikey(username=user.username, apikey=apikey)
+        floyd_logger.info("Login Successful as %s", user.username)
         return
 
     elif token:

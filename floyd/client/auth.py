@@ -13,11 +13,15 @@ class AuthClient(FloydHttpClient):
     def __init__(self):
         self.base_url = "{}/api/v1/user/".format(floyd.floyd_host)
 
-    def get_user(self, access_token):
+    def get_user(self, access_token, is_apikey = False):
         # This is a special case client, because auth_token is not set yet (this is how we verify it)
         # So do not use the shared base client for this!
-        response = requests.get(self.base_url,
-                                headers={"Authorization": "Bearer {}".format(access_token)})
+        auth = ""
+        if is_apikey:
+            auth = "apikey {}".format(access_token)
+        else:
+            auth = "Bearer {}".format(access_token)
+        response = requests.get(self.base_url, headers={"Authorization": auth})
         try:
             user_dict = response.json()
             response.raise_for_status()
