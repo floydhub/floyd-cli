@@ -92,7 +92,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
     floyd_logger.info("URL to job: %s", job_url)
 
     if mode == 'jupyter':
-        floyd_logger.info("🚀  You're using Jupyter notebooks, so we suggest trying out FloydHub Workspaces next: https://docs.floydhub.com/guides/workspace/")
+        floyd_logger.info("You're using Jupyter notebooks, so we suggest trying out FloydHub Workspaces next: https://docs.floydhub.com/guides/workspace/")
 
     if mode in ['jupyter', 'serve']:
         while True:
