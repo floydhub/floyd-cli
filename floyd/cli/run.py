@@ -107,6 +107,9 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 
         # Print the url to jupyter notebook
         if mode == 'jupyter':
+
+            floyd.logger.info("🚀 You're using Jupyter notebooks, so we suggest trying out FloydHub Workspaces next: https://docs.floydhub.com/guides/workspace/")
+
             if not experiment.service_url:
                 floyd_logger.error("Jupyter not available, please check job state and log for error.")
                 sys.exit(1)
