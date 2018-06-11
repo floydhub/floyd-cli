@@ -13,7 +13,7 @@ class AuthClient(FloydHttpClient):
     def __init__(self):
         self.base_url = "{}/api/v1/user/".format(floyd.floyd_host)
 
-    def get_user(self, access_token, is_apikey = False):
+    def get_user(self, access_token, is_apikey=False):
         # This is a special case client, because auth_token is not set yet (this is how we verify it)
         # So do not use the shared base client for this!
         auth = ""
