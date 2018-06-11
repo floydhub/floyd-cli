@@ -27,6 +27,7 @@ class TestExperimentDelete(unittest.TestCase):
 
 
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_auth_header', return_value="Bearer " + mock_access_token().token)
     @patch('floyd.cli.experiment.TaskInstanceClient')
     @patch('floyd.cli.experiment.ModuleClient')
     @patch('floyd.cli.experiment.ExperimentClient.get', side_effect=mock_exp)
@@ -36,6 +37,7 @@ class TestExperimentDelete(unittest.TestCase):
                                               get_experiment,
                                               module_client,
                                               task_instance_client,
+                                              get_auth_header,
                                               get_access_token):
         id_1 = 'mckay/projects/foo/1'
         id_2 = 'mckay/projects/foo/2'
@@ -52,6 +54,7 @@ class TestExperimentDelete(unittest.TestCase):
 
 
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_auth_header', return_value="Bearer " + mock_access_token().token)
     @patch('floyd.cli.experiment.TaskInstanceClient')
     @patch('floyd.cli.experiment.ModuleClient')
     @patch('floyd.cli.experiment.ExperimentClient.get', side_effect=mock_exp)
@@ -61,6 +64,7 @@ class TestExperimentDelete(unittest.TestCase):
                                        get_experiment,
                                        module_client,
                                        task_instance_client,
+                                       get_auth_header,
                                        get_access_token):
         id_1 = 'mckay/projects/foo/1'
         id_2 = 'mckay/projects/foo/2'
@@ -86,12 +90,17 @@ class TestExperimentDelete(unittest.TestCase):
 
 
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_auth_header', return_value="Bearer " + mock_access_token().token)
     @patch('floyd.cli.experiment.TaskInstanceClient')
     @patch('floyd.cli.experiment.ModuleClient')
     @patch('floyd.cli.experiment.ExperimentClient.get', side_effect=mock_exp)
     @patch('floyd.cli.experiment.ExperimentClient.delete', return_value=False)
-    def test_failed_delete(self, delete_experiment, get_experiment,
-                           task_instance_client, module_client,
+    def test_failed_delete(self,
+                           delete_experiment,
+                           get_experiment,
+                           module_client,
+                           task_instance_client,
+                           get_auth_header,
                            get_access_token):
 
         id_1 = 'mckay/projects/foo/1'
@@ -110,9 +119,11 @@ class TestExperimentDelete(unittest.TestCase):
         assert_exit_code(result, 1)
 
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_auth_header', return_value="Bearer " + mock_access_token().token)
     @patch('floyd.cli.experiment.ExperimentClient')
     def test_with_no_found_task_instance(self,
                                          experiment_client,
+                                         get_auth_header,
                                          access_token):
         experiment_client.return_value.get.return_value = None
         id_1 = 'mckay/projects/foo/1'
@@ -126,9 +137,11 @@ class TestExperimentDelete(unittest.TestCase):
         assert_exit_code(result, 1)
 
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_auth_header', return_value="Bearer " + mock_access_token().token)
     @patch('floyd.cli.experiment.ExperimentClient')
     def test_with_found_task_instance(self,
                                       experiment_client,
+                                      get_auth_header,
                                       access_token):
         experiment_client.return_value.get.return_value = Mock(id='999999')
         id_1 = 'mckay/projects/foo/1'
@@ -143,6 +156,7 @@ class TestExperimentDelete(unittest.TestCase):
         assert_exit_code(result, 0)
 
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_auth_header', return_value="Bearer " + mock_access_token().token)
     @patch('floyd.cli.experiment.TaskInstanceClient.get', side_effect=mock_task_inst)
     @patch('floyd.cli.experiment.get_module_task_instance_id', return_value='123')
     @patch('floyd.cli.experiment.ModuleClient.delete')
@@ -154,6 +168,7 @@ class TestExperimentDelete(unittest.TestCase):
                                                   delete_module,
                                                   get_module_task_instance_id,
                                                   get_task_instance,
+                                                  get_auth_header,
                                                   get_access_token):
         id_1 = 'mckay/projects/foo/1'
         result = self.runner.invoke(delete, ['-y', id_1])

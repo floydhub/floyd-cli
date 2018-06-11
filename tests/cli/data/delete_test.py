@@ -29,6 +29,7 @@ class TestDataDelete(unittest.TestCase):
     @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
     @patch('floyd.client.project.ProjectClient', side_effect=mock_project_client)
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token', side_effect=mock_access_token)
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_auth_header', return_value="Bearer " + mock_access_token().token)
     @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.data.DataClient.get', side_effect=mock_data)
     @patch('floyd.cli.data.DataClient.delete', return_value=True)
@@ -36,6 +37,7 @@ class TestDataDelete(unittest.TestCase):
                                               delete_data,
                                               get_data,
                                               assert_token_not_expired,
+                                              get_auth_header,
                                               get_access_token,
                                               get_project,
                                               get_expt_config,
@@ -57,6 +59,7 @@ class TestDataDelete(unittest.TestCase):
     @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
     @patch('floyd.client.project.ProjectClient', side_effect=mock_project_client)
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_auth_header')
     @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.data.DataClient.get', side_effect=mock_data)
     @patch('floyd.cli.data.DataClient.delete', return_value=True)
@@ -64,6 +67,7 @@ class TestDataDelete(unittest.TestCase):
                                        delete_data,
                                        get_data,
                                        assert_token_not_expired,
+                                       get_auth_header,
                                        get_access_token,
                                        project_client,
                                        get_expt_config,
@@ -90,6 +94,7 @@ class TestDataDelete(unittest.TestCase):
     @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
     @patch('floyd.client.project.ProjectClient', side_effect=mock_project_client)
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_auth_header')
     @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.data.DataClient.get', side_effect=mock_data)
     @patch('floyd.cli.data.DataClient.delete', return_value=False)
@@ -97,6 +102,7 @@ class TestDataDelete(unittest.TestCase):
                            delete_data,
                            get_data,
                            assert_token_not_expired,
+                           get_auth_header,
                            get_access_token,
                            project_client,
                            get_expt_config,
@@ -119,6 +125,7 @@ class TestDataDelete(unittest.TestCase):
     @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
     @patch('floyd.manager.experiment_config.ExperimentConfigManager.get_config', return_value=ExperimentConfig('foo', '12345'))
     @patch('floyd.manager.auth_config.AuthConfigManager.get_access_token')
+    @patch('floyd.manager.auth_config.AuthConfigManager.get_auth_header')
     @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.data.DataClient.get', return_value=None)
     @patch('floyd.cli.data.DataClient.delete')
@@ -126,6 +133,7 @@ class TestDataDelete(unittest.TestCase):
                         delete_data,
                         get_data,
                         assert_token_not_expired,
+                        get_auth_header,
                         get_access_token,
                         get_expt_config,
                         get_data_config):
