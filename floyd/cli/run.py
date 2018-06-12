@@ -91,6 +91,9 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
     job_url = '%s/%s' % (floyd.floyd_web_host, job_name)
     floyd_logger.info("URL to job: %s", job_url)
 
+    if mode == 'jupyter':
+        floyd_logger.info("You're using Jupyter notebooks, so we suggest trying out FloydHub Workspaces next: https://docs.floydhub.com/guides/workspace/")
+
     if mode in ['jupyter', 'serve']:
         while True:
             # Wait for the experiment / task instances to become available
