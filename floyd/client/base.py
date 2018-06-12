@@ -22,10 +22,7 @@ class FloydHttpClient(object):
     """
     def __init__(self, skip_auth=False):
         self.base_url = "{}/api/v1".format(floyd.floyd_host)
-        if not skip_auth:
-            self.access_token = AuthConfigManager.get_access_token()
-        else:
-            self.access_token = None
+        self.auth_header = AuthConfigManager.get_auth_header()
 
     def request(self,
                 method,
@@ -44,9 +41,9 @@ class FloydHttpClient(object):
         floyd_logger.debug("Starting request to url: %s with params: %s, data: %s", request_url, params, data)
 
         request_headers = {'x-floydhub-cli-version': get_cli_version()}
-        # Auth headers if access_token is present
-        if self.access_token:
-            request_headers["Authorization"] = "Bearer " + self.access_token.token
+        # Auth headers if present
+        if self.auth_header:
+            request_headers["Authorization"] = self.auth_header
         # Add any additional headers
         if headers:
             request_headers.update(headers)
@@ -78,10 +75,10 @@ class FloydHttpClient(object):
         request_url = self.base_url + url if relative else url
         floyd_logger.debug("Downloading file from url: {}".format(request_url))
 
-        # Auth headers if access_token is present
+        # Auth headers if present
         request_headers = {}
-        if self.access_token:
-            request_headers["Authorization"] = "Bearer " + self.access_token.token
+        if self.auth_header:
+            request_headers["Authorization"] = self.auth_header
         # Add any additional headers
         if headers:
             request_headers.update(headers)

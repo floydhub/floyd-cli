@@ -12,13 +12,20 @@ from floyd.log import logger as floyd_logger
 
 @click.command()
 @click.option('--token', is_flag=True, default=False, help='Just enter token')
+@click.option('--apikey', '-k', default=None, help='Api Key')
 @click.option('--username', '-u', default=None, help='FloydHub username')
 @click.option('--password', '-p', default=None, help='FloydHub password')
-def login(token, username, password):
+def login(token, apikey, username, password):
     """
     Log into Floyd via Auth0.
     """
-    if token:
+    if apikey:
+        user = AuthClient().get_user(apikey, True)
+        AuthConfigManager.set_apikey(username=user.username, apikey=apikey)
+        floyd_logger.info("Login Successful as %s", user.username)
+        return
+
+    elif token:
         # Login using authentication token
         floyd_logger.info(
             "Please paste the authentication token from {}/settings/security.".format(floyd.floyd_web_host))
