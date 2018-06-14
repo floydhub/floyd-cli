@@ -1,5 +1,5 @@
 {% set name = "floyd-cli" %}
-{% set version = "0.10.39" %}
+{% set version = "0.11.0" %}
 {% set file_ext = "tar.gz" %}
 
 package:
