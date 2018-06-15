@@ -42,7 +42,6 @@ class AuthConfigManager(object):
     def purge_access_token(cls):
         if not os.path.isfile(cls.CONFIG_FILE_PATH):
             return True
-
         os.remove(cls.CONFIG_FILE_PATH)
 
 
