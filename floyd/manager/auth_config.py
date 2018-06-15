@@ -44,10 +44,6 @@ class AuthConfigManager(object):
             return True
         os.remove(cls.CONFIG_FILE_PATH)
 
-    @classmethod
-    def has_config_file(cls):
-        return os.path.isfile(cls.CONFIG_FILE_PATH)
-
 
 def _loads_config(file_path):
     if not os.path.isfile(file_path):

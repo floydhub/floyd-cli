@@ -22,8 +22,9 @@ class FloydHttpClient(object):
     """
     def __init__(self, skip_auth=False):
         self.base_url = "{}/api/v1".format(floyd.floyd_host)
-        self.auth_header = ""
-        if AuthConfigManager.has_config_file():
+        if skip_auth:
+            self.auth_header = None
+        else:
             self.auth_header = AuthConfigManager.get_auth_header()
 
     def request(self,
