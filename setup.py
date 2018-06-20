@@ -29,6 +29,7 @@ setup(
         "pytz>=2016.10",
         "tabulate>=0.7.7,<1",
         "pathlib2>=2.2.1,<3",
+        "PyYAML",
         "raven",
     ],
     setup_requires=[],

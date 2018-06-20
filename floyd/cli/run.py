@@ -4,6 +4,7 @@ from tabulate import tabulate
 from time import sleep
 import webbrowser
 import sys
+import yaml
 try:
     from pipes import quote as shell_quote
 except ImportError:
@@ -66,8 +67,18 @@ def process_data_ids(data):
     return True, data_ids
 
 
-def validate_env(env, instance_type):
-    arch = INSTANCE_ARCH_MAP[instance_type]
+def resolve_final_instance_type(instance_type_override, yaml_str, cli_default):
+    if instance_type_override:
+        return instance_type_override
+    if yaml_str:
+        yaml_config = yaml.safe_load(yaml_str)
+        machine = yaml_config.get('machine')
+        if machine:
+            return INSTANCE_TYPE_MAP[machine]
+    return cli_default['instance_type']
+
+
+def validate_env(env, arch):
     env_map = EnvClient().get_all()
     envs = env_map.get(arch)
     if envs:
@@ -171,14 +182,14 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
     This command will generate a run id for reference.
     """
     # cli_default is used for any option that has default value
-    cli_default = {}
+    cli_default = {'description': '', 'command': ''}
     # Error early if more than one --env is passed.  Then get the first/only
     # --env out of the list so all other operations work normally (they don't
     # expect an iterable). For details on this approach, see the comment above
     # the --env click option
     if not env:
-        env = DEFAULT_ENV
-        cli_default['env'] = env
+        cli_default['env'] = DEFAULT_ENV
+        env = None
     elif len(env) > 1:
         floyd_logger.error(
             "You passed more than one environment: {}. Please specify a single environment.".format(env)
@@ -188,8 +199,7 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
         env = env[0]
 
     if not mode:
-        mode = 'job'
-        cli_default['mode'] = mode
+        cli_default['mode'] = 'command'
 
     experiment_config = ExperimentConfigManager.get_config()
     access_token = AuthConfigManager.get_access_token()
@@ -226,18 +236,22 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
         instance_type = C1_INSTANCE_TYPE
 
     if not instance_type:
-        instance_type = C1_INSTANCE_TYPE
-        cli_default['instance_type'] = instance_type
+        cli_default['instance_type'] = C1_INSTANCE_TYPE
 
-    if not validate_env(env, instance_type):
+    yaml_config = read_yaml_config()
+    arch = INSTANCE_ARCH_MAP[
+        resolve_final_instance_type(instance_type, yaml_config, cli_default)
+    ]
+    if not validate_env(env or cli_default['env'], arch):
         sys.exit(3)
 
     command_str = ' '.join(command)
     if command_str and mode in ('jupyter', 'serve'):
         floyd_logger.error('Command argument "%s" cannot be used with mode: %s.\nSee http://docs.floydhub.com/guides/run_a_job/#mode for more information about run modes.', command_str, mode)  # noqa
         sys.exit(3)
-
-    yaml_config = read_yaml_config()
+    if command_str == '':
+        # set to none so it won't override floyd config
+        command_str = None
 
     module = Module(name=experiment_name,
                     description=message or '',
@@ -247,7 +261,6 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
                     family_id=experiment_config.family_id,
                     inputs=module_inputs,
                     env=env,
-                    arch=INSTANCE_ARCH_MAP[instance_type],
                     yaml_config=yaml_config)
 
     try:
@@ -297,8 +310,9 @@ def get_command_line(instance_type, env, message, data, mode, open_notebook, ten
     Return a string representing the full floyd command entered in the command line
     """
     floyd_command = ["floyd", "run"]
-    floyd_command.append('--' + INSTANCE_NAME_MAP[instance_type])
-    if not env == DEFAULT_ENV:
+    if instance_type:
+        floyd_command.append('--' + INSTANCE_NAME_MAP[instance_type])
+    if env and not env == DEFAULT_ENV:
         floyd_command += ["--env", env]
     if message:
         floyd_command += ["--message", shell_quote(message)]
@@ -312,7 +326,7 @@ def get_command_line(instance_type, env, message, data, mode, open_notebook, ten
             floyd_command += ["--data", data_item]
     if tensorboard:
         floyd_command.append("--tensorboard")
-    if not mode == "job":
+    if mode and mode != "job":
         floyd_command += ["--mode", mode]
         if mode == 'jupyter':
             if not open_notebook:
@@ -386,7 +400,8 @@ def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cp
         instance_type = job.instance_type
 
     if env is not None:
-        if not validate_env(env, instance_type):
+        arch = INSTANCE_ARCH_MAP[instance_type]
+        if not validate_env(env, arch):
             sys.exit(1)
         parameters['env'] = env
 

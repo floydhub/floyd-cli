@@ -17,7 +17,8 @@ class ModuleSchema(Schema):
     outputs = fields.List(fields.Dict)
     inputs = fields.List(fields.Dict)
     env = fields.Str()
-    arch = fields.Str()
+    # TODO: remove arch, not used by API anymore
+    arch = fields.Str(allow_none=True)
     resource_id = fields.Str()
     yaml_config = fields.Str()
 
