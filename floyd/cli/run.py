@@ -67,11 +67,15 @@ def process_data_ids(data):
     return True, data_ids
 
 
-def resolve_final_instance_type(instance_type_override, yaml_str, cli_default):
+def resolve_final_instance_type(instance_type_override, yaml_str, task, cli_default):
     if instance_type_override:
         return instance_type_override
     if yaml_str:
         yaml_config = yaml.safe_load(yaml_str)
+        if task:
+            machine = yaml_config['task'][task].get('machine')
+            if machine:
+                return INSTANCE_TYPE_MAP[machine]
         machine = yaml_config.get('machine')
         if machine:
             return INSTANCE_TYPE_MAP[machine]
@@ -173,9 +177,10 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 @click.option('--gpu2', 'gpu2', is_flag=True, help='Run in a GPU2 instance')
 @click.option('--cpu2', 'cpu2', is_flag=True, help='Run in a CPU2 instance')
 @click.option('--max-runtime', '-r', help='Max runtime to override for the job, in seconds')
+@click.option('--task', help='Run a specified task defined in floyd config file')
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpup, cpup, gpu2, cpu2, max_runtime, command):
+def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpup, cpup, gpu2, cpu2, max_runtime, command, task):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
@@ -240,7 +245,7 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
 
     yaml_config = read_yaml_config()
     arch = INSTANCE_ARCH_MAP[
-        resolve_final_instance_type(instance_type, yaml_config, cli_default)
+        resolve_final_instance_type(instance_type, yaml_config, task, cli_default)
     ]
     if not validate_env(env or cli_default['env'], arch):
         sys.exit(3)
@@ -261,7 +266,8 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
                     family_id=experiment_config.family_id,
                     inputs=module_inputs,
                     env=env,
-                    yaml_config=yaml_config)
+                    yaml_config=yaml_config,
+                    task=task)
 
     try:
         module_id = ModuleClient().create(module, cli_default)
@@ -288,7 +294,8 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
                                            data_ids=data_ids,
                                            family_id=experiment_config.family_id,
                                            instance_type=instance_type,
-                                           yaml_config=yaml_config)
+                                           yaml_config=yaml_config,
+                                           task=task)
     expt_client = ExperimentClient()
     expt_info = expt_client.create(experiment_request, cli_default)
     floyd_logger.debug("Created job : %s", expt_info['id'])
