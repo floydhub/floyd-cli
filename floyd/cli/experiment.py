@@ -3,6 +3,8 @@ from tabulate import tabulate
 from time import sleep
 import webbrowser
 import sys
+from shutil import copyfile
+import os
 
 import floyd
 from floyd.cli.utils import (
@@ -20,6 +22,7 @@ from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.model.experiment_config import ExperimentConfig
 from floyd.log import logger as floyd_logger
+from floyd.cli.utils import read_yaml_config
 
 
 @click.command()
@@ -57,6 +60,10 @@ def init(project_name):
                                          family_id=project_obj.id)
     ExperimentConfigManager.set_config(experiment_config)
     FloydIgnoreManager.init()
+
+    yaml_config = read_yaml_config()
+    if not yaml_config:
+        copyfile(os.path.join(os.path.dirname(__file__), 'default_floyd.yml'), 'floyd.yml')
 
     floyd_logger.info("Project \"%s\" initialized in current directory", project_name)
 
