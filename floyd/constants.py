@@ -98,6 +98,11 @@ INSTANCE_NAME_MAP = {
     G2_INSTANCE_TYPE: 'gpu2',
 }
 
+INSTANCE_TYPE_MAP = {
+    INSTANCE_NAME_MAP[t]: t
+    for t in INSTANCE_NAME_MAP
+}
+
 FIRST_STEPS_DOC = """
 Start by cloning the sample project
     git clone https://github.com/floydhub/tensorflow-examples.git

@@ -29,7 +29,7 @@ def get_mode_parameter(mode):
     """
     Map the mode parameter to the server parameter
     """
-    if mode == 'job':
+    if mode == 'job' or mode is None:
         return 'cli'
     elif mode == 'serve':
         return 'serving'
