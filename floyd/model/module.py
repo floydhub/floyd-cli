@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from floyd.constants import DEFAULT_DOCKER_IMAGE, DEFAULT_ENV, DEFAULT_ARCH
+from floyd.constants import DEFAULT_DOCKER_IMAGE, DEFAULT_ENV
 from floyd.model.base import BaseModel
 
 
@@ -19,6 +19,7 @@ class ModuleSchema(Schema):
     env = fields.Str()
     # TODO: remove arch, not used by API anymore
     arch = fields.Str(allow_none=True)
+    instance_type = fields.Str(allow_none=True)
     resource_id = fields.Str()
     yaml_config = fields.Str()
     task = fields.Str()
@@ -43,7 +44,8 @@ class Module(BaseModel):
                  outputs=None,
                  inputs=None,
                  env=DEFAULT_ENV,
-                 arch=DEFAULT_ARCH,
+                 arch=None,
+                 instance_type=None,
                  resource_id=None,
                  yaml_config=None,
                  task=None):
@@ -59,6 +61,7 @@ class Module(BaseModel):
         self.inputs = inputs if inputs else [{'name': 'input', 'type': 'dir'}]
         self.env = env
         self.arch = arch
+        self.instance_type = instance_type
         self.resource_id = resource_id
         self.yaml_config = yaml_config
         self.task = task
