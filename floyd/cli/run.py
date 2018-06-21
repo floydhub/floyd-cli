@@ -11,7 +11,11 @@ except ImportError:
     from shlex import quote as shell_quote
 
 import floyd
-from floyd.constants import DEFAULT_ENV, INSTANCE_NAME_MAP
+from floyd.constants import (
+    DEFAULT_ENV,
+    INSTANCE_NAME_MAP,
+    INSTANCE_TYPE_MAP,
+)
 from floyd.client.data import DataClient
 from floyd.client.project import ProjectClient
 from floyd.cli.utils import (
@@ -266,6 +270,7 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
                     family_id=experiment_config.family_id,
                     inputs=module_inputs,
                     env=env,
+                    instance_type=instance_type,
                     yaml_config=yaml_config,
                     task=task)
 
