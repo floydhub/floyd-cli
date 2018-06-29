@@ -5,6 +5,7 @@ from mock import patch
 from tests.cli import assert_exit_code
 from floyd.cli.run import run, get_command_line
 from tests.cli.mocks import mock_access_token, mock_experiment_config, mock_data_config
+from floyd.cli.run import resolve_final_instance_type
 
 
 class TestExperimentRun(unittest.TestCase):
@@ -159,3 +160,22 @@ class TestExperimentRun(unittest.TestCase):
         """
         result = self.runner.invoke(run, ['--env', 'foo', '--data', 'foo/datasets/bar', 'ls'])
         assert_exit_code(result, 0)
+
+    def test_resolve_final_instance_type(self):
+        re = resolve_final_instance_type(None, 'machine: gpu', None, {'instance_type': 'c1'})
+        assert re == 'g1'
+
+        re = resolve_final_instance_type(None, None, None, {'instance_type': 'c1'})
+        assert re == 'c1'
+
+        yaml_str = '''
+machine: gpu
+task:
+  train:
+    machine: cpu2
+        '''
+        re = resolve_final_instance_type(None, yaml_str, 'train', {'instance_type': 'c1'})
+        assert re == 'c2'
+
+        re = resolve_final_instance_type('g2', yaml_str, 'train', {'instance_type': 'c1'})
+        assert re == 'g2'
