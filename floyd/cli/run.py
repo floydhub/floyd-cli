@@ -76,11 +76,9 @@ def resolve_final_instance_type(instance_type_override, yaml_str, task, cli_defa
         return instance_type_override
     if yaml_str:
         yaml_config = yaml.safe_load(yaml_str)
-        if task:
-            machine = yaml_config['task'][task].get('machine')
-            if machine:
-                return INSTANCE_TYPE_MAP[machine]
         machine = yaml_config.get('machine')
+        if task:
+            machine = yaml_config['task'][task].get('machine', machine)
         if machine:
             return INSTANCE_TYPE_MAP[machine]
     return cli_default['instance_type']
