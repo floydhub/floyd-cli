@@ -1,6 +1,7 @@
 from click.testing import CliRunner
 import unittest
 from mock import patch
+import os
 
 from tests.cli import assert_exit_code
 from floyd.cli.run import run, get_command_line
@@ -179,3 +180,41 @@ task:
 
         re = resolve_final_instance_type('g2', yaml_str, 'train', {'instance_type': 'c1'})
         assert re == 'g2'
+
+    @patch('floyd.model.access_token.assert_token_not_expired')
+    @patch('floyd.cli.run.EnvClient.get_all', return_value={'cpu': {'default': 'bar'}})
+    @patch('floyd.cli.run.AuthConfigManager.get_access_token', side_effect=mock_access_token)
+    @patch('floyd.cli.run.AuthConfigManager.get_auth_header', return_value="Bearer " + mock_access_token().token)
+    @patch('floyd.cli.run.ExperimentConfigManager.get_config', side_effect=mock_experiment_config)
+    @patch('floyd.cli.run.ExperimentConfigManager.set_config')
+    @patch('floyd.cli.run.ModuleClient.create', return_value='module_id')
+    @patch('floyd.cli.run.ExperimentClient')
+    @patch('floyd.cli.run.ProjectClient.exists', return_value=True)
+    def test_with_invalid_config(self,
+                          exists,
+                          expt_client,
+                          create_module,
+                          set_config,
+                          get_config,
+                          get_auth_header,
+                          get_access_token,
+                          get_all_env,
+                          assert_token_not_expired):
+        """
+        Simple experiment with no data attached
+        """
+        with open('floyd.yml', 'w') as fd:
+            fd.write('#')
+
+        # empty config file should not result in crash
+        result = self.runner.invoke(run, ['command'], catch_exceptions=False)
+        assert_exit_code(result, 0)
+
+        with open('floyd.yml', 'w') as fd:
+            fd.write('foo: [}')
+
+        # invalid config file should result in error
+        result = self.runner.invoke(run, ['command'], catch_exceptions=False)
+        assert_exit_code(result, 1)
+
+        os.remove('floyd.yml')
