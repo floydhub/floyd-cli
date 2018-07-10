@@ -77,7 +77,11 @@ def resolve_final_instance_type(instance_type_override, yaml_str, task, cli_defa
 
     yaml_config = None
     if yaml_str:
-        yaml_config = yaml.safe_load(yaml_str)
+        try:
+            yaml_config = yaml.safe_load(yaml_str)
+        except Exception as e:
+            floyd_logger.info("Error reading floyd config file:\n\n%s\nSee https://docs.floydhub.com/floyd_config for more info.", e)
+            sys.exit(1)
 
     if yaml_config:
         machine = yaml_config.get('machine')
