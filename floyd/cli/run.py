@@ -74,8 +74,12 @@ def process_data_ids(data):
 def resolve_final_instance_type(instance_type_override, yaml_str, task, cli_default):
     if instance_type_override:
         return instance_type_override
+
+    yaml_config = None
     if yaml_str:
         yaml_config = yaml.safe_load(yaml_str)
+
+    if yaml_config:
         machine = yaml_config.get('machine')
         if task:
             machine = yaml_config['task'][task].get('machine', machine)
