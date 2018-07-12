@@ -159,8 +159,8 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 
 
 @click.command()
-@click.option('--cpu', default=False, help='Run on a CPU instance')
-@click.option('--gpu', default=False, help='Run on a GPU instance')
+@click.option('--cpu', is_flag=True, default=False, help='Run on a CPU instance')
+@click.option('--gpu', is_flag=True, default=False, help='Run on a GPU instance')
 @click.option('--data', multiple=True, help='Data source id to use')
 @click.option('--mode',
               help='Different floyd modes',
@@ -190,7 +190,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 @click.option('--task', help='Run a specified task defined in floyd config file')
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpup, cpup, gpu2, cpu2, max_runtime, command, task):
+def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpup, cpup, gpu2, cpu2, max_runtime, task, command):
     """
     Run a command on Floyd. Floyd will upload contents of the
     current directory and run your command remotely.
