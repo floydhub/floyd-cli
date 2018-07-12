@@ -58,7 +58,7 @@ class Module(BaseModel):
         self.default_container = default_container
         self.family_id = family_id
         self.outputs = outputs if outputs else [{'name': 'output', 'type': 'dir'}]
-        self.inputs = inputs if inputs else [{'name': 'input', 'type': 'dir'}]
+        self.inputs = inputs if inputs else []
         self.env = env
         self.arch = arch
         self.instance_type = instance_type
