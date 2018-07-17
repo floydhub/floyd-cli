@@ -35,7 +35,7 @@ class TestCliUtil(unittest.TestCase):
         assert normalize_data_name('1', 'yoyo', 'ma') == 'yoyo/datasets/ma/1'
 
         # Full job names are returned unchanged
-        assert normalize_data_name('foo/projects/bar/1') == 'foo/datasets/bar/1'
+        assert normalize_data_name('foo/projects/bar/1') == 'foo/projects/bar/1'
 
         # If no job number is passed, it is not used
         assert normalize_data_name('foo/datasets/bar') == 'foo/datasets/bar'
