@@ -1,13 +1,14 @@
 # floyd-cli
 
-This is the command line tool for FloydHub. Use this to interact with FloydHub from your local machine.
-([www.floydhub.com](http://www.floydhub.com)).
-
 [![image](https://circleci.com/gh/floydhub/floyd-cli/tree/master.svg?style=shield)](https://circleci.com/gh/floydhub/floyd-cli/tree/master)
 [![image](https://badge.fury.io/py/floyd-cli.svg)](https://badge.fury.io/py/floyd-cli)
 [![image](https://anaconda.org/floydhub/floyd-cli/badges/version.svg)](https://anaconda.org/floydhub/floyd-cli)
 
 [Website](http://www.floydhub.com) • [Docs](https://docs.floydhub.com) • [Forum](https://forum.floydhub.com) • [Twitter](https://twitter.com/floydhub_) • [We're Hiring](https://angel.co/floydhub)
+
+**floyd-cli**: The command line tool for FloydHub. Use this to interact with FloydHub from your machine.
+
+FloydHub is the fastest way to build, train, and deploy deep learning models on cloud GPU.s Visit ([www.floydhub.com](http://www.floydhub.com)) to sign up for free.
 
 ## Contents
 -   [Installation](http://docs.floydhub.com/guides/basics/install/)
