@@ -8,7 +8,7 @@
 
 **floyd-cli**: The command line tool for FloydHub. Use this to interact with FloydHub from your machine.
 
-FloydHub is the fastest way to build, train, and deploy deep learning models on cloud GPU.s Visit ([www.floydhub.com](http://www.floydhub.com)) to sign up for free.
+FloydHub is the fastest way to build, train, and deploy deep learning models on cloud GPUs. Visit ([www.floydhub.com](http://www.floydhub.com)) to sign up for free.
 
 ## Contents
 -   [Installation](http://docs.floydhub.com/guides/basics/install/)
