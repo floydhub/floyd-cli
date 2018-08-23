@@ -1,5 +1,7 @@
 # floyd-cli
 
+[![FloydHub Logo](https://github.com/floydhub/static/blob/master/Group.png)](https://www.floydhub.com)
+
 [![image](https://circleci.com/gh/floydhub/floyd-cli/tree/master.svg?style=shield)](https://circleci.com/gh/floydhub/floyd-cli/tree/master)
 [![image](https://badge.fury.io/py/floyd-cli.svg)](https://badge.fury.io/py/floyd-cli)
 [![image](https://anaconda.org/floydhub/floyd-cli/badges/version.svg)](https://anaconda.org/floydhub/floyd-cli)
