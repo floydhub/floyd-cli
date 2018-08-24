@@ -4,7 +4,6 @@ version: 2
 jobs:
   build:
     docker:
-      docker:
         - image: python:2.7.11
       # python:
       #   version: 2.7.11
