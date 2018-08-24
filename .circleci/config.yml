@@ -3,11 +3,13 @@
 version: 2
 jobs:
   build:
-    machine:
-      python:
-        version: 2.7.11
-      environment:
-        PATH: "$HOME/miniconda/bin:$PATH"
+    docker:
+      docker:
+        - image: python:2.7.11
+      # python:
+      #   version: 2.7.11
+      # environment:
+      #   PATH: "$HOME/miniconda/bin:$PATH"
     steps:
         - run:
             name: Install dependencies
