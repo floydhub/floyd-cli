@@ -10,6 +10,7 @@ jobs:
       # environment:
       #   PATH: "$HOME/miniconda/bin:$PATH"
     steps:
+        - checkout
         - run:
             name: Install dependencies
             command: pip install tox tox-pyenv flake8
