@@ -2,31 +2,48 @@
 
 version: 2
 
-shared: &shared
-    steps:
-        - checkout
-        - run:
-            name: Install dependencies
-            command: pip install tox tox-pyenv flake8
-        - run:
-            name: Test
-            command: |
-                flake8 floyd
-                tox -e py27
-        - store_artifacts:
-            path: dist
-
 jobs:
-    py27:
-        <<: *shared
+    test-py27:
         docker:
             - image: python:2.7.11
+        steps:
+            - checkout
+            - run:
+                name: Install dependencies
+                command: pip install tox tox-pyenv flake8
+            - run:
+                name: Test
+                command: |
+                    flake8 floyd
+                    tox -e py27
 
-    py35:
-        <<: *shared
+    test-py35:
         docker:
             - image: python:3.5.2
+        steps:
+            - checkout
+            - run:
+                name: Install dependencies
+                command: pip install tox tox-pyenv flake8
+            - run:
+                name: Test
+                command: |
+                    flake8 floyd
+                    tox -e py35
 
+    test-py36:
+        docker:
+            - image: python:3.6.2
+        steps:
+            - checkout
+            - run:
+                name: Install dependencies
+                command: pip install tox tox-pyenv flake8
+            - run:
+                name: Test
+                command: |
+                    flake8 floyd
+                    tox -e py36
 
 workflows:
     version: 2
@@ -34,3 +51,4 @@ workflows:
         jobs:
             - py27
             - py35
+            - py36
