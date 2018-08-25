@@ -50,19 +50,19 @@ jobs:
             - image: python:3.6.2
         steps:
             - run:
-                - name: Deploy to pypi
-                  command: |
-                    echo "[distutils]" > ~/.pypirc
-                    echo "index-servers =" >> ~/.pypirc
-                    echo "    pypi" >> ~/.pypirc
-                    echo >> ~/.pypirc
-                    # echo "[pypi]" >> ~/.pypirc
-                    # echo "username:$PYPI_USERNAME" >> ~/.pypirc
-                    # echo "password:$PYPI_PASSWORD" >> ~/.pypirc
-                    echo >> ~/.pypirc
-                    python setup.py register -r pypi
-                    # python setup.py sdist upload -r pypi
-                    python setup.py sdist upload
+                name: Deploy to pypi
+                command: |
+                  echo "[distutils]" > ~/.pypirc
+                  echo "index-servers =" >> ~/.pypirc
+                  echo "    pypi" >> ~/.pypirc
+                  echo >> ~/.pypirc
+                  # echo "[pypi]" >> ~/.pypirc
+                  # echo "username:$PYPI_USERNAME" >> ~/.pypirc
+                  # echo "password:$PYPI_PASSWORD" >> ~/.pypirc
+                  echo >> ~/.pypirc
+                  python setup.py register -r pypi
+                  # python setup.py sdist upload -r pypi
+                  python setup.py sdist upload
 
 workflows:
     version: 2
