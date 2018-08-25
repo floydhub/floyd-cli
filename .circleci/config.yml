@@ -76,38 +76,43 @@ jobs:
       			  conda config --add channels conda-forge
       			  conda install conda-build
       			  conda install anaconda-client
+            - run:
                 name: Build the package for python 2.7, 3.5, and 3.6
                 command: |
       			  conda build --python 2.7 conda
       			  conda build --python 3.5 conda
       			  conda build --python 3.6 conda
+            - run:
                 name: Create the build for each OS and architecture (for each 2.7, 3.5, and 3.6)
                 command: |
       			  cp -r $HOME/miniconda/conda-bld/linux-64 .
       			  conda convert -p all `ls linux-64/floyd-cli-*-py27*.tar.bz2` # 2.7
       			  conda convert -p all `ls linux-64/floyd-cli-*-py35*.tar.bz2` # 3.5
       			  conda convert -p all `ls linux-64/floyd-cli-*-py36*.tar.bz2` # 3.6
-      			# name: Upload all 2.7 versions to anaconda.org
-				# command: |
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls linux-64/floyd-cli-*-py27*.tar.bz2`
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls linux-32/floyd-cli-*-py27*.tar.bz2`
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls win-32/floyd-cli-*-py27*.tar.bz2`
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls win-64/floyd-cli-*-py27*.tar.bz2`
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls osx-64/floyd-cli-*-py27*.tar.bz2`
-				# name: Upload all 3.5 versions to anaconda.org
-				# command: |
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls linux-64/floyd-cli-*-py35*.tar.bz2`
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls linux-32/floyd-cli-*-py35*.tar.bz2`
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls win-32/floyd-cli-*-py35*.tar.bz2`
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls win-64/floyd-cli-*-py35*.tar.bz2`
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls osx-64/floyd-cli-*-py35*.tar.bz2`
-				# name: Upload all 3.6 versions to anaconda.org
-				# command: |
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls linux-64/floyd-cli-*-py36*.tar.bz2`
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls linux-32/floyd-cli-*-py36*.tar.bz2`
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls win-32/floyd-cli-*-py36*.tar.bz2`
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls win-64/floyd-cli-*-py36*.tar.bz2`
-      			#   anaconda -t $ANACONDA_TOKEN upload --force `ls osx-64/floyd-cli-*-py36*.tar.bz2`
+            # - run:
+      		# 	name: Upload all 2.7 versions to anaconda.org
+			# 	command: |
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls linux-64/floyd-cli-*-py27*.tar.bz2`
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls linux-32/floyd-cli-*-py27*.tar.bz2`
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls win-32/floyd-cli-*-py27*.tar.bz2`
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls win-64/floyd-cli-*-py27*.tar.bz2`
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls osx-64/floyd-cli-*-py27*.tar.bz2`
+            # - run:
+			# 	name: Upload all 3.5 versions to anaconda.org
+			# 	command: |
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls linux-64/floyd-cli-*-py35*.tar.bz2`
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls linux-32/floyd-cli-*-py35*.tar.bz2`
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls win-32/floyd-cli-*-py35*.tar.bz2`
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls win-64/floyd-cli-*-py35*.tar.bz2`
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls osx-64/floyd-cli-*-py35*.tar.bz2`
+            # - run:
+			# 	name: Upload all 3.6 versions to anaconda.org
+			# 	command: |
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls linux-64/floyd-cli-*-py36*.tar.bz2`
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls linux-32/floyd-cli-*-py36*.tar.bz2`
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls win-32/floyd-cli-*-py36*.tar.bz2`
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls win-64/floyd-cli-*-py36*.tar.bz2`
+      		# 	  anaconda -t $ANACONDA_TOKEN upload --force `ls osx-64/floyd-cli-*-py36*.tar.bz2`
 
 
 workflows:
