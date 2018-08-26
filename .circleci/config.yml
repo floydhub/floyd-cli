@@ -65,7 +65,7 @@ jobs:
                   echo "password:$PYPI_PASSWORD" >> ~/.pypirc
                   echo >> ~/.pypirc
                   python setup.py register -r pypi
-                  python setup.py sdist upload -r pypi
+                  # python setup.py sdist upload -r pypi
             - run:
                 name: Install conda, conda-build, and anaconda-client
                 command: |
