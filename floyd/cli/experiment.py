@@ -233,7 +233,7 @@ def output(id, url):
     except FloydException:
         experiment = ExperimentClient().get(id)
 
-    output_dir_url = "%s/%s/output" % (floyd.floyd_web_host, experiment.name)
+    output_dir_url = "%s/%s/files" % (floyd.floyd_web_host, experiment.name)
     if url:
         floyd_logger.info(output_dir_url)
     else:

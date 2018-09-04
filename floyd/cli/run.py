@@ -120,7 +120,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
     if mode == 'jupyter':
         floyd_logger.info("\n[!] DEPRECATION NOTICE\n"
                           "Jupyter mode will no longer be supported after September 15th.\n"
-                          "Please migrate your projects to Workspaces: "
+                          "Please migrate your projects to use Workspaces: "
                           "https://docs.floydhub.com/guides/workspace/.")
 
     if mode in ['jupyter', 'serve']:
