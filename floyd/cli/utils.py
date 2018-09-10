@@ -25,18 +25,6 @@ def get_module_task_instance_id(task_instances):
     return None
 
 
-def get_mode_parameter(mode):
-    """
-    Map the mode parameter to the server parameter
-    """
-    if mode == 'job' or mode is None:
-        return 'cli'
-    elif mode == 'serve':
-        return 'serving'
-    else:
-        return mode
-
-
 def get_data_name(data_str, default=None):
     """
     If data_str is of the format <ID>:<NAME>, return <NAME>
