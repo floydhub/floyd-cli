@@ -19,7 +19,7 @@ from floyd.constants import (
 from floyd.client.data import DataClient
 from floyd.client.project import ProjectClient
 from floyd.cli.utils import (
-    get_mode_parameter, get_data_name, normalize_data_name, normalize_job_name
+    get_data_name, normalize_data_name, normalize_job_name
 )
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
@@ -86,7 +86,7 @@ def resolve_final_instance_type(instance_type_override, yaml_str, task, cli_defa
     if yaml_config:
         machine = yaml_config.get('machine')
         if task:
-            machine = yaml_config['task'][task].get('machine', machine)
+            machine = yaml_config.get('task', {}).get(task, {}).get('machine', machine)
         if machine:
             return INSTANCE_TYPE_MAP[machine]
     return cli_default['instance_type']
@@ -274,7 +274,7 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
     module = Module(name=experiment_name,
                     description=message or '',
                     command=command_str,
-                    mode=get_mode_parameter(mode),
+                    mode=mode,
                     enable_tensorboard=tensorboard,
                     family_id=experiment_config.family_id,
                     inputs=module_inputs,
@@ -433,7 +433,7 @@ def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cp
         parameters['data_ids'] = data_ids
 
     if message:
-        parameters['message'] = message
+        parameters['description'] = message
 
     if command:
         parameters['command'] = ' '.join(command)
