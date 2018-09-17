@@ -53,11 +53,20 @@ def get_data_id(data_str):
 def normalize_data_name(raw_name, default_username='', default_dataset_name='', use_data_config=True):
     raw_name = raw_name or ''
     if raw_name.endswith('/output'):
-        return normalize_job_name(raw_name[:-len('/output')], default_username, default_dataset_name) + '/output'
+        return normalize_job_name(raw_job_name=raw_name[:-len('/output')],
+                                  default_username=default_username,
+                                  default_project_name=default_dataset_name,
+                                  use_config=False) + '/output'
     elif raw_name.endswith('/home'):
-        return normalize_job_name(raw_name[:-len('/home')], default_username, default_dataset_name) + '/home'
+        return normalize_job_name(raw_job_name=raw_name[:-len('/home')],
+                                  default_username=default_username,
+                                  default_project_name=default_dataset_name,
+                                  user_config=False) + '/home'
     elif '/projects/' in raw_name:
-        return normalize_job_name(raw_name, default_username, default_dataset_name)
+        return normalize_job_name(raw_job_name=raw_name,
+                                  default_username=default_username,
+                                  default_project_name=default_dataset_name,
+                                  user_config=False)
 
     name_parts = raw_name.split('/')
 
