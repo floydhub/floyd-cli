@@ -29,10 +29,9 @@ from floyd.cli.utils import read_yaml_config
 @click.argument('project_name', nargs=1)
 def init(project_name):
     """
-    Initialize new project at the current dir.
-    After init run your command. Example:
+    Initialize new project at the current path.
 
-        floyd run 'python tensorflow.py > /output/model.1'
+    After this you can run other FloydHub commands like status and run.
     """
 
     project_obj = ProjectClient().get_by_name(project_name)
@@ -72,8 +71,9 @@ def init(project_name):
 @click.argument('id', required=False, nargs=1)
 def status(id):
     """
-    View status of all or specific run.
-    It can also list status of all the runs in the project.
+    View status of all jobs in a project.
+
+    The command also accepts a specific job name.
     """
     if id:
         try:
@@ -89,7 +89,7 @@ def status(id):
 
 def print_experiments(experiments):
     """
-    Prints expt details in a table. Includes urls and mode parameters
+    Prints job details in a table. Includes urls and mode parameters
     """
     headers = ["JOB NAME", "CREATED", "STATUS", "DURATION(s)", "INSTANCE", "DESCRIPTION", "METRICS"]
     expt_list = []
@@ -111,7 +111,10 @@ def format_metrics(latest_metrics):
 @click.argument('id', nargs=1)
 def clone(id):
     """
-    Download the code for the experiment to the current path
+    Download files from a job.
+
+    This will download the files that were originally uploaded at
+    the start of the job.
     """
     try:
         experiment = ExperimentClient().get(normalize_job_name(id, use_config=False))
@@ -134,7 +137,7 @@ def clone(id):
 @click.argument('job_name_or_id', nargs=1, required=False)
 def info(job_name_or_id):
     """
-    Prints detailed info for the run
+    View detailed information of a job.
     """
     try:
         experiment = ExperimentClient().get(normalize_job_name(job_name_or_id))
@@ -197,7 +200,9 @@ def follow_logs(instance_log_id, sleep_duration=1):
 @click.argument('id', nargs=1, required=False)
 def logs(id, url, tail, follow, sleep_duration=1):
     """
-    Print the logs of the run.
+    View the logs of a job.
+
+    To follow along a job in real time, use the --tail flag
     """
     tail = tail or follow
 
@@ -225,8 +230,7 @@ def logs(id, url, tail, follow, sleep_duration=1):
 @click.argument('id', nargs=1, required=False)
 def output(id, url):
     """
-    Shows the output url of the run.
-    By default opens the output page in your default browser.
+    View the files from a job.
     """
     try:
         experiment = ExperimentClient().get(normalize_job_name(id))
@@ -245,7 +249,7 @@ def output(id, url):
 @click.argument('id', nargs=1, required=False)
 def stop(id):
     """
-    Stop a run before it can finish.
+    Stop a running job.
     """
     try:
         experiment = ExperimentClient().get(normalize_job_name(id))
@@ -268,7 +272,7 @@ def stop(id):
 @click.option('-y', '--yes', is_flag=True, default=False, help='Skip confirmation')
 def delete(names, yes):
     """
-    Delete project runs
+    Delete a training job.
     """
     failures = False
     for name in names:

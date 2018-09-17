@@ -25,7 +25,7 @@ from floyd.cli.utils import (
 @click.group()
 def data():
     """
-    Subcommand for data operations
+    Subcommand for data operations.
     """
     pass
 
@@ -35,8 +35,9 @@ def data():
 def init(dataset_name):
     """
     Initialize a new dataset at the current dir.
-    After init ensure that your data files are in this directory.
-    Then you can upload them to Floyd. Example:
+
+    Then run the upload command to copy all the files in this
+    directory to FloydHub.
 
         floyd data upload
     """
@@ -78,7 +79,7 @@ def init(dataset_name):
               help='Job commit message')
 def upload(resume, message):
     """
-    Upload data in the current dir to Floyd.
+    Upload files in the current dir to FloydHub.
     """
     data_config = DataConfigManager.get_config()
 
@@ -94,8 +95,9 @@ def upload(resume, message):
 @click.argument('id', required=False, nargs=1)
 def status(id):
     """
-    Show the status of a run with id. or a friendly name.
-    It can also list status of all the runs in the project.
+    View status of all versions in a dataset.
+
+    The command also accepts a specific dataset version.
     """
     if id:
         data_source = DataClient().get(normalize_data_name(id))
@@ -112,7 +114,7 @@ def status(id):
 
 def print_data(data_sources):
     """
-    Print data information in tabular form
+    Print dataset information in tabular form
     """
     if not data_sources:
         return
@@ -130,7 +132,7 @@ def print_data(data_sources):
 @click.argument('id', nargs=1)
 def clone(id):
     """
-    Download the code for the job to the current path
+    Download files from a dataset.
     """
 
     data_source = DataClient().get(normalize_data_name(id, use_data_config=False))
@@ -154,7 +156,7 @@ def clone(id):
 @click.argument('data_name', nargs=1)
 def listfiles(data_name):
     """
-    List files in the given dataset
+    List files in a dataset.
     """
 
     data_source = DataClient().get(normalize_data_name(data_name, use_data_config=False))
@@ -197,7 +199,7 @@ def listfiles(data_name):
 @click.argument('path', nargs=1)
 def getfile(data_name, path):
     """
-    Get the specified individual file from a dataset
+    Download a specific file from a dataset.
     """
 
     data_source = DataClient().get(normalize_data_name(data_name, use_data_config=False))
@@ -221,8 +223,7 @@ def getfile(data_name, path):
 @click.argument('id', nargs=1, required=False)
 def output(id, url):
     """
-    Shows the url of the dataset. You can use id or a friendly URI.
-    By default opens the output page in your default browser.
+    View the files from a dataset.
     """
     data_source = DataClient().get(normalize_data_name(id))
     if id and not data_source:
@@ -246,7 +247,7 @@ def output(id, url):
               help='Skip confirmation')
 def delete(ids, yes):
     """
-    Delete data sets.
+    Delete datasets.
     """
     failures = False
 
@@ -288,7 +289,10 @@ def delete(ids, yes):
 @click.argument('source')
 def add(source):
     """
-    Create data for current dataset from a given source, for example: foo/projects/bar/1/output
+    Add job output to a dataset.
+
+    This will create a new dataset version with the job output.
+    Use the full job name: foo/projects/bar/1/home or foo/projects/bar/1/output
     """
     new_data = DatasetClient().add_data(source)
     print_data([DataClient().get(new_data['data_id'])])

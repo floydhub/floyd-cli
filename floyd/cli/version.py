@@ -20,7 +20,7 @@ def conda_upgrade():
 @click.command()
 def version():
     """
-    Prints the current version of the CLI
+    View the current version of the CLI.
     """
     import pkg_resources
     version = pkg_resources.require(PROJECT_NAME)[0].version
@@ -41,6 +41,6 @@ def auto_upgrade():
 @click.command()
 def upgrade():
     """
-    Upgrade floyd command line
+    Upgrade CLI to the latest version.
     """
     auto_upgrade()

@@ -19,7 +19,7 @@ from floyd.log import configure_logger
 def cli(host, verbose):
     """
     Floyd CLI interacts with FloydHub server and executes your commands.
-    More help is available under each command listed below.
+    Detailed help is available at https://docs.floydhub.com/commands/.
     """
     import raven
     raven.Client(

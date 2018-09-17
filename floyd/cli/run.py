@@ -195,9 +195,10 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 @click.pass_context
 def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpup, cpup, gpu2, cpu2, max_runtime, task, command):
     """
-    Run a command on Floyd. Floyd will upload contents of the
-    current directory and run your command remotely.
-    This command will generate a run id for reference.
+    Start a new job on FloydHub.
+
+    Floyd will upload contents of the current directory and
+    run your command.
     """
     # cli_default is used for any option that has default value
     cli_default = {'description': '', 'command': ''}
@@ -382,7 +383,7 @@ def get_command_line(instance_type, env, message, data, mode, open_notebook, ten
 @click.pass_context
 def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cpup, command):
     """
-    Restart a given job as a new job.
+    Restart a finished job as a new job.
     """
     # Error early if more than one --env is passed. Then get the first/only
     # --env out of the list so all other operations work normally (they don't
