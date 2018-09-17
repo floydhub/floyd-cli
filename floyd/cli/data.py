@@ -132,7 +132,7 @@ def print_data(data_sources):
 @click.argument('id', nargs=1)
 def clone(id):
     """
-    Download files from a dataset.
+    Download all files in a dataset.
     """
 
     data_source = DataClient().get(normalize_data_name(id, use_data_config=False))
@@ -289,7 +289,7 @@ def delete(ids, yes):
 @click.argument('source')
 def add(source):
     """
-    Add job output to a dataset.
+    Create a new dataset version from the contents of a job.
 
     This will create a new dataset version with the job output.
     Use the full job name: foo/projects/bar/1/home or foo/projects/bar/1/output
