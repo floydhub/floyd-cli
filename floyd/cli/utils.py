@@ -61,12 +61,12 @@ def normalize_data_name(raw_name, default_username='', default_dataset_name='', 
         return normalize_job_name(raw_job_name=raw_name[:-len('/home')],
                                   default_username=default_username,
                                   default_project_name=default_dataset_name,
-                                  user_config=False) + '/home'
+                                  use_config=False) + '/home'
     elif '/projects/' in raw_name:
         return normalize_job_name(raw_job_name=raw_name,
                                   default_username=default_username,
                                   default_project_name=default_dataset_name,
-                                  user_config=False)
+                                  use_config=False)
 
     name_parts = raw_name.split('/')
 
