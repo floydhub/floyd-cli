@@ -1,7 +1,6 @@
 import os
 import sys
 import tarfile
-import tempfile
 import signal
 
 from pathlib2 import PurePath
@@ -143,7 +142,7 @@ def create_tarfile(source_dir, filename="/tmp/contents.tar.gz"):
         warn_purge_exit(info_msg="Permission denied. Removing compressed data...",
                         filename=filename,
                         exit_msg=("Permission denied. Make sure to have read permission "
-                        "for each file and subfolder inside your dataset folder."))
+                                  "for each file and subfolder inside your dataset folder."))
 
     except KeyboardInterrupt:  # Purge tarball on Ctrl-C
         warn_purge_exit(info_msg="Ctrl-C signal detected: Removing compressed data...",
