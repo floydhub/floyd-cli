@@ -1,6 +1,11 @@
 import os
-from pathlib2 import PurePath
+import sys
 import tarfile
+import tempfile
+import signal
+
+from pathlib2 import PurePath
+from shutil import rmtree
 
 from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.log import logger as floyd_logger
@@ -114,9 +119,33 @@ def sizeof_fmt(num, suffix='B'):
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
 
+def warn_purge_exit(info_msg, filename, exit_msg):
+    """
+    Warn the user that's something went wrong,
+    remove the tarball and provide an exit message.
+    """
+    floyd_logger.info(info_msg)
+    rmtree(os.path.dirname(filename))
+    sys.exit(exit_msg)
+
+
 def create_tarfile(source_dir, filename="/tmp/contents.tar.gz"):
     """
     Create a tar file with the contents of the current directory
     """
-    with tarfile.open(filename, "w:gz") as tar:
-        tar.add(source_dir, arcname=os.path.basename(source_dir))
+    try:
+        # Define the default signal handler for catching: Ctrl-C
+        signal.signal(signal.SIGINT, signal.default_int_handler)
+        with tarfile.open(filename, "w:gz") as tar:
+            tar.add(source_dir, arcname=os.path.basename(source_dir))
+
+    except OSError:  # OSError: [Errno 13] Permission denied
+        warn_purge_exit(info_msg="Permission denied. Removing compressed data...",
+                        filename=filename,
+                        exit_msg=("Permission denied. Make sure to have read permission "
+                        "for each file and subfolder inside your dataset folder."))
+
+    except KeyboardInterrupt:  # Purge tarball on Ctrl-C
+        warn_purge_exit(info_msg="Ctrl-C signal detected: Removing compressed data...",
+                        filename=filename,
+                        exit_msg="Stopped the data upload gracefully.")
