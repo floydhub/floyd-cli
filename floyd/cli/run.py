@@ -162,35 +162,35 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 
 
 @click.command()
-@click.option('--cpu', is_flag=True, default=False, help='Run on a CPU instance')
-@click.option('--gpu', is_flag=True, default=False, help='Run on a GPU instance')
-@click.option('--data', multiple=True, help='Data source id to use')
-@click.option('--mode',
-              help='Different floyd modes',
-              default=None,
-              type=click.Choice(['job', 'jupyter', 'serve']))
-@click.option('--open/--no-open', 'open_notebook',
-              help='Automatically open the notebook url',
-              default=True)
-@click.option('-f', '--follow', is_flag=True, default=False, help='Automatically follow logs')
 # To enforce having a single --env, we have to allow multiple --env flags and
 # then manually enforce that just one was passed. Otherwise all but the last
 # --env will just be ignored. This is a way around the limitations of click's
 # behavior.
 @click.option('--env',
-              help='Environment type to use',
+              help='Environment name to use. Eg: tensorflow-1.8',
               default=None,
               multiple=True)
+@click.option('--gpu', is_flag=True, default=False, help='Run on a GPU instance')
+@click.option('--data', multiple=True, help='Dataset name and path to attach to the job')
 @click.option('--message', '-m',
-              help='Job commit message')
+              help='Specify description for the job')
+@click.option('--mode',
+              help='Select the mode for this run',
+              default=None,
+              type=click.Choice(['job', 'jupyter', 'serve']))
+@click.option('-f', '--follow', is_flag=True, default=False, help='Automatically follow logs')
 @click.option('--tensorboard/--no-tensorboard',
-              help='Run tensorboard in the job environment')
+              help='Enable tensorboard in the job environment')
+@click.option('--cpu', is_flag=True, default=False, help='Run on a CPU instance')
 @click.option('--gpu+', 'gpup', is_flag=True, help='Run in a GPU+ instance')
 @click.option('--cpu+', 'cpup', is_flag=True, help='Run in a CPU+ instance')
 @click.option('--gpu2', 'gpu2', is_flag=True, help='Run in a GPU2 instance')
 @click.option('--cpu2', 'cpu2', is_flag=True, help='Run in a CPU2 instance')
-@click.option('--max-runtime', '-r', help='Max runtime to override for the job, in seconds')
+@click.option('--max-runtime', '-r', help='Max runtime after which job is terminated, in seconds')
 @click.option('--task', help='Run a specified task defined in floyd config file')
+@click.option('--open/--no-open', 'open_notebook',
+              help='Automatically open the notebook url',
+              default=True)
 @click.argument('command', nargs=-1)
 @click.pass_context
 def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpup, cpup, gpu2, cpu2, max_runtime, task, command):
