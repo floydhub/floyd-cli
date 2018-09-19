@@ -49,7 +49,7 @@ def upload_is_resumable(data_config):
     )
 
 
-def initialize_new_upload(data_config, access_token, description=None):
+def initialize_new_upload(data_config, access_token, source_dir='.', description=None):
     # TODO: hit upload server to check for liveness before moving on
     data_config.set_tarball_path(None)
     data_config.set_data_endpoint(None)
@@ -66,7 +66,7 @@ def initialize_new_upload(data_config, access_token, description=None):
                        tarball_path)
     floyd_logger.info("Compressing data...")
     # TODO: purge tarball on Ctrl-C
-    create_tarfile(source_dir='.', filename=tarball_path)
+    create_tarfile(source_dir=source_dir, filename=tarball_path)
 
     # If starting a new upload fails for some reason down the line, we don't
     # want to re-tar, so save off the tarball path now
