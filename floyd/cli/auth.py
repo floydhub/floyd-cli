@@ -17,7 +17,7 @@ from floyd.log import logger as floyd_logger
 @click.option('--password', '-p', default=None, help='FloydHub password')
 def login(token, apikey, username, password):
     """
-    Log into Floyd via Auth0.
+    Login to FloydHub.
     """
     if apikey:
         user = AuthClient().get_user(apikey, True)
@@ -74,6 +74,6 @@ def login(token, apikey, username, password):
 @click.command()
 def logout():
     """
-    Logout of Floyd.
+    Logout of FloydHub.
     """
     AuthConfigManager.purge_access_token()
