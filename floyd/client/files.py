@@ -142,10 +142,12 @@ def create_tarfile(source_dir, filename="/tmp/contents.tar.gz"):
     except OSError as e:
         # OSError: [Errno 13] Permission denied
         if e.errno == errno.EACCES:
+            source_dir = os.getcwd() if source_dir == '.' else source_dir  # Expand cwd
             warn_purge_exit(info_msg="Permission denied. Removing compressed data...",
                             filename=filename,
                             exit_msg=("Permission denied. Make sure to have read permission "
-                                      "for all the files and directories in the path."))
+                                      "for all the files and directories in the path: %s")
+                            % (source_dir))
 
     except KeyboardInterrupt:  # Purge tarball on Ctrl-C
         warn_purge_exit(info_msg="Ctrl-C signal detected: Removing compressed data...",
