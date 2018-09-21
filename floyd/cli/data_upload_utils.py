@@ -49,7 +49,7 @@ def upload_is_resumable(data_config):
     )
 
 
-def initialize_new_upload(data_config, access_token, source_dir='.', description=None):
+def initialize_new_upload(data_config, access_token, description=None, source_dir='.'):
     # TODO: hit upload server to check for liveness before moving on
     data_config.set_tarball_path(None)
     data_config.set_data_endpoint(None)

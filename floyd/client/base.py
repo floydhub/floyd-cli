@@ -112,7 +112,7 @@ class FloydHttpClient(object):
             floyd_logger.debug("Exception: {}".format(exception))
             sys.exit("Cannot connect to the Floyd server. Check your internet connection.")
 
-    def download_tar(self, url, destination_dir='.', untar=True, delete_after_untar=False):
+    def download_tar(self, url, untar=True, delete_after_untar=False, destination_dir='.'):
         """
         Download and optionally untar the tar file from the given url
         """
