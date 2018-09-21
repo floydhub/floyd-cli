@@ -399,11 +399,7 @@ def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cp
     except FloydException:
         job = expt_client.get(job_name)
 
-    if gpup:
-        instance_type = G1P_INSTANCE_TYPE
-    elif cpup:
-        instance_type = C1P_INSTANCE_TYPE
-    elif gpu:
+    if gpu:
         instance_type = G1_INSTANCE_TYPE
     elif cpu:
         instance_type = C1_INSTANCE_TYPE
