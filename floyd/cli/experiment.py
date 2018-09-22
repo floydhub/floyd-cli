@@ -148,7 +148,6 @@ def info(job_name_or_id):
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
     normalized_job_name = normalize_job_name(experiment.name)
     table = [["Job name", normalized_job_name],
-             ["Output name", normalized_job_name + '/output' if task_instance else None],
              ["Created", experiment.created_pretty],
              ["Status", experiment.state], ["Duration(s)", experiment.duration_rounded],
              ["Instance", experiment.instance_type_trimmed],
