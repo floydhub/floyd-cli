@@ -195,17 +195,14 @@ def follow_logs(instance_log_id, sleep_duration=1):
 
 @click.command()
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
-@click.option('-t', '--tail', is_flag=True, default=False, help='Stream the logs')
-@click.option('-f', '--follow', is_flag=True, default=False, help='Stream the logs (alias for -t/--tail)')
+@click.option('-f', '--follow', is_flag=True, default=False, help='Keep streaming the logs in real time')
 @click.argument('id', nargs=1, required=False)
-def logs(id, url, tail, follow, sleep_duration=1):
+def logs(id, url, follow, sleep_duration=1):
     """
     View the logs of a job.
 
-    To follow along a job in real time, use the --tail flag
+    To follow along a job in real time, use the --follow flag
     """
-    tail = tail or follow
-
     instance_log_id = get_log_id(id)
 
     if url:
@@ -214,7 +211,7 @@ def logs(id, url, tail, follow, sleep_duration=1):
         floyd_logger.info(log_url)
         return
 
-    if tail:
+    if follow:
         floyd_logger.info("Launching job ...")
         follow_logs(instance_log_id, sleep_duration)
     else:
