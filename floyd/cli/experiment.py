@@ -182,12 +182,33 @@ def get_log_id(job_id):
     return instance_log_id
 
 
+def check_job_termination_line(log_output_line):
+    """
+    Get Job termination by inspecting if any of the termination log lines is detected
+    in the current log output line.
+    """
+    job_terminated = False
+    success = "[success] Finished execution"
+    failure = "[failed] Task execution failed"
+    shutdown = "[shutdown] Task execution cancelled"
+    timeout = "[timeout] Task execution cancelled"
+    termination_list = [success, failure, shutdown, timeout]
+
+    if any(terminal_line in log_output_line for terminal_line in termination_list):
+        job_terminated = True
+
+    return job_terminated
+
+
 def follow_logs(instance_log_id, sleep_duration=1):
     cur_idx = 0
-    while True:
+    job_terminated = False
+    while not job_terminated:
         # Get the logs in a loop and log the new lines
         log_file_contents = ResourceClient().get_content(instance_log_id)
         print_output = log_file_contents[cur_idx:]
+        # Get the status of the Job from the current log line
+        job_terminated = check_job_termination_line(print_output)
         cur_idx += len(print_output)
         sys.stdout.write(print_output)
         sleep(sleep_duration)
