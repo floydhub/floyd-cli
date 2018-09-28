@@ -3,7 +3,6 @@ import sys
 import tarfile
 import signal
 import errno
-import tempfile
 
 from pathlib2 import PurePath
 from shutil import rmtree
@@ -151,11 +150,12 @@ def create_tarfile(source_dir, filename="/tmp/contents.tar.gz"):
                             % (source_dir))
         # OSError: [Errno 28] No Space Left on Device (IOError on python2.7)
         elif e.errno == errno.ENOSPC:
+            dir_path = os.path.dirname(filename)
             warn_purge_exit(info_msg="No space left. Removing compressed data...",
                             filename=filename,
                             exit_msg=("No space left when compressing your data in: %s.\n"
                                       "Make sure to have enough space before uploading your data.")
-                            % (tempfile.mkdtemp()))
+                            % (os.path.abspath(dir_path)))
 
     except KeyboardInterrupt:  # Purge tarball on Ctrl-C
         warn_purge_exit(info_msg="Ctrl-C signal detected: Removing compressed data...",
