@@ -59,12 +59,14 @@ def initialize_new_upload(data_config, access_token, description=None, source_di
     data_name = "{}/{}".format(namespace, data_config.name)
 
     # Create tarball of the data using the ID returned from the API
+    # TODO: allow to the users to change directory for the compression
     temp_dir = tempfile.mkdtemp()
     tarball_path = os.path.join(temp_dir, "floydhub_data.tar.gz")
 
     floyd_logger.debug("Creating tarfile with contents of current directory: %s",
                        tarball_path)
     floyd_logger.info("Compressing data...")
+
     # TODO: purge tarball on Ctrl-C
     create_tarfile(source_dir=source_dir, filename=tarball_path)
 
