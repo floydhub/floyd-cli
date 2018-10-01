@@ -24,6 +24,16 @@ from floyd.model.experiment_config import ExperimentConfig
 from floyd.log import logger as floyd_logger
 from floyd.cli.utils import read_yaml_config
 
+# Log output which defines the exit status of the job
+SUCCESS_OUTPUT = "[success] Finished execution"
+FAILURE_OUTPUT = "[failed] Task execution failed"
+SHUTDOWN_OUTPUT = "[shutdown] Task execution cancelled"
+TIMEOUT_OUTPUT = "[timeout] Task execution cancelled"
+TERMINATION_OUTPUT_LIST = [SUCCESS_OUTPUT,
+                           FAILURE_OUTPUT,
+                           SHUTDOWN_OUTPUT,
+                           TIMEOUT_OUTPUT]
+
 
 @click.command()
 @click.argument('project_name', nargs=1)
@@ -182,30 +192,19 @@ def get_log_id(job_id):
     return instance_log_id
 
 
-def check_job_termination_line(log_output_line, termination_list):
-    """
-    Get Job termination by inspecting if any of the termination log lines is detected
-    in the current log output line.
-    """
-    return any(terminal_line in log_output_line for terminal_line in termination_list)
-
-
 def follow_logs(instance_log_id, sleep_duration=1):
+    """
+    Follow the logs until Job termination.
+    """
     cur_idx = 0
     job_terminated = False
-
-    success = "[success] Finished execution"
-    failure = "[failed] Task execution failed"
-    shutdown = "[shutdown] Task execution cancelled"
-    timeout = "[timeout] Task execution cancelled"
-    termination_list = [success, failure, shutdown, timeout]
 
     while not job_terminated:
         # Get the logs in a loop and log the new lines
         log_file_contents = ResourceClient().get_content(instance_log_id)
         print_output = log_file_contents[cur_idx:]
         # Get the status of the Job from the current log line
-        job_terminated = check_job_termination_line(print_output, termination_list)
+        job_terminated = any(print_output in terminal_output for terminal_output in TERMINATION_OUTPUT_LIST)
         cur_idx += len(print_output)
         sys.stdout.write(print_output)
         sleep(sleep_duration)
