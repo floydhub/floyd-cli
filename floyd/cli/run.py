@@ -28,8 +28,8 @@ from floyd.exceptions import FloydException
 from floyd.manager.auth_config import AuthConfigManager
 from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.constants import (
-    G1P_INSTANCE_TYPE, C1P_INSTANCE_TYPE, C1_INSTANCE_TYPE, G1_INSTANCE_TYPE,
-    INSTANCE_ARCH_MAP, G2_INSTANCE_TYPE, C2_INSTANCE_TYPE
+    C1_INSTANCE_TYPE, G1_INSTANCE_TYPE, INSTANCE_ARCH_MAP,
+    G2_INSTANCE_TYPE, C2_INSTANCE_TYPE
 )
 from floyd.model.module import Module
 from floyd.model.experiment import ExperimentRequest
@@ -182,8 +182,6 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
 @click.option('--tensorboard/--no-tensorboard',
               help='Enable tensorboard in the job environment')
 @click.option('--cpu', is_flag=True, default=False, help='Run on a CPU instance')
-@click.option('--gpu+', 'gpup', is_flag=True, help='Run in a GPU+ instance')
-@click.option('--cpu+', 'cpup', is_flag=True, help='Run in a CPU+ instance')
 @click.option('--gpu2', 'gpu2', is_flag=True, help='Run in a GPU2 instance')
 @click.option('--cpu2', 'cpu2', is_flag=True, help='Run in a CPU2 instance')
 @click.option('--max-runtime', '-r', help='Max runtime after which job is terminated, in seconds')
@@ -193,7 +191,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
               default=True)
 @click.argument('command', nargs=-1)
 @click.pass_context
-def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpup, cpup, gpu2, cpu2, max_runtime, task, command):
+def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorboard, gpu2, cpu2, max_runtime, task, command):
     """
     Start a new job on FloydHub.
 
@@ -245,10 +243,6 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
         instance_type = G2_INSTANCE_TYPE
     elif cpu2:
         instance_type = C2_INSTANCE_TYPE
-    elif gpup:
-        instance_type = G1P_INSTANCE_TYPE
-    elif cpup:
-        instance_type = C1P_INSTANCE_TYPE
     elif gpu:
         instance_type = G1_INSTANCE_TYPE
     elif cpu:
@@ -405,11 +399,7 @@ def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cp
     except FloydException:
         job = expt_client.get(job_name)
 
-    if gpup:
-        instance_type = G1P_INSTANCE_TYPE
-    elif cpup:
-        instance_type = C1P_INSTANCE_TYPE
-    elif gpu:
+    if gpu:
         instance_type = G1_INSTANCE_TYPE
     elif cpu:
         instance_type = C1_INSTANCE_TYPE

@@ -72,7 +72,7 @@ class TestExperimentRun(unittest.TestCase):
     @patch('floyd.cli.run.normalize_data_name', return_value='mckay/datasets/foo/1')
     def test_get_command_line(self, _):
         re = get_command_line(
-            instance_type='g1p',
+            instance_type='g2',
             env='pytorch-2.0:py2',
             message='test\' message',
             data=['foo:input'],
@@ -81,7 +81,7 @@ class TestExperimentRun(unittest.TestCase):
             tensorboard=True,
             command_str='echo hello'
         )
-        assert re == 'floyd run --gpu+ --env pytorch-2.0:py2 --message \'test\'"\'"\' message\' --data mckay/datasets/foo/1:input --tensorboard \'echo hello\''
+        assert re == 'floyd run --gpu2 --env pytorch-2.0:py2 --message \'test\'"\'"\' message\' --data mckay/datasets/foo/1:input --tensorboard \'echo hello\''
 
         re = get_command_line(
             instance_type='c1',
