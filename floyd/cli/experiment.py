@@ -204,7 +204,7 @@ def follow_logs(instance_log_id, sleep_duration=1):
         log_file_contents = ResourceClient().get_content(instance_log_id)
         print_output = log_file_contents[cur_idx:]
         # Get the status of the Job from the current log line
-        job_terminated = any(print_output in terminal_output for terminal_output in TERMINATION_OUTPUT_LIST)
+        job_terminated = any(terminal_output in print_output for terminal_output in TERMINATION_OUTPUT_LIST)
         cur_idx += len(print_output)
         sys.stdout.write(print_output)
         sleep(sleep_duration)
