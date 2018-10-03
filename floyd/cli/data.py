@@ -100,16 +100,26 @@ def status(id):
     The command also accepts a specific dataset version.
     """
     if id:
-        data_source = DataClient().get(normalize_data_name(id))
-
-        if not data_source:
-            # Try with the raw ID
-            data_source = DataClient().get(id)
-
+        data_source = get_data_object(id, use_data_config=False)
         print_data([data_source] if data_source else [])
     else:
         data_sources = DataClient().get_all()
         print_data(data_sources)
+
+
+def get_data_object(data_id, use_data_config=True):
+    """
+    Normalize the data_id and query the server.
+    If that is unavailable try the raw ID
+    """
+    normalized_data_reference = normalize_data_name(data_id, use_data_config=use_data_config)
+    data_obj = DataClient().get(normalized_data_reference)
+
+    # Try with the raw ID
+    if not data_obj and data_id != normalized_data_reference:
+        data_obj = DataClient().get(id)
+
+    return data_obj
 
 
 def print_data(data_sources):
@@ -134,11 +144,7 @@ def clone(id):
     """
     Download all files in a dataset.
     """
-
-    data_source = DataClient().get(normalize_data_name(id, use_data_config=False))
-    if id and not data_source:
-        # Try with the raw ID
-        data_source = DataClient().get(id)
+    data_source = get_data_object(id, use_data_config=False)
 
     if not data_source:
         if 'output' in id:
@@ -159,10 +165,7 @@ def listfiles(data_name):
     List files in a dataset.
     """
 
-    data_source = DataClient().get(normalize_data_name(data_name, use_data_config=False))
-    if data_name and not data_source:
-        # Try with the raw ID
-        data_source = DataClient().get(data_name)
+    data_source = get_data_object(data_name, use_data_config=False)
 
     if not data_source:
         if 'output' in data_name:
@@ -202,10 +205,7 @@ def getfile(data_name, path):
     Download a specific file from a dataset.
     """
 
-    data_source = DataClient().get(normalize_data_name(data_name, use_data_config=False))
-    if data_name and not data_source:
-        # Try with the raw ID
-        data_source = DataClient().get(data_name)
+    data_source = get_data_object(data_name, use_data_config=False)
 
     if not data_source:
         if 'output' in data_name:
@@ -215,6 +215,7 @@ def getfile(data_name, path):
     url = "{}/api/v1/resources/{}/{}?content=true".format(floyd.floyd_host, data_source.resource_id, path)
     fname = os.path.basename(path)
     DataClient().download(url, filename=fname)
+    floyd_logger.info("Download finished")
 
 
 @click.command()
@@ -225,10 +226,7 @@ def output(id, url):
     """
     View the files from a dataset.
     """
-    data_source = DataClient().get(normalize_data_name(id))
-    if id and not data_source:
-        # Try with the raw ID
-        data_source = DataClient().get(id)
+    data_source = get_data_object(id, use_data_config=False)
 
     if not data_source:
         sys.exit()
@@ -252,10 +250,7 @@ def delete(ids, yes):
     failures = False
 
     for id in ids:
-        data_source = DataClient().get(normalize_data_name(id))
-        if not data_source:
-            # Try with the raw ID
-            data_source = DataClient().get(id)
+        data_source = get_data_object(id, use_data_config=True)
 
         if not data_source:
             failures = True
