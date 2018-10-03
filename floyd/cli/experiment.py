@@ -24,6 +24,16 @@ from floyd.model.experiment_config import ExperimentConfig
 from floyd.log import logger as floyd_logger
 from floyd.cli.utils import read_yaml_config
 
+# Log output which defines the exit status of the job
+SUCCESS_OUTPUT = "[success] Finished execution"
+FAILURE_OUTPUT = "[failed] Task execution failed"
+SHUTDOWN_OUTPUT = "[shutdown] Task execution cancelled"
+TIMEOUT_OUTPUT = "[timeout] Task execution cancelled"
+TERMINATION_OUTPUT_LIST = [SUCCESS_OUTPUT,
+                           FAILURE_OUTPUT,
+                           SHUTDOWN_OUTPUT,
+                           TIMEOUT_OUTPUT]
+
 
 @click.command()
 @click.argument('project_name', nargs=1)
@@ -148,7 +158,6 @@ def info(job_name_or_id):
     task_instance = TaskInstanceClient().get(task_instance_id) if task_instance_id else None
     normalized_job_name = normalize_job_name(experiment.name)
     table = [["Job name", normalized_job_name],
-             ["Output name", normalized_job_name + '/output' if task_instance else None],
              ["Created", experiment.created_pretty],
              ["Status", experiment.state], ["Duration(s)", experiment.duration_rounded],
              ["Instance", experiment.instance_type_trimmed],
@@ -183,11 +192,18 @@ def get_log_id(job_id):
 
 
 def follow_logs(instance_log_id, sleep_duration=1):
+    """
+    Follow the logs until Job termination.
+    """
     cur_idx = 0
-    while True:
+    job_terminated = False
+
+    while not job_terminated:
         # Get the logs in a loop and log the new lines
         log_file_contents = ResourceClient().get_content(instance_log_id)
         print_output = log_file_contents[cur_idx:]
+        # Get the status of the Job from the current log line
+        job_terminated = any(terminal_output in print_output for terminal_output in TERMINATION_OUTPUT_LIST)
         cur_idx += len(print_output)
         sys.stdout.write(print_output)
         sleep(sleep_duration)
@@ -195,17 +211,14 @@ def follow_logs(instance_log_id, sleep_duration=1):
 
 @click.command()
 @click.option('-u', '--url', is_flag=True, default=False, help='Only print url for accessing logs')
-@click.option('-t', '--tail', is_flag=True, default=False, help='Stream the logs')
-@click.option('-f', '--follow', is_flag=True, default=False, help='Stream the logs (alias for -t/--tail)')
+@click.option('-f', '--follow', is_flag=True, default=False, help='Keep streaming the logs in real time')
 @click.argument('id', nargs=1, required=False)
-def logs(id, url, tail, follow, sleep_duration=1):
+def logs(id, url, follow, sleep_duration=1):
     """
     View the logs of a job.
 
-    To follow along a job in real time, use the --tail flag
+    To follow along a job in real time, use the --follow flag
     """
-    tail = tail or follow
-
     instance_log_id = get_log_id(id)
 
     if url:
@@ -214,7 +227,7 @@ def logs(id, url, tail, follow, sleep_duration=1):
         floyd_logger.info(log_url)
         return
 
-    if tail:
+    if follow:
         floyd_logger.info("Launching job ...")
         follow_logs(instance_log_id, sleep_duration)
     else:
