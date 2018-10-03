@@ -33,6 +33,7 @@ class DataSchema(Schema):
     data = fields.Nested(DataDetailsSchema)
     version = fields.Str(allow_none=True)
     resource_id = fields.Str(allow_none=True)
+    public = fields.Boolean(allow_none=True)
 
     @post_load
     def make_data(self, data):
@@ -49,7 +50,8 @@ class Data(BaseModel):
                  description,
                  data,
                  version=None,
-                 resource_id=None):
+                 resource_id=None,
+                 public=None):
         self.id = id
         self.name = name
         self.created = self.localize_date(created)
@@ -58,6 +60,7 @@ class Data(BaseModel):
         self.state = data.state
         self.version = int(float(version)) if version else None
         self.resource_id = resource_id
+        self.public = public
 
     def localize_date(self, date):
         if not date.tzinfo:
