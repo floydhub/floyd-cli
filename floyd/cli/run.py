@@ -35,6 +35,7 @@ from floyd.model.module import Module
 from floyd.model.experiment import ExperimentRequest
 from floyd.log import logger as floyd_logger
 from floyd.exceptions import BadRequestException
+from floyd.cli.data import get_data_object
 from floyd.cli.experiment import get_log_id, follow_logs
 from floyd.cli.utils import current_project_namespace, read_yaml_config
 
@@ -54,14 +55,8 @@ def process_data_ids(data_ids):
         path = None
         if ':' in data_name_or_id:
             data_name_or_id, path = data_name_or_id.split(':')
-            data_name_or_id = normalize_data_name(data_name_or_id, use_data_config=False)
 
-        normalized_data_name = normalize_data_name(data_name_or_id, use_data_config=False)
-        data_obj = DataClient().get(normalized_data_name)
-
-        # The user could specify a raw ID as well
-        if not data_obj and data_name_or_id != normalized_data_name:
-            data_obj = DataClient().get(data_name_or_id)
+        data_obj = get_data_object(data_id=data_name_or_id, use_data_config=False)
 
         if not data_obj:
             floyd_logger.error(
