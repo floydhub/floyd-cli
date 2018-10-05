@@ -16,7 +16,6 @@ from floyd.constants import (
     INSTANCE_NAME_MAP,
     INSTANCE_TYPE_MAP,
 )
-from floyd.client.data import DataClient
 from floyd.client.project import ProjectClient
 from floyd.cli.utils import (
     get_data_name, normalize_data_name, normalize_job_name
