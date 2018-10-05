@@ -16,7 +16,6 @@ from floyd.constants import (
     INSTANCE_NAME_MAP,
     INSTANCE_TYPE_MAP,
 )
-from floyd.client.data import DataClient
 from floyd.client.project import ProjectClient
 from floyd.cli.utils import (
     get_data_name, normalize_data_name, normalize_job_name
@@ -35,12 +34,13 @@ from floyd.model.module import Module
 from floyd.model.experiment import ExperimentRequest
 from floyd.log import logger as floyd_logger
 from floyd.exceptions import BadRequestException
+from floyd.cli.data import get_data_object
 from floyd.cli.experiment import get_log_id, follow_logs
-from floyd.cli.utils import read_yaml_config
+from floyd.cli.utils import current_project_namespace, read_yaml_config
 
 
-def process_data_ids(data):
-    if len(data) > 5:
+def process_data_ids(data_ids):
+    if len(data_ids) > 5:
         floyd_logger.error(
             "Cannot attach more than 5 datasets to a job")
         return False, None
@@ -48,27 +48,37 @@ def process_data_ids(data):
     # Get the data entity from the server to:
     # 1. Confirm that the data id or uri exists and has the right permissions
     # 2. If uri is used, get the id of the dataset
-    data_ids = []
-    for data_name_or_id in data:
+    processed_data_ids = []
+
+    for data_name_or_id in data_ids:
         path = None
         if ':' in data_name_or_id:
             data_name_or_id, path = data_name_or_id.split(':')
-            data_name_or_id = normalize_data_name(data_name_or_id, use_data_config=False)
 
-        data_obj = DataClient().get(normalize_data_name(data_name_or_id, use_data_config=False))
-
-        if not data_obj:
-            # Try with the raw ID
-            data_obj = DataClient().get(data_name_or_id)
+        data_obj = get_data_object(data_id=data_name_or_id, use_data_config=False)
 
         if not data_obj:
-            floyd_logger.error("Data not found for name or id: {}".format(data_name_or_id))
+            floyd_logger.error(
+                "Data not found for name: {}. "
+                "Check if the data name is correct and you have permission to access it.".format(data_name_or_id)
+            )
             return False, None
+
+        # If data is private, check if the namespaces match
+        if not data_obj.public:
+            data_namespace = data_obj.name.split('/')[0]
+            if not data_namespace == current_project_namespace():
+                floyd_logger.error(
+                    "Data is private and can only be attached to projects in its own namespace ({}): {}".format(
+                        data_namespace, data_name_or_id)
+                )
+                return False, None
+
         if path:
-            data_ids.append("%s:%s" % (data_obj.id, path))
+            processed_data_ids.append("%s:%s" % (data_obj.id, path))
         else:
-            data_ids.append(data_obj.id)
-    return True, data_ids
+            processed_data_ids.append(data_obj.id)
+    return True, processed_data_ids
 
 
 def resolve_final_instance_type(instance_type_override, yaml_str, task, cli_default):

@@ -42,7 +42,7 @@ class TestExperimentRun(unittest.TestCase):
         assert_exit_code(result, 0)
 
     @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
-    @patch('floyd.cli.run.DataClient.get')
+    @patch('floyd.cli.data.DataClient.get')
     @patch('floyd.cli.run.EnvClient.get_all', return_value={'cpu': {'default': 'bar'}})
     @patch('floyd.cli.run.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.run.AuthConfigManager.get_auth_header', return_value="Bearer " + mock_access_token().token)
@@ -135,8 +135,8 @@ class TestExperimentRun(unittest.TestCase):
         result = self.runner.invoke(run, ['--env', 'foo', 'ls'])
         assert_exit_code(result, 0)
 
-    @patch('floyd.cli.run.DataClient.get')
     @patch('floyd.model.access_token.assert_token_not_expired')
+    @patch('floyd.cli.data.DataClient.get')
     @patch('floyd.cli.run.EnvClient.get_all', return_value={'cpu': {'foo': 'foo', 'bar': 'bar'}})
     @patch('floyd.cli.run.AuthConfigManager.get_access_token', side_effect=mock_access_token)
     @patch('floyd.cli.run.AuthConfigManager.get_auth_header', return_value="Bearer " + mock_access_token().token)
