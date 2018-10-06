@@ -113,11 +113,12 @@ def get_data_object(data_id, use_data_config=True):
     If that is unavailable try the raw ID
     """
     normalized_data_reference = normalize_data_name(data_id, use_data_config=use_data_config)
-    data_obj = DataClient().get(normalized_data_reference)
+    client = DataClient()
+    data_obj = client.get(normalized_data_reference)
 
     # Try with the raw ID
     if not data_obj and data_id != normalized_data_reference:
-        data_obj = DataClient().get(id)
+        data_obj = client.get(data_id)
 
     return data_obj
 
