@@ -190,6 +190,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
               type=click.Choice(['job', 'jupyter', 'serve']))
 @click.option('-f', '--follow', is_flag=True, default=False, help='Automatically follow logs')
 @click.option('--tensorboard/--no-tensorboard',
+              default=True,
               help='Enable tensorboard in the job environment')
 @click.option('--cpu', is_flag=True, default=False, help='Run on a CPU instance')
 @click.option('--gpu2', 'gpu2', is_flag=True, help='Run in a GPU2 instance')
