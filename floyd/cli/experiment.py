@@ -167,7 +167,7 @@ def info(job_name_or_id):
         table.append(["Mode", task_instance.mode])
         table.append(["Url", experiment.service_url])
     if experiment.tensorboard_url:
-        table.append(["Tensorboard", experiment.tensorboard_url])
+        table.append(["TensorBoard", experiment.tensorboard_url])
     floyd_logger.info(tabulate(table))
 
 

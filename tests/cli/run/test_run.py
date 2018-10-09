@@ -78,10 +78,9 @@ class TestExperimentRun(unittest.TestCase):
             data=['foo:input'],
             mode='job',
             open_notebook=False,
-            tensorboard=True,
             command_str='echo hello'
         )
-        assert re == 'floyd run --gpu2 --env pytorch-2.0:py2 --message \'test\'"\'"\' message\' --data mckay/datasets/foo/1:input --tensorboard \'echo hello\''
+        assert re == 'floyd run --gpu2 --env pytorch-2.0:py2 --message \'test\'"\'"\' message\' --data mckay/datasets/foo/1:input \'echo hello\''
 
         re = get_command_line(
             instance_type='c1',
@@ -90,7 +89,6 @@ class TestExperimentRun(unittest.TestCase):
             data=['foo:input', 'bar'],
             mode='jupyter',
             open_notebook=True,
-            tensorboard=False,
             command_str='echo \'hello'
         )
         assert re == 'floyd run --cpu --env tensorflow --data mckay/datasets/foo/1:input --data bar --mode jupyter'
@@ -102,10 +100,9 @@ class TestExperimentRun(unittest.TestCase):
             data=['foo:input'],
             mode='job',
             open_notebook=False,
-            tensorboard=True,
             command_str='echo hello > /output'
         )
-        assert re == 'floyd run --gpu --env tensorflow --data mckay/datasets/foo/1:input --tensorboard \'echo hello > /output\''
+        assert re == 'floyd run --gpu --env tensorflow --data mckay/datasets/foo/1:input \'echo hello > /output\''
 
     @patch('floyd.model.access_token.assert_token_not_expired')
     @patch('floyd.cli.run.EnvClient.get_all', return_value={'cpu': {'foo': 'foo', 'bar': 'bar'}})
