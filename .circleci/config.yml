@@ -3,6 +3,19 @@
 version: 2
 
 jobs:
+    lint:
+        docker:
+            - image: python:3.7
+        steps:
+            - checkout
+            - run:
+                name: Install dependencies
+                command: pip install flake8
+            - run:
+                name: Test
+                command: |
+                    flake8 floyd
+
     test-py27:
         docker:
             - image: python:2.7.11
@@ -10,11 +23,10 @@ jobs:
             - checkout
             - run:
                 name: Install dependencies
-                command: pip install tox tox-pyenv flake8
+                command: pip install tox tox-pyenv
             - run:
                 name: Test
                 command: |
-                    flake8 floyd
                     tox -e py27
 
     test-py35:
@@ -24,11 +36,10 @@ jobs:
             - checkout
             - run:
                 name: Install dependencies
-                command: pip install tox tox-pyenv flake8
+                command: pip install tox tox-pyenv
             - run:
                 name: Test
                 command: |
-                    flake8 floyd
                     tox -e py35
 
     test-py36:
@@ -38,12 +49,24 @@ jobs:
             - checkout
             - run:
                 name: Install dependencies
-                command: pip install tox tox-pyenv flake8
+                command: pip install tox tox-pyenv
             - run:
                 name: Test
                 command: |
-                    flake8 floyd
                     tox -e py36
+
+    test-py37:
+        docker:
+            - image: python:3.7
+        steps:
+            - checkout
+            - run:
+                name: Install dependencies
+                command: pip install tox tox-pyenv
+            - run:
+                name: Test
+                command: |
+                    tox -e py37
 
     deploy:
         docker:
@@ -52,7 +75,7 @@ jobs:
             - checkout
             - run:
                 name: Install dependencies
-                command: pip install tox tox-pyenv flake8
+                command: pip install tox tox-pyenv
             - run:
                 name: Deploy to pypi
                 command: |
@@ -77,20 +100,22 @@ jobs:
                   conda install conda-build
                   conda install anaconda-client
             - run:
-                name: Build the package for python 2.7, 3.5, and 3.6
+                name: Build the package for all python versions
                 command: |
                   PATH=$PATH:$HOME/miniconda/bin
                   conda build --python 2.7 conda
                   conda build --python 3.5 conda
                   conda build --python 3.6 conda
+                  conda build --python 3.7 conda
             - run:
-                name: Create the build for each OS and architecture (for each 2.7, 3.5, and 3.6)
+                name: Create the build for each OS and architecture (for each 2.7, 3.5, 3.6 and 3.7)
                 command: |
                   PATH=$PATH:$HOME/miniconda/bin
                   cp -r $HOME/miniconda/conda-bld/linux-64 .
                   conda convert -p all `ls linux-64/floyd-cli-*-py27*.tar.bz2` # 2.7
                   conda convert -p all `ls linux-64/floyd-cli-*-py35*.tar.bz2` # 3.5
                   conda convert -p all `ls linux-64/floyd-cli-*-py36*.tar.bz2` # 3.6
+                  conda convert -p all `ls linux-64/floyd-cli-*-py37*.tar.bz2` # 3.7
             - run:
                 name: Upload all 2.7 versions to anaconda.org
                 command: |
@@ -118,20 +143,33 @@ jobs:
                   anaconda -t $ANACONDA_TOKEN upload --force `ls win-32/floyd-cli-*-py36*.tar.bz2`
                   anaconda -t $ANACONDA_TOKEN upload --force `ls win-64/floyd-cli-*-py36*.tar.bz2`
                   anaconda -t $ANACONDA_TOKEN upload --force `ls osx-64/floyd-cli-*-py36*.tar.bz2`
+            - run:
+                name: Upload all 3.7 versions to anaconda.org
+                command: |
+                  PATH=$PATH:$HOME/miniconda/bin
+                  anaconda -t $ANACONDA_TOKEN upload --force `ls linux-64/floyd-cli-*-py37*.tar.bz2`
+                  anaconda -t $ANACONDA_TOKEN upload --force `ls linux-32/floyd-cli-*-py37*.tar.bz2`
+                  anaconda -t $ANACONDA_TOKEN upload --force `ls win-32/floyd-cli-*-py37*.tar.bz2`
+                  anaconda -t $ANACONDA_TOKEN upload --force `ls win-64/floyd-cli-*-py37*.tar.bz2`
+                  anaconda -t $ANACONDA_TOKEN upload --force `ls osx-64/floyd-cli-*-py37*.tar.bz2`
 
 
 workflows:
     version: 2
     build:
         jobs:
+            - lint
             - test-py27
             - test-py35
             - test-py36
+            - test-py37
             - deploy:
                 requires:
+                    - lint
                     - test-py27
                     - test-py35
                     - test-py36
+                    - test-py37
                 filters:
                     branches:
                         only: /release.*/
