@@ -1,6 +1,7 @@
 import pkg_resources
 import sys
 import os
+import re
 
 from floyd.exceptions import FloydException
 from floyd.manager.auth_config import AuthConfigManager
@@ -8,6 +9,9 @@ from floyd.manager.experiment_config import ExperimentConfigManager
 from floyd.manager.data_config import DataConfigManager
 
 from floyd.constants import DOCKER_IMAGES
+
+# Name or Namespace/Name or Namespace/[datasets|projects]/Name
+NAMESPACE_PATTERN = '^([a-zA-Z0-9\-]+\/?){0,2}?[a-zA-Z0-9\-]+$'
 
 
 def get_docker_image(env, gpu):
@@ -221,6 +225,14 @@ def get_namespace_from_name(name):
     or
     <namespace>/<project_name>
     """
+    if not re.match(NAMESPACE_PATTERN, name):
+        sys.exit(("Argument '%s' doesn't match any recognized pattern:\n"
+                  "\tfloyd [data] init <project_or_dataset_name>\n"
+                  "\tfloyd [data] init <namespace>/<project_or_dataset_name>\n"
+                  "\tfloyd [data] init <namespace>/[projects|dataset]/<project_or_dataset_name>\n"
+                  "\n Note: Argument can contains only alphanumeric and - chars"
+                  ) % name)
+
     name_parts = name.split("/", 2)
     if len(name_parts) > 1:
         return name_parts[0], name_parts[-1]
