@@ -190,7 +190,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
               type=click.Choice(['job', 'jupyter', 'serve']))
 @click.option('-f', '--follow', is_flag=True, default=False, help='Automatically follow logs')
 @click.option('--tensorboard/--no-tensorboard',
-              help='Enable tensorboard in the job environment')
+              help='TensorBoard is now enabled by default')
 @click.option('--cpu', is_flag=True, default=False, help='Run on a CPU instance')
 @click.option('--gpu2', 'gpu2', is_flag=True, help='Run in a GPU2 instance')
 @click.option('--cpu2', 'cpu2', is_flag=True, help='Run in a CPU2 instance')
@@ -280,7 +280,6 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
                     description=message or '',
                     command=command_str,
                     mode=mode,
-                    enable_tensorboard=tensorboard,
                     family_id=experiment_config.family_id,
                     inputs=module_inputs,
                     env=env,
@@ -303,7 +302,7 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
     # Get the actual command entered in the command line
     if max_runtime:
         max_runtime = int(max_runtime)
-    full_command = get_command_line(instance_type, env, message, data, mode, open_notebook, tensorboard, command_str)
+    full_command = get_command_line(instance_type, env, message, data, mode, open_notebook, command_str)
     experiment_request = ExperimentRequest(name=experiment_name,
                                            description=message,
                                            full_command=full_command,
@@ -331,7 +330,7 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
         follow_logs(instance_log_id)
 
 
-def get_command_line(instance_type, env, message, data, mode, open_notebook, tensorboard, command_str):
+def get_command_line(instance_type, env, message, data, mode, open_notebook, command_str):
     """
     Return a string representing the full floyd command entered in the command line
     """
@@ -350,8 +349,6 @@ def get_command_line(instance_type, env, message, data, mode, open_notebook, ten
                 data_item = normalize_data_name(parts[0], use_data_config=False) + ':' + parts[1]
 
             floyd_command += ["--data", data_item]
-    if tensorboard:
-        floyd_command.append("--tensorboard")
     if mode and mode != "job":
         floyd_command += ["--mode", mode]
         if mode == 'jupyter':
