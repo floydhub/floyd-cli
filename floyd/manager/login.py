@@ -1,7 +1,6 @@
 import sys
 import threading
 import socket
-import contextlib
 import webbrowser
 import subprocess
 
@@ -57,34 +56,34 @@ class LoginHttpRequestHandler(BaseHTTPRequestHandler):
         return
 
 
-@contextlib.contextmanager
 def get_free_port():
     try:
         s = socket.socket()
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind(('localhost', 0))
-        yield s.getsockname()[1]
+        (hostname, port) = s.getsockname()
         s.close()
+        return (hostname, port)
     except socket.error:
-        yield None
+        return (None, None)
 
 
 def wait_for_apikey():
     floyd_logger.info('Waiting for login from browser...')
 
     key_queue = Queue()
-    with get_free_port() as port:
-        if not port:
-            floyd_logger.error("Failed to allocate TCP port for automatic login.")
-            return
-        server = LoginServer(('', port), LoginHttpRequestHandler, key_queue)
+    (hostname, port) = get_free_port()
+    if not port:
+        floyd_logger.error("Failed to allocate TCP port for automatic login.")
+        return
+    server = LoginServer((hostname, port), LoginHttpRequestHandler, key_queue)
 
     t = threading.Thread(
         target=server.serve_forever)
     t.daemon = True
     t.start()
 
-    cli_host = 'http://127.0.0.1'
+    cli_host = 'http://' + hostname
     url = '%s/cli_login?callback=%s:%s' % (floyd.floyd_web_host, cli_host, port)
     subprocess.check_output(
         [sys.executable, '-m', 'webbrowser', url], stderr=subprocess.STDOUT)
