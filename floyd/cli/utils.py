@@ -230,7 +230,7 @@ def get_namespace_from_name(name):
                   "\tfloyd [data] init <project_or_dataset_name>\n"
                   "\tfloyd [data] init <namespace>/<project_or_dataset_name>\n"
                   "\tfloyd [data] init <namespace>/[projects|dataset]/<project_or_dataset_name>\n"
-                  "\n Note: Argument can contains only alphanumeric and - chars"
+                  "\n Note: Argument can contain only alphanumeric and - chars"
                   ) % name)
 
     name_parts = name.split("/", 2)
