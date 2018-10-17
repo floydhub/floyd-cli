@@ -11,7 +11,7 @@ from floyd.manager.data_config import DataConfigManager
 from floyd.constants import DOCKER_IMAGES
 
 # Name or Namespace/Name or Namespace/[datasets|projects]/Name
-NAMESPACE_PATTERN = '^([a-zA-Z0-9\-]+\/?){0,2}?[a-zA-Z0-9\-]+$'
+NAMESPACE_PATTERN = r'^([a-zA-Z0-9\-]+\/?){0,2}?[a-zA-Z0-9\-]+$'
 
 
 def get_docker_image(env, gpu):
@@ -230,7 +230,7 @@ def get_namespace_from_name(name):
                   "\tfloyd [data] init <project_or_dataset_name>\n"
                   "\tfloyd [data] init <namespace>/<project_or_dataset_name>\n"
                   "\tfloyd [data] init <namespace>/[projects|dataset]/<project_or_dataset_name>\n"
-                  "\n Note: Argument can contain only alphanumeric and - chars"
+                  "\n Note: Argument can only contain alphanumeric (and hyphen-minus -) characters."
                   ) % name)
 
     name_parts = name.split("/", 2)

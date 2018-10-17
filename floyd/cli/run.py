@@ -39,15 +39,16 @@ from floyd.cli.data import get_data_object
 from floyd.cli.experiment import get_log_id, follow_logs
 from floyd.cli.utils import current_project_namespace, read_yaml_config
 
-# DEPRECATED: <data_id>, <data_id>:<mounting_point>
+# DEPRECATED pattern, but still available: <data_id>, <data_id>:<mount_dir>
 DATAID_PATTERN = r'[a-zA-Z0-9\-]+(\:\/?[a-zA-Z0-9\-]+\/?)?'
 
+# All the possible patterns:
 # <dataset_name>
-# or <dataset_name>:<mounting_point>
+# or <dataset_name>:<mount_dir>
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>
-# or <namespace>/[projects|datasets]/<dataset_or_project_name>:<mounting_point>
+# or <namespace>/[projects|datasets]/<dataset_or_project_name>:<mount_dir>
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>
-# or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>:<mounting_point>
+# or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>:<mount_dir>
 DATANAME_PATTERN = r'([a-zA-Z0-9\-]+\/(datasets|projects)\/)?[a-zA-Z0-9\-]+(\/[0-9]+)?(\:\/?[a-zA-Z0-9\-]+\/?)?'
 DATAMOUNT_PATTERN = '^(%s|%s)$' % (DATAID_PATTERN, DATANAME_PATTERN)
 
@@ -66,15 +67,11 @@ def process_data_ids(data_ids):
     for data_name_or_id in data_ids:
         if not re.match(DATAMOUNT_PATTERN, data_name_or_id):
             sys.exit(("Argument '%s' doesn't match any recognized pattern:\n"
-                      "\tfloyd run --data <dataset_name>\n"
-                      "\tfloyd run --data <dataset_name>:<mounting_point>\n"
-                      "\tfloyd run --data <namespace>/[projects|datasets]/<dataset_or_project_name>\n"
-                      "\tfloyd run --data <namespace>/[projects|datasets]/<dataset_or_project_name>:<mounting_point>\n"
-                      "\tfloyd run --data <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>\n"
-                      "\tfloyd run --data <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>:<mounting_point>\n"
-                      "\tfloyd run --data <data_id> (DEPRECATED)\n"
+                      "\tfloyd run --data <namespace>/datasets/<dataset_name>:<mount_dir>\n"
+                      "\tfloyd run --data <namespace>/datasets/<dataset_name>/<version>:<mount_dir>\n"
+                      "\tfloyd run --data <namespace>/projects/<project_name>/<version>:<mount_dir>\n"
                       "\tfloyd run --data <data_id>:<mounting_point> (DEPRECATED)\n"
-                      "\n Note: Argument can contain only alphanumeric and - chars"
+                      "\n Note: Argument can only contain alphanumeric (and hyphen-minus -) characters."
                       ) % data_name_or_id)
         path = None
         if ':' in data_name_or_id:
