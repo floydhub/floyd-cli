@@ -69,6 +69,70 @@ class TestExperimentRun(unittest.TestCase):
         result = self.runner.invoke(run, ['command', '--data', 'data-id1', '--data', 'data-id2'], catch_exceptions=False)
         assert_exit_code(result, 0)
 
+    @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
+    @patch('floyd.cli.data.DataClient.get')
+    @patch('floyd.cli.run.EnvClient.get_all', return_value={'cpu': {'default': 'bar'}})
+    @patch('floyd.cli.run.AuthConfigManager.get_access_token', side_effect=mock_access_token)
+    @patch('floyd.cli.run.AuthConfigManager.get_auth_header', return_value="Bearer " + mock_access_token().token)
+    @patch('floyd.cli.run.ExperimentConfigManager.get_config', side_effect=mock_experiment_config)
+    @patch('floyd.cli.run.ExperimentConfigManager.set_config')
+    @patch('floyd.cli.run.ModuleClient.create', return_value='module_id')
+    @patch('floyd.cli.run.ExperimentClient')
+    @patch('floyd.cli.run.ProjectClient.exists', return_value=True)
+    def test_regex_for_data_arg(self,
+                                exists,
+                                expt_client,
+                                create_module,
+                                set_config,
+                                get_config,
+                                get_auth_header,
+                                get_access_token,
+                                env_get_all,
+                                data_get,
+                                get_data_config):
+        """
+        Test regex patterns for data arg
+        """
+        # PATTERN: <dataset_name>
+        result = self.runner.invoke(run, ['command', '--data', 'data-id1'], catch_exceptions=False)
+        assert_exit_code(result, 0)
+
+        # PATTERN: <dataset_name>:<mounting_point>
+        result = self.runner.invoke(run, ['command', '--data', 'data-id1:/bar'], catch_exceptions=False)
+        assert_exit_code(result, 0)
+
+        # PATTERN: <namespace>/[projects|datasets]/<dataset_or_project_name>
+        result = self.runner.invoke(run, ['command', '--data', 'mckay/datasets/data-id1'], catch_exceptions=False)
+        assert_exit_code(result, 0)
+
+        # PATTERN: <namespace>/[projects|datasets]/<dataset_or_project_name>:<mounting_point>
+        result = self.runner.invoke(run, ['command', '--data', 'mckay/datasets/data-id1:/bar'], catch_exceptions=False)
+        assert_exit_code(result, 0)
+
+        # PATTERN: <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>
+        result = self.runner.invoke(run, ['command', '--data', 'mckay/datasets/data-id1/1'], catch_exceptions=False)
+        assert_exit_code(result, 0)
+
+        # PATTERN: <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>:<mounting_point>
+        result = self.runner.invoke(run, ['command', '--data', 'mckay/datasets/data-id1/1:bar'], catch_exceptions=False)
+        assert_exit_code(result, 0)
+
+        # PATTERN: Bad argument (missing mounting point)
+        result = self.runner.invoke(run, ['command', '--data', 'data-id1:'], catch_exceptions=False)
+        assert_exit_code(result, 1)
+
+        # PATTERN: Bad argument (/)
+        result = self.runner.invoke(run, ['command', '--data', '/'], catch_exceptions=False)
+        assert_exit_code(result, 1)
+
+        # PATTERN: Bad argument - URL
+        result = self.runner.invoke(run, ['command', '--data', 'https://floydhub.com/mckay/datasets/data-id1'], catch_exceptions=False)
+        assert_exit_code(result, 1)
+
+        # PATTERN: Bad argument - mounting point
+        result = self.runner.invoke(run, ['command', '--data', 'mckay/datasets/data-id1:/input/code'], catch_exceptions=False)
+        assert_exit_code(result, 1)
+
     @patch('floyd.cli.run.normalize_data_name', return_value='mckay/datasets/foo/1')
     def test_get_command_line(self, _):
         re = get_command_line(
@@ -188,15 +252,15 @@ task:
     @patch('floyd.cli.run.ExperimentClient')
     @patch('floyd.cli.run.ProjectClient.exists', return_value=True)
     def test_with_invalid_config(self,
-                          exists,
-                          expt_client,
-                          create_module,
-                          set_config,
-                          get_config,
-                          get_auth_header,
-                          get_access_token,
-                          get_all_env,
-                          assert_token_not_expired):
+                                 exists,
+                                 expt_client,
+                                 create_module,
+                                 set_config,
+                                 get_config,
+                                 get_auth_header,
+                                 get_access_token,
+                                 get_all_env,
+                                 assert_token_not_expired):
         """
         Simple experiment with no data attached
         """
