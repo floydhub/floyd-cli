@@ -9,7 +9,7 @@ from clint.textui.progress import dots, STREAM as clint_STREAM
 from floyd.exceptions import WaitTimeoutException
 from floyd.client.data import DataClient
 from floyd.client.resource import ResourceClient
-from floyd.client.files import create_tarfile, sizeof_fmt
+from floyd.client.files import sizeof_fmt, DataCompressor
 from floyd.client.tus_data import TusDataClient
 from floyd.log import logger as floyd_logger
 from floyd.manager.data_config import DataConfigManager
@@ -65,10 +65,11 @@ def initialize_new_upload(data_config, access_token, description=None, source_di
 
     floyd_logger.debug("Creating tarfile with contents of current directory: %s",
                        tarball_path)
-    floyd_logger.info("Compressing data...")
 
+    # DEBUG
+    data_compressor = DataCompressor(source_dir=source_dir, filename=tarball_path)
     # TODO: purge tarball on Ctrl-C
-    create_tarfile(source_dir=source_dir, filename=tarball_path)
+    data_compressor.create_tarfile()
 
     # If starting a new upload fails for some reason down the line, we don't
     # want to re-tar, so save off the tarball path now

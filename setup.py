@@ -31,6 +31,7 @@ setup(
         "pathlib2>=2.2.1,<3",
         "PyYAML",
         "raven",
+        "scandir;python_version<'3.5'",
     ],
     setup_requires=[],
     dependency_links=[],
