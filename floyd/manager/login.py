@@ -50,7 +50,17 @@ class LoginHttpRequestHandler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write("OK".encode('utf-8'))
+
+        page_content = ("""
+            <html>
+            <header>
+             <script>
+               window.location.replace("%s/cli_login?keystate=sent");
+             </script>
+            </header>
+            </html>
+        """ % (floyd.floyd_web_host)).encode('utf-8')
+        self.wfile.write(page_content)
 
     def log_message(self, fmt, *args):
         return
@@ -84,7 +94,7 @@ def wait_for_apikey():
     t.start()
 
     cli_host = 'http://' + hostname
-    url = '%s/cli_login?callback=%s:%s' % (floyd.floyd_web_host, cli_host, port)
+    url = '%s/cli_login?fallback=redirect&callback=%s:%s' % (floyd.floyd_web_host, cli_host, port)
     subprocess.check_output(
         [sys.executable, '-m', 'webbrowser', url], stderr=subprocess.STDOUT)
 
