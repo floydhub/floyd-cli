@@ -7,12 +7,12 @@ import errno
 from pathlib2 import PurePath
 from shutil import rmtree
 
-# Use the built-in version of scandir/walk if possible, otherwise
+# Use the built-in version of scandir if possible, otherwise
 # use the scandir module version
 try:
-    from os import scandir, walk
+    from os import scandir
 except ImportError:
-    from scandir import scandir, walk  # noqa: F401
+    from scandir import scandir  # noqa: F401
 from clint.textui.progress import Bar as ProgressBar
 
 from floyd.manager.floyd_ignore import FloydIgnoreManager
