@@ -68,7 +68,7 @@ jobs:
                 command: |
                     tox -e py37
 
-    deploy:
+    deploy-pypi:
         docker:
             - image: python:3.6.2
         steps:
@@ -89,6 +89,12 @@ jobs:
                   echo >> ~/.pypirc
                   python setup.py register -r pypi
                   python setup.py sdist upload -r pypi
+
+    deploy-conda:
+        docker:
+            - image: python:3.6.2
+        steps:
+            - checkout
             - run:
                 name: Install conda, conda-build, and anaconda-client
                 command: |
@@ -163,13 +169,20 @@ workflows:
             - test-py35
             - test-py36
             - test-py37
-            - deploy:
+            - deploy-pypi:
                 requires:
                     - lint
                     - test-py27
                     - test-py35
                     - test-py36
                     - test-py37
+                filters:
+                    branches:
+                        only: /release.*/
+
+            - deploy-conda:
+                requires:
+                    - deploy-pypi
                 filters:
                     branches:
                         only: /release.*/
