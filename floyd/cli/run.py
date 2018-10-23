@@ -40,7 +40,7 @@ from floyd.cli.experiment import get_log_id, follow_logs
 from floyd.cli.utils import current_project_namespace, read_yaml_config
 
 # DEPRECATED pattern, but still available: <data_id>, <data_id>:<mount_dir>
-DATAID_PATTERN = r'[a-zA-Z0-9\-]+(\:\/?[a-zA-Z0-9\-]+\/?)?'
+DATAID_PATTERN = r'[a-zA-Z0-9\-_]+(\:\/?[a-zA-Z0-9\-_]+\/?)?'
 
 # All the possible patterns:
 # <dataset_name>
@@ -49,7 +49,7 @@ DATAID_PATTERN = r'[a-zA-Z0-9\-]+(\:\/?[a-zA-Z0-9\-]+\/?)?'
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>:<mount_dir>
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>:<mount_dir>
-DATANAME_PATTERN = r'([a-zA-Z0-9\-]+\/(datasets|projects)\/)?[a-zA-Z0-9\-]+(\/[0-9]+)?(\:\/?[a-zA-Z0-9\-]+\/?)?'
+DATANAME_PATTERN = r'([a-zA-Z0-9\-_]+\/(datasets|projects)\/)?[a-zA-Z0-9\-_]+(\/[0-9]+)?(\:\/?[a-zA-Z0-9\-_]+\/?)?'
 DATAMOUNT_PATTERN = '^(%s|%s)$' % (DATAID_PATTERN, DATANAME_PATTERN)
 
 
