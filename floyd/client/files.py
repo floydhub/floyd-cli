@@ -156,7 +156,7 @@ class DataCompressor(object):
 
         Note: it should take about 0.1s for counting 100k files on a dual core machine
         """
-        floyd_logger.info("Get number of files to compress... (it could take some seconds)")
+        floyd_logger.info("Get number of files to compress... (this could take a few seconds)")
         paths = [self.source_dir]
         try:
             # Traverse each subdirs of source_dir and count files/dirs
@@ -183,7 +183,6 @@ class DataCompressor(object):
         """
         floyd_logger.info("Compressing data...")
         # Show progress bar (file_compressed/file_to_compress)
-        # self.__compression_bar = tqdm(total=self.__files_to_compress)
         self.__compression_bar = ProgressBar(expected_size=self.__files_to_compress, filled_char='=')
 
         # Auxiliary functions

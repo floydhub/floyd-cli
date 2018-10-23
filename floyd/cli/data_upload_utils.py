@@ -66,7 +66,6 @@ def initialize_new_upload(data_config, access_token, description=None, source_di
     floyd_logger.debug("Creating tarfile with contents of current directory: %s",
                        tarball_path)
 
-    # DEBUG
     data_compressor = DataCompressor(source_dir=source_dir, filename=tarball_path)
     # TODO: purge tarball on Ctrl-C
     data_compressor.create_tarfile()
