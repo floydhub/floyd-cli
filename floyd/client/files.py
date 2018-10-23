@@ -7,6 +7,14 @@ import errno
 from pathlib2 import PurePath
 from shutil import rmtree
 
+# Use the built-in version of scandir if possible, otherwise
+# use the scandir module version
+try:
+    from os import scandir
+except ImportError:
+    from scandir import scandir  # noqa: F401
+from clint.textui.progress import Bar as ProgressBar
+
 from floyd.manager.floyd_ignore import FloydIgnoreManager
 from floyd.log import logger as floyd_logger
 
@@ -119,45 +127,112 @@ def sizeof_fmt(num, suffix='B'):
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
 
-def warn_purge_exit(info_msg, filename, exit_msg):
+class DataCompressor(object):
     """
-    Warn the user that's something went wrong,
-    remove the tarball and provide an exit message.
+    Local Data Compression with progress bar.
     """
-    floyd_logger.info(info_msg)
-    rmtree(os.path.dirname(filename))
-    sys.exit(exit_msg)
+    def __init__(self,
+                 source_dir,
+                 filename):
+        # Data directory to compress
+        self.source_dir = source_dir
+        # Archive (Tar file) name
+        # e.g. "/tmp/contents.tar.gz"
+        self.filename = filename
 
+        # Prgress Bar for tracking data compression
+        self.__compression_bar = None
 
-def create_tarfile(source_dir, filename="/tmp/contents.tar.gz"):
-    """
-    Create a tar file with the contents of the current directory
-    """
-    try:
-        # Define the default signal handler for catching: Ctrl-C
-        signal.signal(signal.SIGINT, signal.default_int_handler)
-        with tarfile.open(filename, "w:gz") as tar:
-            tar.add(source_dir, arcname=os.path.basename(source_dir))
+        # Number of files to compress
+        self.__files_to_compress = 0
+        self.__get_nfiles_to_compress()
 
-    except (OSError, IOError) as e:
-        # OSError: [Errno 13] Permission denied
-        if e.errno == errno.EACCES:
-            source_dir = os.getcwd() if source_dir == '.' else source_dir  # Expand cwd
-            warn_purge_exit(info_msg="Permission denied. Removing compressed data...",
-                            filename=filename,
-                            exit_msg=("Permission denied. Make sure to have read permission "
-                                      "for all the files and directories in the path: %s")
-                            % (source_dir))
-        # OSError: [Errno 28] No Space Left on Device (IOError on python2.7)
-        elif e.errno == errno.ENOSPC:
-            dir_path = os.path.dirname(filename)
-            warn_purge_exit(info_msg="No space left. Removing compressed data...",
-                            filename=filename,
-                            exit_msg=("No space left when compressing your data in: %s.\n"
-                                      "Make sure to have enough space before uploading your data.")
-                            % (os.path.abspath(dir_path)))
+        # Number of files already compressed
+        self.__files_compressed = 0
 
-    except KeyboardInterrupt:  # Purge tarball on Ctrl-C
-        warn_purge_exit(info_msg="Ctrl-C signal detected: Removing compressed data...",
-                        filename=filename,
-                        exit_msg="Stopped the data upload gracefully.")
+    def __get_nfiles_to_compress(self):
+        """
+        Return the number of files to compress
+
+        Note: it should take about 0.1s for counting 100k files on a dual core machine
+        """
+        floyd_logger.info("Get number of files to compress... (this could take a few seconds)")
+        paths = [self.source_dir]
+        try:
+            # Traverse each subdirs of source_dir and count files/dirs
+            while paths:
+                path = paths.pop()
+                for item in scandir(path):
+                    if item.is_dir():
+                        paths.append(item.path)
+                        self.__files_to_compress += 1
+                    elif item.is_file():
+                        self.__files_to_compress += 1
+        except OSError as e:
+            # OSError: [Errno 13] Permission denied
+            if e.errno == errno.EACCES:
+                self.source_dir = os.getcwd() if self.source_dir == '.' else self.source_dir  # Expand cwd
+                sys.exit(("Permission denied. Make sure to have read permission "
+                          "for all the files and directories in the path: %s")
+                         % (self.source_dir))
+        floyd_logger.info("Compressing %d files", self.__files_to_compress)
+
+    def create_tarfile(self):
+        """
+        Create a tar file with the contents of the current directory
+        """
+        floyd_logger.info("Compressing data...")
+        # Show progress bar (file_compressed/file_to_compress)
+        self.__compression_bar = ProgressBar(expected_size=self.__files_to_compress, filled_char='=')
+
+        # Auxiliary functions
+        def dfilter_file_counter(tarinfo):
+            """
+            Dummy filter function used to track the progression at file levels.
+            """
+            # .update(1)
+            self.__files_compressed += 1
+            self.__compression_bar.show(self.__files_compressed)
+            return tarinfo
+
+        def warn_purge_exit(info_msg, filename, progress_bar, exit_msg):
+            """
+            Warn the user that's something went wrong,
+            remove the tarball and provide an exit message.
+            """
+            progress_bar.done()
+            floyd_logger.info(info_msg)
+            rmtree(os.path.dirname(filename))
+            sys.exit(exit_msg)
+
+        try:
+            # Define the default signal handler for catching: Ctrl-C
+            signal.signal(signal.SIGINT, signal.default_int_handler)
+            with tarfile.open(self.filename, "w:gz") as tar:
+                tar.add(self.source_dir, arcname=os.path.basename(self.source_dir), filter=dfilter_file_counter)
+            self.__compression_bar.done()
+        except (OSError, IOError) as e:
+            # OSError: [Errno 13] Permission denied
+            if e.errno == errno.EACCES:
+                self.source_dir = os.getcwd() if self.source_dir == '.' else self.source_dir  # Expand cwd
+                warn_purge_exit(info_msg="Permission denied. Removing compressed data...",
+                                filename=self.filename,
+                                progress_bar=self.__compression_bar,
+                                exit_msg=("Permission denied. Make sure to have read permission "
+                                          "for all the files and directories in the path: %s")
+                                % (self.source_dir))
+            # OSError: [Errno 28] No Space Left on Device (IOError on python2.7)
+            elif e.errno == errno.ENOSPC:
+                dir_path = os.path.dirname(self.filename)
+                warn_purge_exit(info_msg="No space left. Removing compressed data...",
+                                filename=self.filename,
+                                progress_bar=self.__compression_bar,
+                                exit_msg=("No space left when compressing your data in: %s.\n"
+                                          "Make sure to have enough space before uploading your data.")
+                                % (os.path.abspath(dir_path)))
+
+        except KeyboardInterrupt:  # Purge tarball on Ctrl-C
+            warn_purge_exit(info_msg="Ctrl-C signal detected: Removing compressed data...",
+                            filename=self.filename,
+                            progress_bar=self.__compression_bar,
+                            exit_msg="Stopped the data upload gracefully.")
