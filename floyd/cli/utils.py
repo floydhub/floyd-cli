@@ -11,7 +11,7 @@ from floyd.manager.data_config import DataConfigManager
 from floyd.constants import DOCKER_IMAGES
 
 # Name or Namespace/Name or Namespace/[datasets|projects]/Name
-NAMESPACE_PATTERN = r'^([a-zA-Z0-9\-]+\/?){0,2}?[a-zA-Z0-9\-]+$'
+NAMESPACE_PATTERN = r'^([a-zA-Z0-9\-]+\/?){0,2}?[a-zA-Z0-9\-_]+$'
 
 
 def get_docker_image(env, gpu):
