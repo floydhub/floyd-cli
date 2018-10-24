@@ -39,8 +39,12 @@ from floyd.cli.data import get_data_object
 from floyd.cli.experiment import get_log_id, follow_logs
 from floyd.cli.utils import current_project_namespace, read_yaml_config
 
+# This is the same as r'[\w\-]'
+ALLOWED_CHARSET = r'[a-zA-Z0-9\-_]'
+
 # DEPRECATED pattern, but still available: <data_id>, <data_id>:<mount_dir>
-DATAID_PATTERN = r'[a-zA-Z0-9\-_]+(\:\/?[a-zA-Z0-9\-_]+\/?)?'
+# DATAID_PATTERN = '%s+(\:\/?%s+\/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET)
+DATAID_PATTERN = '%s+(:/?%s+/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET)
 
 # All the possible patterns:
 # <dataset_name>
@@ -49,7 +53,7 @@ DATAID_PATTERN = r'[a-zA-Z0-9\-_]+(\:\/?[a-zA-Z0-9\-_]+\/?)?'
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>:<mount_dir>
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>:<mount_dir>
-DATANAME_PATTERN = r'([a-zA-Z0-9\-_]+\/(datasets|projects)\/)?[a-zA-Z0-9\-_]+(\/[0-9]+)?(\:\/?[a-zA-Z0-9\-_]+\/?)?'
+DATANAME_PATTERN = '(%s+/(datasets|projects)/)?%s+(/[0-9]+)?(:/?%s+/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
 DATAMOUNT_PATTERN = '^(%s|%s)$' % (DATAID_PATTERN, DATANAME_PATTERN)
 
 
@@ -71,7 +75,7 @@ def process_data_ids(data_ids):
                       "\tfloyd run --data <namespace>/datasets/<dataset_name>/<version>:<mount_dir>\n"
                       "\tfloyd run --data <namespace>/projects/<project_name>/<version>:<mount_dir>\n"
                       "\tfloyd run --data <data_id>:<mounting_point> (DEPRECATED)\n"
-                      "\n Note: Argument can only contain alphanumeric (and hyphen-minus -) characters."
+                      "\n Note: Argument can only contain alphanumeric, hyphen-minus - and underscore _ characters."
                       ) % data_name_or_id)
         path = None
         if ':' in data_name_or_id:
@@ -341,13 +345,10 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
     floyd_logger.debug("Created job : %s", expt_info['id'])
 
     job_name = expt_info['name']
-    if not follow:
-        show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook)
-    else:
-        # If the user specified --follow, we assume they're only interested in
-        # log output and not in anything that would be displayed by
-        # show_new_job_info.
-        floyd_logger.info("Opening logs ...")
+    show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook)
+
+    if follow:
+        floyd_logger.info("\nFollow flag detected (--follow): Opening logs ...")
         instance_log_id = instance_log_id = get_log_id(job_name)
         follow_logs(instance_log_id)
 

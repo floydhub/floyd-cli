@@ -43,8 +43,8 @@ def opt_to_resume(resume_flag):
 def upload_is_resumable(data_config):
     # TODO: Check to make sure server says the upload is resumable
     return (
-        (data_config.resource_id or "") or
-        (os.path.isfile(data_config.tarball_path or "") and
+        (data_config.resource_id or "") or  # noqa: W504
+        (os.path.isfile(data_config.tarball_path or "") and  # noqa: W504
          data_config.data_endpoint)
     )
 

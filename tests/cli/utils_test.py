@@ -84,3 +84,46 @@ class TestCliUtil(unittest.TestCase):
 
         # Returns the name of ExperimentConfigManager().get_config()
         assert current_project_name() == expt_config().name
+
+
+    @patch('floyd.cli.utils.current_username', return_value='pete')
+    def test_get_namespace_from_name(self, _0):
+        """
+        Test Regex for args of dataset and project initialization
+        """
+        from floyd.cli.utils import get_namespace_from_name
+        # PATTERN: <dataset_or_project_name>
+        assert get_namespace_from_name('test') == ('pete', 'test')
+
+        # PATTERN: <namespace>/[dataset|project]/<dataset_or_project_name>
+        assert get_namespace_from_name('foo_user/datasets/test_1') == ('foo_user', 'test_1')
+        assert get_namespace_from_name('foo_user/projects/test_1') == ('foo_user', 'test_1')
+        
+        # PATTERN: <namespace>/<dataset_or_project_name>
+        assert get_namespace_from_name('foo_user/test_1-1') == ('foo_user', 'test_1-1')
+
+        # BAD PATTERN: Bad argument (/)
+        with self.assertRaises(SystemExit) as cm:
+            get_namespace_from_name('/')
+
+        error = (
+                 "Argument '/' doesn't match any recognized pattern:\n"
+                 "\tfloyd [data] init <project_or_dataset_name>\n"
+                 "\tfloyd [data] init <namespace>/<project_or_dataset_name>\n"
+                 "\tfloyd [data] init <namespace>/[projects|dataset]/<project_or_dataset_name>\n"
+                 "\n Argument can only contain alphanumeric, hyphen-minus - and underscore _ characters."
+                 )
+        self.assertEqual(cm.exception.code, error)
+
+        # BAD PATTERN: Characters not allowed (:?)
+        with self.assertRaises(SystemExit) as cm:
+            get_namespace_from_name('test_:?1-1')
+
+        error = (
+                 "Argument 'test_:?1-1' doesn't match any recognized pattern:\n"
+                 "\tfloyd [data] init <project_or_dataset_name>\n"
+                 "\tfloyd [data] init <namespace>/<project_or_dataset_name>\n"
+                 "\tfloyd [data] init <namespace>/[projects|dataset]/<project_or_dataset_name>\n"
+                 "\n Argument can only contain alphanumeric, hyphen-minus - and underscore _ characters."
+                 )
+        self.assertEqual(cm.exception.code, error)
