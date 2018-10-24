@@ -54,7 +54,7 @@ class ExperimentClient(FloydHttpClient):
             self.request("DELETE",
                          "{}{}".format(self.url, id))
             return True
-        except NotFoundException as e:
+        except NotFoundException:
             floyd_logger.info(
                 ("Job {}: ERROR! A deletable job with this "
                  "id was not found. Make sure you have the correct id and "

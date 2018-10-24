@@ -57,7 +57,7 @@ class TusDataClient(FloydHttpClient):
         except FloydException as e:
             floyd_logger.info("Data upload create: ERROR! %s", e.message)
             location = ""
-        except requests.exceptions.ConnectionError as e:
+        except requests.exceptions.ConnectionError:
             floyd_logger.error(
                 "Cannot connect to the Floyd data upload server for upload url. "
                 "Check your internet connection.")
@@ -84,7 +84,7 @@ class TusDataClient(FloydHttpClient):
                 "Failed to fetch offset data from upload server! %s",
                 e.message)
             return False
-        except requests.exceptions.ConnectionError as e:
+        except requests.exceptions.ConnectionError:
             floyd_logger.error(
                 "Cannot connect to the Floyd data upload server for offset. "
                 "Check your internet connection.")
@@ -109,7 +109,7 @@ class TusDataClient(FloydHttpClient):
                         "Failed to fetch offset data from upload server! %s",
                         e.message)
                     return False
-                except requests.exceptions.ConnectionError as e:
+                except requests.exceptions.ConnectionError:
                     floyd_logger.error(
                         "Cannot connect to the Floyd data upload server. "
                         "Check your internet connection.")

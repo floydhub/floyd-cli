@@ -110,11 +110,11 @@ class TestExperimentRun(unittest.TestCase):
         assert_exit_code(result, 0)
 
         # PATTERN: <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>
-        result = self.runner.invoke(run, ['command', '--data', 'mckay/datasets/data-id1/1'], catch_exceptions=False)
+        result = self.runner.invoke(run, ['command', '--data', 'mckay/datasets/data_id1/1'], catch_exceptions=False)
         assert_exit_code(result, 0)
 
         # PATTERN: <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>:<mounting_point>
-        result = self.runner.invoke(run, ['command', '--data', 'mckay/datasets/data-id1/1:bar'], catch_exceptions=False)
+        result = self.runner.invoke(run, ['command', '--data', 'mckay/datasets/data-id1/1:bar_2_foo'], catch_exceptions=False)
         assert_exit_code(result, 0)
 
         # PATTERN: Bad argument (missing mounting point)

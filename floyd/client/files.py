@@ -190,9 +190,8 @@ class DataCompressor(object):
             """
             Dummy filter function used to track the progression at file levels.
             """
-            # .update(1)
-            self.__files_compressed += 1
             self.__compression_bar.show(self.__files_compressed)
+            self.__files_compressed += 1
             return tarinfo
 
         def warn_purge_exit(info_msg, filename, progress_bar, exit_msg):
