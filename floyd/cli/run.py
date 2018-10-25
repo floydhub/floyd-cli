@@ -53,8 +53,9 @@ DATAID_PATTERN = '%s+(:/?%s+/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET)
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>:<mount_dir>
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>:<mount_dir>
-DATANAME_PATTERN = '(%s+/(datasets|projects)/)?%s+(/[0-9]+)?(:/?%s+/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
-DATAMOUNT_PATTERN = '^(%s|%s)$' % (DATAID_PATTERN, DATANAME_PATTERN)
+DATANAME_PATTERN = '(%s+/datasets/)?%s+(/[0-9]+)?(:/?%s+/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
+PRJFILE_PATTERN = '(%s+/projects/)?%s+(/[0-9]+(/output)?)?(:/?%s+/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
+DATAMOUNT_PATTERN = '^(%s|%s|%s)$' % (DATAID_PATTERN, DATANAME_PATTERN, PRJFILE_PATTERN)
 
 
 def process_data_ids(data_ids):
