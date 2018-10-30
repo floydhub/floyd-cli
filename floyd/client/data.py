@@ -1,6 +1,6 @@
 from clint.textui.progress import Bar as ProgressBar
 
-from floyd.manager.auth_config import AuthConfigManager
+from floyd.manager.data_config import DataConfigManager
 from floyd.exceptions import FloydException, BadRequestException
 from floyd.client.base import FloydHttpClient
 from floyd.model.data import Data
@@ -75,11 +75,12 @@ class DataClient(FloydHttpClient):
 
     def get_all(self):
         try:
-            access_token = AuthConfigManager.get_access_token()
+            data_config = DataConfigManager.get_config()
+
             response = self.request("GET",
                                     self.url,
                                     params={"module_type": "data",
-                                            "username": access_token.username})
+                                            "family_id": data_config.family_id})
             data_dict = response.json()
             return [Data.from_dict(data) for data in data_dict]
         except FloydException as e:
