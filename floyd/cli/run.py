@@ -68,6 +68,8 @@ def process_data_ids(data_ids):
     # 1. Confirm that the data id or uri exists and has the right permissions
     # 2. If uri is used, get the id of the dataset
     processed_data_ids = []
+    # List of list to collect data info for show_new_job_info - [[data, mount_dir]]
+    show_data_info = []
 
     for data_name_or_id in data_ids:
         if not re.match(DATAMOUNT_PATTERN, data_name_or_id):
@@ -103,9 +105,11 @@ def process_data_ids(data_ids):
 
         if path:
             processed_data_ids.append("%s:%s" % (data_obj.id, path))
+            show_data_info.append([data_name_or_id, path if path.startswith('/') else '/' + path])
         else:
             processed_data_ids.append(data_obj.id)
-    return True, processed_data_ids
+            show_data_info.append([data_name_or_id, '/' + data_obj.id])
+    return True, processed_data_ids, show_data_info
 
 
 def resolve_final_instance_type(instance_type_override, yaml_str, task, cli_default):
@@ -147,12 +151,18 @@ def validate_env(env, arch):
     return True
 
 
-def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True):
+def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True, show_data_info=None):
     table_output = [["JOB NAME"], [job_name]]
     floyd_logger.info('\n' + tabulate(table_output, headers="firstrow") + '\n')
 
     job_url = '%s/%s' % (floyd.floyd_web_host, job_name)
     floyd_logger.info("URL to job: %s", job_url)
+
+    if show_data_info is not None:
+        headers = ["DATANAME", "MOUNTING DIRECTORY"]
+        floyd_logger.info('\n' + tabulate(show_data_info, headers=headers))
+        input_data_url = '%s/data' % (job_url)
+        floyd_logger.info("\nURL to Input Data: %s", input_data_url)
 
     if mode == 'jupyter':
         floyd_logger.info("\n[!] DEPRECATION NOTICE\n"
@@ -266,7 +276,7 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
 
     experiment_name = "{}/{}".format(namespace, experiment_config.name)
 
-    success, data_ids = process_data_ids(data)
+    success, data_ids, show_data_info = process_data_ids(data)
     if not success:
         sys.exit(2)
 
@@ -346,7 +356,8 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
     floyd_logger.debug("Created job : %s", expt_info['id'])
 
     job_name = expt_info['name']
-    show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook)
+
+    show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook, show_data_info)
 
     if follow:
         floyd_logger.info("\nFollow flag detected (--follow): Opening logs ...")
