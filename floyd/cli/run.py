@@ -161,8 +161,6 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
     if show_data_info is not None:
         headers = ["DATANAME", "MOUNTING DIRECTORY"]
         floyd_logger.info('\n' + tabulate(show_data_info, headers=headers))
-        input_data_url = '%s/data' % (job_url)
-        floyd_logger.info("\nURL to Input Data: %s", input_data_url)
 
     if mode == 'jupyter':
         floyd_logger.info("\n[!] DEPRECATION NOTICE\n"
