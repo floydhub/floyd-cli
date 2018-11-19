@@ -39,8 +39,8 @@ from floyd.cli.data import get_data_object
 from floyd.cli.experiment import get_log_id, follow_logs
 from floyd.cli.utils import current_project_namespace, read_yaml_config
 
-# This is the same as r'[\w\-]'
-ALLOWED_CHARSET = r'[a-zA-Z0-9\-_]'
+# This is the same as r'[\w\-\.]'
+ALLOWED_CHARSET = r'[a-zA-Z0-9\-_\.]'
 
 # DEPRECATED pattern, but still available: <data_id>, <data_id>:<mount_dir>
 # DATAID_PATTERN = '%s+(\:\/?%s+\/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET)
@@ -78,7 +78,7 @@ def process_data_ids(data_ids):
                       "\tfloyd run --data <namespace>/datasets/<dataset_name>/<version>:<mount_dir>\n"
                       "\tfloyd run --data <namespace>/projects/<project_name>/<version>:<mount_dir>\n"
                       "\tfloyd run --data <data_id>:<mounting_point> (DEPRECATED)\n"
-                      "\n Note: Argument can only contain alphanumeric, hyphen-minus - and underscore _ characters."
+                      "\n Note: Argument can only contain alphanumeric, hyphen-minus '-' , underscore '_' and dot '.' characters."
                       ) % data_name_or_id)
         path = None
         if ':' in data_name_or_id:
