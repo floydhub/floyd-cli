@@ -12,7 +12,7 @@ from floyd.constants import DOCKER_IMAGES
 
 # Name or Namespace/Name or Namespace/[datasets|projects]/Name
 # Note: [a-zA-Z0-9\-_] is the same as r'[\w\-]'
-NAMESPACE_PATTERN = r'^([a-zA-Z0-9\-_]+\/?){0,2}?[a-zA-Z0-9\-_]+$'
+NAMESPACE_PATTERN = r'^([a-zA-Z0-9\-_\.]+\/?){0,2}?[a-zA-Z0-9\-_]+$'
 
 
 def get_docker_image(env, gpu):
@@ -231,7 +231,7 @@ def get_namespace_from_name(name):
                   "\tfloyd [data] init <project_or_dataset_name>\n"
                   "\tfloyd [data] init <namespace>/<project_or_dataset_name>\n"
                   "\tfloyd [data] init <namespace>/[projects|dataset]/<project_or_dataset_name>\n"
-                  "\n Argument can only contain alphanumeric, hyphen-minus - and underscore _ characters."
+                  "\n Note: Argument can only contain alphanumeric, hyphen-minus '-' , underscore '_' and dot '.' characters."
                   ) % name)
 
     name_parts = name.split("/", 2)
