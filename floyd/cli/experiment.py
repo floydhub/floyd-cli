@@ -119,7 +119,9 @@ def format_metrics(latest_metrics):
 
 @click.command()
 @click.argument('id', nargs=1)
-def clone(id):
+@click.option('--directory', '-d',
+              help='Download a directory from Job')
+def clone(id, directory):
     """
     Download files from a job.
 
@@ -136,8 +138,16 @@ def clone(id):
     if not task_instance:
         sys.exit("Cannot clone this version of the job. Try a different version.")
     module = ModuleClient().get(task_instance.module_id) if task_instance else None
-    code_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
-                                                                          module.resource_id)
+
+    # Download the full Code
+    if directory is None:
+        code_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
+                                                                              module.resource_id)
+    # Download a directory from Code
+    else:
+        code_url = "{}/api/v1/download/artifacts/code/{}?is_dir=true&path={}".format(floyd.floyd_host,
+                                                                                     experiment.id,
+                                                                                     directory)
     ExperimentClient().download_tar(url=code_url,
                                     untar=True,
                                     delete_after_untar=True)

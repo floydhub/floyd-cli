@@ -6,6 +6,7 @@ from tabulate import tabulate
 import webbrowser
 
 import floyd
+from floyd.client.experiment import ExperimentClient
 from floyd.client.data import DataClient
 from floyd.client.dataset import DatasetClient
 from floyd.exceptions import FloydException
@@ -18,6 +19,7 @@ from floyd.cli.data_upload_utils import (
 )
 from floyd.cli.utils import (
     normalize_data_name,
+    normalize_job_name,
     get_namespace_from_name
 )
 
@@ -141,9 +143,17 @@ def print_data(data_sources):
 
 @click.command()
 @click.argument('id', nargs=1)
-def clone(id):
+@click.option('--directory', '-d',
+              help='Download a directory from Job output or a dataset')
+def clone(id, directory):
     """
-    Download all files in a dataset.
+    - Download all files in a dataset or from Job output
+    - Download a directory from a dataset or from Job output
+
+    (e.g. foo/projects/bar/1/files, foo/projects/bar/1/output or foo/dataset/bar/1/
+
+    This will download the files that are returned at
+    the end of the job.
     """
     data_source = get_data_object(id, use_data_config=False)
 
@@ -152,8 +162,28 @@ def clone(id):
             floyd_logger.info("Note: You cannot clone the output of a running job. You need to wait for it to finish.")
         sys.exit()
 
-    data_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
-                                                                          data_source.resource_id)
+    # Download the full Dataset
+    if directory is None:
+        data_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
+                                                                              data_source.resource_id)
+    # Download a directory from Dataset or Files
+    else:
+        # Get the type of data resource from the id (foo/projects/bar/ or foo/datasets/bar/)
+        if '/datasets/' in id:
+            resource_type = 'data'
+            resource_id = data_source.id
+        else:
+            resource_type = 'files'
+            try:
+                experiment = ExperimentClient().get(normalize_job_name(id, use_config=False))
+            except FloydException:
+                experiment = ExperimentClient().get(id)
+            resource_id = experiment.id
+
+        data_url = "{}/api/v1/download/artifacts/{}/{}?is_dir=true&path={}".format(floyd.floyd_host,
+                                                                                   resource_type,
+                                                                                   resource_id,
+                                                                                   directory)
     DataClient().download_tar(url=data_url,
                               untar=True,
                               delete_after_untar=True)
