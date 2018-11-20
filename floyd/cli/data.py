@@ -288,7 +288,7 @@ def add(source):
     Create a new dataset version from the contents of a job.
 
     This will create a new dataset version with the job output.
-    Use the full job name: foo/projects/bar/1/home or foo/projects/bar/1/output
+    Use the full job name: foo/projects/bar/1/code, foo/projects/bar/1/files or foo/projects/bar/1/output
     """
     new_data = DatasetClient().add_data(source)
     print_data([DataClient().get(new_data['data_id'])])
