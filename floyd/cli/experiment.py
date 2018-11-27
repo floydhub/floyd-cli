@@ -119,14 +119,22 @@ def format_metrics(latest_metrics):
 
 @click.command()
 @click.argument('id', nargs=1)
-@click.option('--directory', '-d',
-              help='Download a directory from Job')
-def clone(id, directory):
+@click.option('--path', '-p',
+              help='Download files in a specific path from a job')
+def clone(id, path):
     """
-    Download files from a job.
+    - Download all files from a job
 
-    This will download the files that were originally uploaded at
+    Eg: alice/projects/mnist/1/
+
+    Note: This will download the files that were originally uploaded at
     the start of the job.
+
+    - Download files in a specific path from a job
+
+    Specify the path to a directory and download all its files and subdirectories.
+
+    Eg: --path models/checkpoint1
     """
     try:
         experiment = ExperimentClient().get(normalize_job_name(id, use_config=False))
@@ -139,15 +147,15 @@ def clone(id, directory):
         sys.exit("Cannot clone this version of the job. Try a different version.")
     module = ModuleClient().get(task_instance.module_id) if task_instance else None
 
-    # Download the full Code
-    if directory is None:
-        code_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
-                                                                              module.resource_id)
-    # Download a directory from Code
-    else:
+    if path:
+        # Download a directory from Code
         code_url = "{}/api/v1/download/artifacts/code/{}?is_dir=true&path={}".format(floyd.floyd_host,
                                                                                      experiment.id,
-                                                                                     directory)
+                                                                                     path)
+    else:
+        # Download the full Code
+        code_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
+                                                                              module.resource_id)
     ExperimentClient().download_tar(url=code_url,
                                     untar=True,
                                     delete_after_untar=True)

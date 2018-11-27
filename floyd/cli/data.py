@@ -143,17 +143,24 @@ def print_data(data_sources):
 
 @click.command()
 @click.argument('id', nargs=1)
-@click.option('--directory', '-d',
-              help='Download a directory from Job output or a dataset')
-def clone(id, directory):
+@click.option('--path', '-p',
+              help='Download files in a specific path from job output or a dataset')
+def clone(id, path):
     """
-    - Download all files in a dataset or from Job output
+    - Download all files in a dataset or from a Job output
+
+    Eg: alice/projects/mnist/1/files, alice/projects/mnist/1/output or alice/dataset/mnist-data/1/
+
+    Using /output will download the files that are saved at the end of the job.
+
+    Note: This will download the files that are saved at
+    the end of the job.
+
     - Download a directory from a dataset or from Job output
 
-    (e.g. foo/projects/bar/1/files, foo/projects/bar/1/output or foo/dataset/bar/1/
+    Specify the path to a directory and download all its files and subdirectories.
 
-    This will download the files that are returned at
-    the end of the job.
+    Eg: --path models/checkpoint1
     """
     data_source = get_data_object(id, use_data_config=False)
 
@@ -162,12 +169,8 @@ def clone(id, directory):
             floyd_logger.info("Note: You cannot clone the output of a running job. You need to wait for it to finish.")
         sys.exit()
 
-    # Download the full Dataset
-    if directory is None:
-        data_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
-                                                                              data_source.resource_id)
-    # Download a directory from Dataset or Files
-    else:
+    if path:
+        # Download a directory from Dataset or Files
         # Get the type of data resource from the id (foo/projects/bar/ or foo/datasets/bar/)
         if '/datasets/' in id:
             resource_type = 'data'
@@ -183,7 +186,11 @@ def clone(id, directory):
         data_url = "{}/api/v1/download/artifacts/{}/{}?is_dir=true&path={}".format(floyd.floyd_host,
                                                                                    resource_type,
                                                                                    resource_id,
-                                                                                   directory)
+                                                                                   path)
+    else:
+        # Download the full Dataset
+        data_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
+                                                                              data_source.resource_id)
     DataClient().download_tar(url=data_url,
                               untar=True,
                               delete_after_untar=True)
