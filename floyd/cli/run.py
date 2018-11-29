@@ -158,7 +158,7 @@ def show_new_job_info(expt_client, job_name, expt_info, mode, open_notebook=True
     job_url = '%s/%s' % (floyd.floyd_web_host, job_name)
     floyd_logger.info("URL to job: %s", job_url)
 
-    if show_data_info is not None:
+    if show_data_info:
         headers = ["DATANAME", "MOUNTING DIRECTORY"]
         floyd_logger.info('\n' + tabulate(show_data_info, headers=headers))
 

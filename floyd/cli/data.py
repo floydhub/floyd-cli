@@ -6,6 +6,7 @@ from tabulate import tabulate
 import webbrowser
 
 import floyd
+from floyd.client.experiment import ExperimentClient
 from floyd.client.data import DataClient
 from floyd.client.dataset import DatasetClient
 from floyd.exceptions import FloydException
@@ -18,6 +19,7 @@ from floyd.cli.data_upload_utils import (
 )
 from floyd.cli.utils import (
     normalize_data_name,
+    normalize_job_name,
     get_namespace_from_name
 )
 
@@ -141,9 +143,24 @@ def print_data(data_sources):
 
 @click.command()
 @click.argument('id', nargs=1)
-def clone(id):
+@click.option('--path', '-p',
+              help='Download files in a specific path from job output or a dataset')
+def clone(id, path):
     """
-    Download all files in a dataset.
+    - Download all files in a dataset or from a Job output
+
+    Eg: alice/projects/mnist/1/files, alice/projects/mnist/1/output or alice/dataset/mnist-data/1/
+
+    Using /output will download the files that are saved at the end of the job.
+
+    Note: This will download the files that are saved at
+    the end of the job.
+
+    - Download a directory from a dataset or from Job output
+
+    Specify the path to a directory and download all its files and subdirectories.
+
+    Eg: --path models/checkpoint1
     """
     data_source = get_data_object(id, use_data_config=False)
 
@@ -152,8 +169,28 @@ def clone(id):
             floyd_logger.info("Note: You cannot clone the output of a running job. You need to wait for it to finish.")
         sys.exit()
 
-    data_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
-                                                                          data_source.resource_id)
+    if path:
+        # Download a directory from Dataset or Files
+        # Get the type of data resource from the id (foo/projects/bar/ or foo/datasets/bar/)
+        if '/datasets/' in id:
+            resource_type = 'data'
+            resource_id = data_source.id
+        else:
+            resource_type = 'files'
+            try:
+                experiment = ExperimentClient().get(normalize_job_name(id, use_config=False))
+            except FloydException:
+                experiment = ExperimentClient().get(id)
+            resource_id = experiment.id
+
+        data_url = "{}/api/v1/download/artifacts/{}/{}?is_dir=true&path={}".format(floyd.floyd_host,
+                                                                                   resource_type,
+                                                                                   resource_id,
+                                                                                   path)
+    else:
+        # Download the full Dataset
+        data_url = "{}/api/v1/resources/{}?content=true&download=true".format(floyd.floyd_host,
+                                                                              data_source.resource_id)
     DataClient().download_tar(url=data_url,
                               untar=True,
                               delete_after_untar=True)
@@ -288,7 +325,7 @@ def add(source):
     Create a new dataset version from the contents of a job.
 
     This will create a new dataset version with the job output.
-    Use the full job name: foo/projects/bar/1/home or foo/projects/bar/1/output
+    Use the full job name: foo/projects/bar/1/code, foo/projects/bar/1/files or foo/projects/bar/1/output
     """
     new_data = DatasetClient().add_data(source)
     print_data([DataClient().get(new_data['data_id'])])
