@@ -53,8 +53,8 @@ DATAID_PATTERN = '%s+(:/?%s+/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET)
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>:<mount_dir>
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>:<mount_dir>
-DATANAME_PATTERN = '(%s+/datasets/)?%s+(/[0-9]+)?(:/?%s+/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
-PRJFILE_PATTERN = '(%s+/projects/)?%s+(/[0-9]+(/output)?)?(:/?%s+/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
+DATANAME_PATTERN = '(%s+/datasets/)?%s+(/[0-9]+)?:/?%s+/?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
+PRJFILE_PATTERN = '(%s+/projects/)?%s+(/[0-9]+(/output)?)?:/?%s+/?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
 DATAMOUNT_PATTERN = '^(%s|%s|%s)$' % (DATAID_PATTERN, DATANAME_PATTERN, PRJFILE_PATTERN)
 
 
@@ -77,12 +77,12 @@ def process_data_ids(data_ids):
                       "\tfloyd run --data <namespace>/datasets/<dataset_name>:<mount_dir>\n"
                       "\tfloyd run --data <namespace>/datasets/<dataset_name>/<version>:<mount_dir>\n"
                       "\tfloyd run --data <namespace>/projects/<project_name>/<version>:<mount_dir>\n"
-                      "\tfloyd run --data <data_id>:<mounting_point> (DEPRECATED)\n"
+                      "\tfloyd run --data <data_id>:<mount_dir> (DEPRECATED)\n"
                       "\n Note: Argument can only contain alphanumeric, hyphen-minus '-' , underscore '_' and dot '.' characters."
                       ) % data_name_or_id)
+        
         path = None
-        if ':' in data_name_or_id:
-            data_name_or_id, path = data_name_or_id.split(':')
+        data_name_or_id, path = data_name_or_id.split(':')
 
         data_obj = get_data_object(data_id=data_name_or_id, use_data_config=False)
 
@@ -103,12 +103,10 @@ def process_data_ids(data_ids):
                 )
                 return False, None
 
-        if path:
-            processed_data_ids.append("%s:%s" % (data_obj.id, path))
-            show_data_info.append([data_name_or_id, path if path.startswith('/') else '/' + path])
-        else:
-            processed_data_ids.append(data_obj.id)
-            show_data_info.append([data_name_or_id, '/' + data_obj.id])
+        
+        processed_data_ids.append("%s:%s" % (data_obj.id, path))
+        show_data_info.append([data_name_or_id, path if path.startswith('/') else '/' + path])
+
     return True, processed_data_ids, show_data_info
 
 
@@ -279,8 +277,7 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
         sys.exit(2)
 
     # Create module
-    default_name = 'input' if len(data_ids) <= 1 else None
-    module_inputs = [{'name': get_data_name(data_str, default_name),
+    module_inputs = [{'name': get_data_name(data_str),
                       'type': 'dir'} for data_str in data_ids]
 
     instance_type = None

@@ -66,7 +66,7 @@ class TestExperimentRun(unittest.TestCase):
         Experiment with multiple data ids
         """
         data_get.return_value.id = 'data_id'
-        result = self.runner.invoke(run, ['command', '--data', 'data-id1', '--data', 'data-id2'], catch_exceptions=False)
+        result = self.runner.invoke(run, ['command', '--data', 'data-id1:bar', '--data', 'data-id2:foo'], catch_exceptions=False)
         assert_exit_code(result, 0)
 
     @patch('floyd.manager.data_config.DataConfigManager.get_config', side_effect=mock_data_config)
@@ -93,28 +93,16 @@ class TestExperimentRun(unittest.TestCase):
         """
         Test regex patterns for data arg
         """
-        # PATTERN: <dataset_name>
-        result = self.runner.invoke(run, ['command', '--data', 'data-id1'], catch_exceptions=False)
-        assert_exit_code(result, 0)
-
         # PATTERN: <dataset_name>:<mounting_point>
         result = self.runner.invoke(run, ['command', '--data', 'data-id1:/bar'], catch_exceptions=False)
         assert_exit_code(result, 0)
 
-        # PATTERN: <namespace>/[projects|datasets]/<dataset_or_project_name>
-        result = self.runner.invoke(run, ['command', '--data', 'mckay/datasets/data-id1'], catch_exceptions=False)
-        assert_exit_code(result, 0)
-
         # PATTERN: <namespace>/[projects|datasets]/<dataset_or_project_name>:<mounting_point>
-        result = self.runner.invoke(run, ['command', '--data', 'mckay/datasets/data-id1:/bar'], catch_exceptions=False)
+        result = self.runner.invoke(run, ['command', '--data', 'mckay/datasets/data-id1:bar'], catch_exceptions=False)
         assert_exit_code(result, 0)
 
         # PATTERN: <namespace>/projects/<project_name>/output:<mounting_point>
         result = self.runner.invoke(run, ['command', '--data', 'mckay/projects/test/1/output:/bar'], catch_exceptions=False)
-        assert_exit_code(result, 0)
-
-        # PATTERN: <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>
-        result = self.runner.invoke(run, ['command', '--data', 'mckay/datasets/data_id1/1'], catch_exceptions=False)
         assert_exit_code(result, 0)
 
         # PATTERN: <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>:<mounting_point>
@@ -224,7 +212,7 @@ class TestExperimentRun(unittest.TestCase):
         """
         CLI should fail if more than one --env is passed
         """
-        result = self.runner.invoke(run, ['--env', 'foo', '--data', 'foo/datasets/bar', 'ls'])
+        result = self.runner.invoke(run, ['--env', 'foo', '--data', 'foo/datasets/bar:bar', 'ls'])
         assert_exit_code(result, 0)
 
     def test_resolve_final_instance_type(self):

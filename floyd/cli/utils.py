@@ -32,14 +32,14 @@ def get_module_task_instance_id(task_instances):
 
 def get_data_name(data_str, default=None):
     """
-    If data_str is of the format <ID>:<NAME>, return <NAME>
-    Else return default if default is present
-    Otherwise return ID itself
+    
+    Given data_str format <ID>:<NAME>, return <NAME>
     """
     if ':' in data_str:
         _, name = data_str.split(':')
     else:
-        name = default if default else data_str
+        # data_str has to be <ID>:<NAME> compliant
+        sys.exit(1)
     return name
 
 
