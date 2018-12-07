@@ -19,7 +19,7 @@ from floyd.constants import (
 )
 from floyd.client.project import ProjectClient
 from floyd.cli.utils import (
-    get_data_name, normalize_data_name, normalize_job_name
+    normalize_data_name, normalize_job_name
 )
 from floyd.client.experiment import ExperimentClient
 from floyd.client.module import ModuleClient
@@ -54,8 +54,8 @@ DATAID_PATTERN = '%s+(:/?%s+/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET)
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>:<mount_dir>
 DATANAME_PATTERN = '(%s+/datasets/)?%s+(/[0-9]+)?:/?%s+/?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
-PRJFILE_PATTERN = '(%s+/projects/)?%s+(/[0-9]+(/output)?)?:/?%s+/?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
-DATAMOUNT_PATTERN = '^(%s|%s|%s)$' % (DATAID_PATTERN, DATANAME_PATTERN, PRJFILE_PATTERN)
+PROJECT_OUTPUT_PATTERN = '(%s+/projects/)?%s+(/[0-9]+(/output)?)?:/?%s+/?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
+DATAMOUNT_PATTERN = '^(%s|%s|%s)$' % (DATAID_PATTERN, DATANAME_PATTERN, PROJECT_OUTPUT_PATTERN)
 
 
 def process_data_ids(data_ids):
@@ -77,13 +77,11 @@ def process_data_ids(data_ids):
                       "\tfloyd run --data <namespace>/datasets/<dataset_name>:<mount_dir>\n"
                       "\tfloyd run --data <namespace>/datasets/<dataset_name>/<version>:<mount_dir>\n"
                       "\tfloyd run --data <namespace>/projects/<project_name>/<version>:<mount_dir>\n"
-                      "\tfloyd run --data <data_id>:<mount_dir> (DEPRECATED)\n"
+                      "\tfloyd run --data <namespace>/projects/<project_name>/<version>/output:<mount_dir>\n"
                       "\n Note: Argument can only contain alphanumeric, hyphen-minus '-' , underscore '_' and dot '.' characters."
                       ) % data_name_or_id)
 
-        path = None
         data_name_or_id, path = data_name_or_id.split(':')
-
         data_obj = get_data_object(data_id=data_name_or_id, use_data_config=False)
 
         if not data_obj:
@@ -276,7 +274,7 @@ def run(ctx, cpu, gpu, env, message, data, mode, open_notebook, follow, tensorbo
         sys.exit(2)
 
     # Create module
-    module_inputs = [{'name': get_data_name(data_str),
+    module_inputs = [{'name': data_str.split(':')[1],
                       'type': 'dir'} for data_str in data_ids]
 
     instance_type = None

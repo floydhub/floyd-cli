@@ -30,18 +30,6 @@ def get_module_task_instance_id(task_instances):
     return None
 
 
-def get_data_name(data_str, default=None):
-    """
-    Given data_str format <ID>:<NAME>, return <NAME>
-    """
-    if ':' in data_str:
-        _, name = data_str.split(':')
-    else:
-        # data_str has to be <ID>:<NAME> compliant
-        sys.exit(1)
-    return name
-
-
 def get_data_id(data_str):
     """
     If data_str is of the format <ID>:<NAME>, or <URI>/<PATH>:<NAME>
