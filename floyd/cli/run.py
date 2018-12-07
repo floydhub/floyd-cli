@@ -80,7 +80,7 @@ def process_data_ids(data_ids):
                       "\tfloyd run --data <data_id>:<mount_dir> (DEPRECATED)\n"
                       "\n Note: Argument can only contain alphanumeric, hyphen-minus '-' , underscore '_' and dot '.' characters."
                       ) % data_name_or_id)
-        
+
         path = None
         data_name_or_id, path = data_name_or_id.split(':')
 
@@ -103,7 +103,6 @@ def process_data_ids(data_ids):
                 )
                 return False, None
 
-        
         processed_data_ids.append("%s:%s" % (data_obj.id, path))
         show_data_info.append([data_name_or_id, path if path.startswith('/') else '/' + path])
 

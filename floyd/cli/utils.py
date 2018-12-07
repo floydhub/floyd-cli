@@ -32,7 +32,6 @@ def get_module_task_instance_id(task_instances):
 
 def get_data_name(data_str, default=None):
     """
-    
     Given data_str format <ID>:<NAME>, return <NAME>
     """
     if ':' in data_str:
