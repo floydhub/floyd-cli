@@ -42,20 +42,13 @@ from floyd.cli.utils import current_project_namespace, read_yaml_config
 # This is the same as r'[\w\-\.]'
 ALLOWED_CHARSET = r'[a-zA-Z0-9\-_\.]'
 
-# DEPRECATED pattern, but still available: <data_id>, <data_id>:<mount_dir>
-# DATAID_PATTERN = '%s+(\:\/?%s+\/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET)
-DATAID_PATTERN = '%s+(:/?%s+/?)?' % (ALLOWED_CHARSET, ALLOWED_CHARSET)
-
 # All the possible patterns:
-# <dataset_name>
-# or <dataset_name>:<mount_dir>
-# or <namespace>/[projects|datasets]/<dataset_or_project_name>
+# <dataset_or_project_name>:<mount_dir>
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>:<mount_dir>
-# or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>
 # or <namespace>/[projects|datasets]/<dataset_or_project_name>/<version>:<mount_dir>
-DATANAME_PATTERN = '(%s+/datasets/)?%s+(/[0-9]+)?:/?%s+/?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
-PROJECT_OUTPUT_PATTERN = '(%s+/projects/)?%s+(/[0-9]+(/output)?)?:/?%s+/?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
-DATAMOUNT_PATTERN = '^(%s|%s|%s)$' % (DATAID_PATTERN, DATANAME_PATTERN, PROJECT_OUTPUT_PATTERN)
+DATANAME_PATTERN = '(%s+/datasets/)?%s+(/?|/[0-9]+/?):/?%s+/?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
+PROJECT_OUTPUT_PATTERN = '(%s+/projects/)?%s+(/?|/[0-9]+(/?|/output/?)):/?%s+/?' % (ALLOWED_CHARSET, ALLOWED_CHARSET, ALLOWED_CHARSET)
+DATAMOUNT_PATTERN = '^(%s|%s)$' % (DATANAME_PATTERN, PROJECT_OUTPUT_PATTERN)
 
 
 def process_data_ids(data_ids):
