@@ -444,7 +444,7 @@ def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cp
             sys.exit(1)
         parameters['env'] = env
 
-    success, data_ids = process_data_ids(data)
+    success, data_ids, show_data_info = process_data_ids(data)
     if not success:
         sys.exit(1)
     if data_ids:
@@ -463,4 +463,4 @@ def restart(ctx, job_name, data, open_notebook, env, message, gpu, cpu, gpup, cp
         floyd_logger.error("Failed to restart job")
         sys.exit(1)
 
-    show_new_job_info(expt_client, new_job_info['name'], new_job_info, job.mode, open_notebook)
+    show_new_job_info(expt_client, new_job_info['name'], new_job_info, job.mode, open_notebook, show_data_info)
