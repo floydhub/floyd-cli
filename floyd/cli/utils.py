@@ -116,7 +116,7 @@ def normalize_job_name(raw_job_name, default_username='', default_project_name='
     namespace = default_username
     if use_config:
         default_project_name = default_project_name or current_project_name()
-        namespace = current_project_namespace()
+        namespace = namespace or current_project_namespace()
 
     name_parts = raw_job_name.split('/')
     project_name = default_project_name

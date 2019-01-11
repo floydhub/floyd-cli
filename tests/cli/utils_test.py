@@ -57,8 +57,8 @@ class TestCliUtil(unittest.TestCase):
 
         # current_username and current_project_name are overridden with the
         # second and third args if passed
-        assert normalize_job_name('bar/1', 'yoyo', use_config=False) == 'yoyo/projects/bar/1'
-        assert normalize_job_name('1', 'yoyo', 'ma', use_config=False) == 'yoyo/projects/ma/1'
+        assert normalize_job_name('bar/1', 'yoyo') == 'yoyo/projects/bar/1'
+        assert normalize_job_name('1', 'yoyo', 'ma') == 'yoyo/projects/ma/1'
 
         # Full job names are returned unchanged
         assert normalize_job_name('foo/projects/bar/1') == 'foo/projects/bar/1'
