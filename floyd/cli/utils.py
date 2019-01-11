@@ -113,13 +113,12 @@ def normalize_data_name(raw_name, default_username='', default_dataset_name='', 
 
 def normalize_job_name(raw_job_name, default_username='', default_project_name='', use_config=True):
     raw_job_name = raw_job_name or ''
-
+    namespace = default_username
     if use_config:
         default_project_name = default_project_name or current_project_name()
+        namespace = namespace or current_project_namespace()
 
     name_parts = raw_job_name.split('/')
-
-    namespace = default_username or current_project_namespace()
     project_name = default_project_name
     number = ''  # current job number
 
